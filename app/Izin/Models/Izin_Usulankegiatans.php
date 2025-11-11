@@ -42,4 +42,9 @@ class Izin_Usulankegiatans extends Model
     {
         return $this->hasOne(Izin_Detailusulankegiatans::class, 'usulankegiatan_id');
     }
+
+    public function pelaksanaankegiatans()
+    {
+        return $this->hasOne(Izin_Pelaksanaankegiatans::class, 'usulankegiatan_id');
+    }
 }

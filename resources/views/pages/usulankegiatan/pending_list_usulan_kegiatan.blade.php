@@ -84,7 +84,10 @@
                                        class="text-green-600 hover:text-green-700 underline">
                                         Lihat Surat Usulan
                                     </a>
-                                    <a href="#" class="text-green-600 hover:text-green-700 underline">Lihat Keberjalanan</a>
+                                    <a href="{{ route('superadmin.pelaksanaankegiatan.show', $u->id) }}" target="_blank" 
+                                        class="text-green-600 hover:text-green-700 underline">
+                                        Lihat Keberjalanan
+                                    </a>
                                     <a href="#" class="text-green-600 hover:text-green-700 underline">Lihat Laporan</a>
                                 </div>
                             </div>

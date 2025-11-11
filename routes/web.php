@@ -66,6 +66,10 @@ Route::middleware('auth')->group(function () {
 
         // Submit hasil review (approve/reject)
         Route::post('/superadmin/usulankegiatan/{id}/review', [ReviewUsulanKegiatansController::class, 'reviewUpload'])->name('superadmin.usulankegiatan.reviewUpload');
+
+        // Lihat Bukti Pelaksanaan Kegiatan
+        Route::get('/superadmin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('superadmin.pelaksanaankegiatan.show');
+
     });
 });
 

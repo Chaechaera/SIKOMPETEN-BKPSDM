@@ -15,7 +15,7 @@ class PelaksanaanKegiatansController extends Controller
     public function create($id)
     {
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
-        return view('pages.upload_pelaksanaan_kegiatan', compact('usulankegiatans'));
+        return view('pages.pelaksanaankegiatan.upload_pelaksanaan_kegiatan', compact('usulankegiatans'));
     }
 
     /**
@@ -57,4 +57,29 @@ class PelaksanaanKegiatansController extends Controller
             ->route('admin.usulankegiatan.index')
             ->with('success', 'Bukti Pelaksanaan Kegiatan Berhasil Diunggah!');
     }
+
+    /**
+     * Tampilkan Bukti Pelaksanaan Kegiatan
+     */
+    public function show($id)
+{
+    $pelaksanaankegiatans = Izin_Pelaksanaankegiatans::where('usulankegiatan_id', $id)->first();
+
+    if (!$pelaksanaankegiatans) {
+        return redirect()->back()->with('error', 'Data pelaksanaan kegiatan belum tersedia.');
+    }
+
+    // Decode JSON dari kolom buktipelaksanaan_kegiatan
+    $buktipelaksanaan_kegiatanFiles = json_decode($pelaksanaankegiatans->buktipelaksanaan_kegiatan, true) ?? [];
+
+    $usulankegiatans = Izin_Usulankegiatans::find($id);
+
+    return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', [
+    'usulankegiatans' => $usulankegiatans,
+    'buktipelaksanaan_kegiatanFiles' => $buktipelaksanaan_kegiatanFiles,
+]);
+
+    //return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', compact('pelaksanaankegiatans', 'usulankegiatans', 'buktipelaksanaan_kegiatanFiles'));
+}
+
 }
