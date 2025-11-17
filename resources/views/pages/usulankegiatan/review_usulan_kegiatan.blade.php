@@ -15,7 +15,7 @@
                 ✕
             </button>
 
-            <h3 class="text-lg font-semibold mb-4">
+            <h3 class="text-md font-semibold text-gray-800 mb-3 text-center">
                 Review Usulan: {{ $usulankegiatans->nama_kegiatan }}
             </h3>
 
@@ -36,14 +36,14 @@
                         type="submit" 
                         name="actionusulan_kegiatan" 
                         value="accepted" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        class="bg-green-100 hover:bg-green-200 text-green-700 font-medium px-6 py-2 rounded-lg transition">
                         Setujui
                     </button>
                     <button 
                         type="submit" 
                         name="actionusulan_kegiatan" 
                         value="rejected" 
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                        class="bg-red-100 hover:bg-red-200 text-red-700 font-medium px-6 py-2 rounded-lg transition">
                         Tolak
                     </button>
                 </div>
