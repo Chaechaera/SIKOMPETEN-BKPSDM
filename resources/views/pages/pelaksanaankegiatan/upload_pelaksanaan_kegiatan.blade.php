@@ -31,7 +31,7 @@
                     @enderror
 
                     <!-- Tempat munculnya daftar file -->
-        <ul id="fileList" class="mt-2 list-disc list-inside text-gray-700"></ul>
+                    <ul id="fileList" class="mt-2 list-disc list-inside text-gray-700"></ul>
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3">
@@ -49,21 +49,21 @@
     </div>
 
     <script>
-    // Ambil elemen input dan daftar file
-    const fileInput = document.getElementById('buktipelaksanaan_kegiatanFiles');
-    const fileList = document.getElementById('fileList');
+        // Ambil elemen input dan daftar file
+        const fileInput = document.getElementById('buktipelaksanaan_kegiatanFiles');
+        const fileList = document.getElementById('fileList');
 
-    // Event ketika user pilih file
-    fileInput.addEventListener('change', function() {
-        fileList.innerHTML = ''; // kosongkan dulu
+        // Event ketika user pilih file
+        fileInput.addEventListener('change', function() {
+            fileList.innerHTML = ''; // kosongkan dulu
 
-        // Kalau ada file yang dipilih
-        for (let i = 0; i < this.files.length; i++) {
-            const li = document.createElement('li');
-            li.textContent = `${i + 1}. ${this.files[i].name}`;
-            fileList.appendChild(li);
-        }
-    });
-</script>
+            // Kalau ada file yang dipilih
+            for (let i = 0; i < this.files.length; i++) {
+                const li = document.createElement('li');
+                li.textContent = `${i + 1}. ${this.files[i].name}`;
+                fileList.appendChild(li);
+            }
+        });
+    </script>
 
 </x-app-layout>

@@ -1,6 +1,8 @@
 <?php
 
+use App\Izin\Http\Controllers\Admin\DetailLaporanKegiatansController;
 use App\Izin\Http\Controllers\Admin\DetailUsulanKegiatansController;
+use App\Izin\Http\Controllers\Admin\LaporanKegiatansController;
 use App\Izin\Http\Controllers\Admin\PelaksanaanKegiatansController;
 use App\Izin\Http\Controllers\Admin\UsulanKegiatansController;
 use App\Izin\Http\Controllers\IdentitasSuratsController;
@@ -50,6 +52,17 @@ Route::middleware('auth')->group(function () {
         // Submit Pelaksanann Kegiatan
         Route::get('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'create'])->name('admin.pelaksanaankegiatan.create');
         Route::post('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'store'])->name('admin.pelaksanaankegiatan.store');
+
+        // Buat Pelaporan Hasil Kegiatan Pada Form Ajukan Laporan Hasil Kegiatan
+        Route::get('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.create');
+
+        // Submit Pelaporan Hasil Kegiatan
+        Route::post('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.store');
+        Route::post('/admin/laporankegiatan/identitassurat/{id}', [IdentitasSuratsController::class, 'store'])->name('admin.identitassurat.store');
+        Route::post('/admin/laporankegiatan/detaillaporankegiatan/{id}', [DetailLaporanKegiatansController::class, 'store'])->name('admin.detaillaporankegiatan.store');
+
+        // Download Surat Usulan Kegiatan dan KAK
+        Route::get('/admin/laporankegiatan/{id}/download', [LaporanKegiatansController::class, 'download'])->name('admin.laporankegiatan.download');
     });
 
     // Bagian Superadmin

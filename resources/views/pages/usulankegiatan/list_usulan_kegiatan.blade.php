@@ -104,7 +104,7 @@
                                     </a>
                                     @elseif($u->statususulan_kegiatan === 'in_progress')
                                     <!-- Tahap Laporan Hasil -->
-                                    <a href="#"
+                                    <a href="{{ route('admin.laporankegiatan.create', $u->id) }}" target="_blank"
                                         class="text-indigo-600 hover:underline font-medium">
                                         Update Laporan Hasil Kegiatan
                                     </a>

@@ -7,7 +7,6 @@ use App\Izin\Models\Izin_Detailusulankegiatans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DetailUsulanKegiatansController extends Controller
 {

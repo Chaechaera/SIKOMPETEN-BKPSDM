@@ -9,7 +9,6 @@ use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\PDF;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
