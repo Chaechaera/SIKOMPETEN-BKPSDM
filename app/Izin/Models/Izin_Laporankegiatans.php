@@ -24,7 +24,6 @@ class Izin_Laporankegiatans extends Model
         'ruanglingkup_laporan',
         'metodepelatihan_id',
         'narasumber_laporan',
-        'penutup_laporan',
     ];
 
     protected $casts = [
@@ -44,7 +43,7 @@ class Izin_Laporankegiatans extends Model
 
     public function detaillaporankegiatans()
     {
-        return $this->hasOne(Izin_Detaillaporankegiatans::class, 'laporankegiatan_id');
+        return $this->hasOne(Izin_Detaillaporankegiatans::class, 'laporankegiatan_id')->withDefault();
     }
 
     public function identitassurats()

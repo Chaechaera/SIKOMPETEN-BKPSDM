@@ -1,4 +1,6 @@
 <x-app-layout>
+    @php $unfinished = $usulankegiatans->where('statususulan_kegiatan', '!=', 'finish')->count() > 0; @endphp
+
     <div class="p-6 space-y-6">
 
         <!-- Judul Halaman -->
@@ -8,12 +10,12 @@
         <div class="bg-gray-50 p-4 rounded-xl shadow-sm border">
             <h2 class="text-lg font-semibold mb-3">Progress Pengajuan</h2>
             {{-- Komponen Stepper (bisa dijadikan partial blade include) --}}
-            @include('components.proggres-stepper', ['statususulan_kegiatanSaatini' => $usulankegiatans[0]->statususulan_kegiatan ?? 'pending'])
+            @include('components.proggres-stepper', ['statususulan_kegiatanSaatini' => $usulankegiatans[0]->statususulan_kegiatan ?? null])
         </div>
 
         <!-- Tombol Aksi -->
         <div class="flex gap-3 mt-4">
-            <a href="{{ route('admin.usulankegiatan.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            <a href="{{ route('admin.usulankegiatan.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" >
                 + Buat Usulan Baru
             </a>
 
@@ -88,10 +90,10 @@
                                     <a href="{{ route('admin.usulankegiatan.download', $u->id) }}" target="_blank" class="text-green-600 hover:text-green-700 underline">
                                         Lihat Surat Usulan
                                     </a>
-                                    <a href="#" target="_blank" class="text-green-600 hover:text-green-700 underline">
+                                    <a href="{{ route('admin.laporankegiatan.download', $u->id) }}" target="_blank" class="text-green-600 hover:text-green-700 underline">
                                         Lihat Laporan
                                     </a>
-                                    <a href="#" target="_blank" class="text-green-600 hover:text-green-700 underline">
+                                    <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}" target="_blank" class="text-green-600 hover:text-green-700 underline">
                                         Lihat Surat Balasan Laporan
                                     </a>
 
@@ -129,7 +131,7 @@
                             </form>
 
                             <!-- Download Sertifikat -->
-                            <a href="#" target="_blank" class="text-green-600 hover:underline font-medium">
+                            <a href="{{ route('admin.sertifikat.download', $u->id) }}" target="_blank" class="text-green-600 hover:underline font-medium">
                                 Download Sertifikat
                             </a>
                         </td>

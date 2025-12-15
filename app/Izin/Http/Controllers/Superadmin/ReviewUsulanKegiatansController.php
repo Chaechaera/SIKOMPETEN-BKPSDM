@@ -13,6 +13,7 @@ class ReviewUsulanKegiatansController extends Controller
     {
         $usulankegiatans = Izin_Usulankegiatans::with([
             'identitassurats:id,nomor_surat,perihal_surat',
+            'laporankegiatans',
         ])
             ->select(['id', 'nama_kegiatan', 'subunitkerja_id', 'identitassurat_id', 'tanggalpelaksanaan_kegiatan', 'lokasi_kegiatan', 'statususulan_kegiatan']);
         

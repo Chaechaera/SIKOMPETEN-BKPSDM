@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('dokumentasi_laporan')->nullable();
             $table->text('gambardokumentasi_laporan')->nullable();
             $table->text('outputkegiatan_laporan')->nullable();
+            $table->string('templatesertifikat_kegiatan')->nullable();
             $table->timestamps();
         });
     }

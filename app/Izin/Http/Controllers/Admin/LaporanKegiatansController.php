@@ -7,6 +7,7 @@ use App\Izin\Models\Izin_Identitassurats;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
+use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,7 +68,6 @@ class LaporanKegiatansController extends Controller
             }
         }
 
-
         $laporankegiatans = Izin_Laporankegiatans::create([
             'usulankegiatan_id' => $usulankegiatans->id,
             'identitassurat_id' => $identitassurats->id,
@@ -81,10 +81,14 @@ class LaporanKegiatansController extends Controller
             'ruanglingkup_laporan' => $request->ruanglingkup_laporan,
             'metodepelatihan_id' => $request->metodepelatihan_id,
             'narasumber_laporan' => $request->narasumber_laporan,
-            'penutup_laporan' => $request->penutup_laporan,
         ]);
 
         $request->merge(['laporankegiatan_id' => $laporankegiatans->id]);
+
+        // Update Status Usulan Kegiatan ke Database
+        $usulankegiatans->update([
+            'statususulan_kegiatan' => 'completed',
+        ]);
 
         // Lanjut ke controller detail
         return app(DetailLaporanKegiatansController::class)->store($request);
@@ -95,7 +99,8 @@ class LaporanKegiatansController extends Controller
         // Ambil data lengkap dengan relasi
         $laporankegiatans = Izin_Laporankegiatans::with([
             'identitassurats',
-            'detaillaporankegiatans'
+            'detaillaporankegiatans',
+            'usulankegiatans',
         ])->findOrFail($id);
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
@@ -125,10 +130,15 @@ class LaporanKegiatansController extends Controller
             if (file_exists($path)) {
                 try {
                     $spreadsheet = IOFactory::load($path);
-                    foreach ($spreadsheet->getActiveSheet()->toArray(null, true, true, true) as $row) {
-                        $rundown_laporan[] = array_values($row);
+                    $sheet = $spreadsheet->getActiveSheet();
+                    // Ambil semua baris, termasuk yang kosong
+                    $rundown_laporan = [];
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+                        $values = array_values($row);
+                        $rundown_laporan[] = $values;
                     }
                 } catch (\Exception $e) {
+                    $rundown_laporan = [];
                 }
             }
         }
@@ -140,10 +150,15 @@ class LaporanKegiatansController extends Controller
             if (file_exists($path)) {
                 try {
                     $spreadsheet = IOFactory::load($path);
-                    foreach ($spreadsheet->getActiveSheet()->toArray(null, true, true, true) as $row) {
-                        $peserta_laporan[] = array_values($row);
+                    $sheet = $spreadsheet->getActiveSheet();
+                    // Ambil semua baris, termasuk yang kosong
+                    $peserta_laporan = [];
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+                        $values = array_values($row);
+                        $peserta_laporan[] = $values;
                     }
                 } catch (\Exception $e) {
+                    $peserta_laporan = [];
                 }
             }
         }
@@ -151,13 +166,14 @@ class LaporanKegiatansController extends Controller
         // DOKUMENTASI GAMBAR (multiple)
         $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
-            $files_gambardokumentasi = json_decode($laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan, true);
-            if (is_array($files_gambardokumentasi)) {
-                foreach ($files_gambardokumentasi as $file) {
-                    $path = storage_path("app/public/ = $file");
-                    if (file_exists($path)) {
-                        $gambardokumentasi_laporan[] = $path;
-                    }
+            $files_gambardokumentasi = json_decode($laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan, true) ?? [];
+
+            foreach ($files_gambardokumentasi as $file) {
+                $path = storage_path("app/public/" . $file);
+                if (file_exists($path)) {
+                    $gambardokumentasi_laporan[] = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($path));
+                } else {
+                    $gambardokumentasi_laporan[] = null;
                 }
             }
         }
@@ -169,12 +185,12 @@ class LaporanKegiatansController extends Controller
             'laporankegiatans' => $laporankegiatans,
             'rundown_laporan' => $rundown_laporan,
             'peserta_laporan' => $peserta_laporan,
-            'dokumentasi_gambar' => $gambardokumentasi_laporan,
+            'gambardokumentasi_laporan' => $gambardokumentasi_laporan,
             'atribut_khusus' => $atribut_khusus,
             'kop_path' => $kop_path,
             'ttd_path' => $ttd_path,
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Laporan_Hasil_' . $laporankegiatans->nama_kegiatan . '.pdf');
+        return $pdf->stream('Laporan_Hasil_' . $laporankegiatans->usulankegiatans->nama_kegiatan . '.pdf');
     }
 }

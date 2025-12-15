@@ -88,16 +88,28 @@
                                         class="text-green-600 hover:text-green-700 underline">
                                         Lihat Keberjalanan
                                     </a>
-                                    <a href="#" class="text-green-600 hover:text-green-700 underline">Lihat Laporan</a>
+                                    <a href="{{ route('superadmin.laporankegiatan.download', $u->id) }}" target="_blank"
+                                        class="text-green-600 hover:text-green-700 underline">
+                                        Lihat Laporan
+                                    </a>
                                 </div>
                             </div>
 
                             <!-- Review Usulan -->
                             @if($u->statususulan_kegiatan === 'pending')
                             <button
-                                onclick="openReviewModal('{{ $u->id }}')"
+                                onclick="openReviewModal('{{ $u->id }}', 'usulankegiatans')"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                                 Review Usulan
+                            </button>
+                            @endif
+
+                            <!-- Review Laporan -->
+                            @if($u->statususulan_kegiatan === 'completed')
+                            <button
+                                onclick="openReviewModal('{{ $u->laporankegiatans->id }}', 'laporankegiatans')"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                                Review Laporan
                             </button>
                             @endif
 
@@ -126,7 +138,7 @@
     <div id="reviewModalContainer"></div>
 
     <script>
-        async function openReviewModal(usulanId) {
+        async function openReviewModal(id, type = 'usulankegiatans') {
             const container = document.getElementById('reviewModalContainer');
             container.innerHTML = `
                 <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
@@ -134,8 +146,13 @@
                 </div>
             `;
 
+            // Tentukan endpoint berdasarkan tipe
+            const url = type === 'laporankegiatans'
+                ? `/superadmin/laporankegiatan/${id}/review`
+                : `/superadmin/usulankegiatan/${id}/review`;
+
             try {
-                const response = await fetch(`/superadmin/usulankegiatan/${usulanId}/review`);
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('Gagal memuat form review.');
                 const html = await response.text();
                 container.innerHTML = html;

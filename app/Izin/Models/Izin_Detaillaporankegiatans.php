@@ -22,18 +22,21 @@ class Izin_Detaillaporankegiatans extends Model
         'dokumentasi_laporan',
         'gambardokumentasi_laporan',
         'outputkegiatan_laporan',
+        'templatesertifikat_kegiatan',
     ];
 
     protected $casts = [
         'gambardokumentasi_laporan' => 'array',
-        'rundown_laporan' => 'array',
-        'peserta_laporan' => 'array',
+    ];
+
+    protected $with = [
+        'pesertakegiatans'
     ];
 
     // RELATIONS
     public function laporankegiatans()
     {
-        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');
+        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id', 'id');
     }
 
     public function pesertakegiatans()

@@ -103,12 +103,6 @@
                             class="border p-2 w-full" placeholder="Nama narasumber kegiatan">
                     </div>
 
-                    <div class="mt-4">
-                        <label class="block font-medium">Penutup</label>
-                        <textarea name="penutup_laporan" class="border p-2 w-full"
-                            placeholder="Tuliskan kesimpulan atau penutup laporan">{{ old('penutup_laporan') }}</textarea>
-                    </div>
-
                     {{-- ===================================================== --}}
                     {{-- ATRIBUT KHUSUS OTOMATIS SESUAI CARA PELATIHAN --}}
                     {{-- ===================================================== --}}
@@ -223,6 +217,21 @@
 
                         <!-- Tempat munculnya daftar file -->
                         <ul id="fileList" class="mt-2 list-disc list-inside text-gray-700"></ul>
+                    </div>
+                </div>
+
+                {{-- ===================================================== --}}
+                {{-- BAGIAN 4: UPLOAD TEMPLATE SERTIFIKAT --}}
+                {{-- ===================================================== --}}
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h2 class="text-xl font-semibold mb-4">Template Sertifikat</h2>
+
+                    <div class="mt-4">
+                        <label class="block font-medium">Upload File Template Sertifikat (PNG / JPG)</label>
+                        <input type="file" name="templatesertifikat_kegiatan" accept=".png,.jpg" class="border p-2 w-full">
+                        @error('templatesertifikat_kegiatan')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
 

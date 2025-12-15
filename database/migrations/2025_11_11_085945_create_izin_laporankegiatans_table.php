@@ -25,7 +25,6 @@ return new class extends Migration
             $table->text('ruanglingkup_laporan')->nullable();
             $table->foreignId('metodepelatihan_id')->constrained('ref_metodepelatihans');
             $table->text('narasumber_laporan')->nullable();
-            $table->text('penutup_laporan')->nullable();
             $table->timestamps();
         });
     }

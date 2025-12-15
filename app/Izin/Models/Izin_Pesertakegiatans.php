@@ -17,6 +17,8 @@ class Izin_Pesertakegiatans extends Model
         'nip_peserta', 
         'jabatan_peserta', 
         'subunitkerja_id_peserta',
+        'sertifikat_id',
+        'nomorsertifikatpeserta_kegiatan',
     ];
 
     // RELATION
@@ -28,5 +30,10 @@ class Izin_Pesertakegiatans extends Model
     public function subunitkerjas()
     {
         return $this->belongsTo(Izin_RefSubunitkerjas::class, 'subunitkerja_id_peserta');
+    }
+
+    public function sertifikats()
+    {
+        return $this->belongsTo(Izin_Sertifikats::class, 'sertifikat_id');
     }
 }

@@ -31,49 +31,47 @@ class DetailLaporanKegiatansController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        /*$request->validate([
             'gambardokumentasi_laporan.*' => 'required|mimes:jpg,jpeg,png|max:2048'
-        ]);
+        ]);*/
 
         // Data dasar
-        $datadetaillaporan = $request->only([
+        $detaillaporankegiatans = $request->only([
             'laporankegiatan_id',
             'rincian_laporan',
             'undangan_laporan',
             'materi_laporan',
             'daftarhadir_laporan',
             'dokumentasi_laporan',
+            'gambardokumentasi_laporan',
             'outputkegiatan_laporan',
+            'templatesertifikat_kegiatan',
         ]);
 
-        $path_rundown_laporan = [];
-        $path_peserta_laporan = [];
+        // -----------------------------
+        // UPLOAD RUNDOWN FILE
+        // -----------------------------
 
-        // -----------------------------
-        // PROCESS RUNDOWN FILE
-        // -----------------------------
         if ($request->hasFile('rundown_laporan')) {
-
-            $stored = $request->file('rundown_laporan')->store('izin/rundown_laporan', 'public');
-            $datadetaillaporan['rundown_laporan'] = $stored;
-
-            $spreadsheet = IOFactory::load(Storage::disk('public')->path($stored));
-            $sheet = $spreadsheet->getActiveSheet();
-
-            foreach ($sheet->toArray(null, true, true, true) as $row) {
-                $path_rundown_laporan[] = array_values($row);
-            }
+            $detaillaporankegiatans['rundown_laporan'] = $request->file('rundown_laporan')->store('izin/rundown_laporan', 'public');
         }
 
         // -----------------------------
-        // PROCESS PESERTA EXCEL
+        // UPLOAD TEMPLATE SERTIFIKAT
         // -----------------------------
+
+        if ($request->hasFile('templatesertifikat_kegiatan')) {
+            $detaillaporankegiatans['templatesertifikat_kegiatan'] = $request->file('templatesertifikat_kegiatan')->store('izin/template_sertifikat', 'public');
+        }
+
+        // -----------------------------
+        // UPLOAD PESERTA EXCEL
+        // -----------------------------
+        $path_peserta_laporan = [];
         if ($request->hasFile('peserta_laporan')) {
+            $detaillaporankegiatans['peserta_laporan'] = $request->file('peserta_laporan')->store('izin/peserta_laporan', 'public');
 
-            $stored = $request->file('peserta_laporan')->store('izin/peserta_laporan', 'public');
-            $datadetaillaporan['peserta_laporan'] = $stored;
-
-            $spreadsheet = IOFactory::load(Storage::disk('public')->path($stored));
+            $spreadsheet = IOFactory::load(Storage::disk('public')->path($detaillaporankegiatans['peserta_laporan']));
             $sheet = $spreadsheet->getActiveSheet();
 
             foreach ($sheet->toArray(null, true, true, true) as $row) {
@@ -95,12 +93,11 @@ class DetailLaporanKegiatansController extends Controller
         // -----------------------------
         // INSERT DETAIL LAPORAN
         // -----------------------------
+
         $detaillaporan = Izin_Detaillaporankegiatans::create(array_merge(
-            $datadetaillaporan,
+            $detaillaporankegiatans,
             [
                 'gambardokumentasi_laporan' => json_encode($path_gambardokumentasi),
-                'rundown_laporan' => json_encode($path_rundown_laporan),
-                'peserta_laporan' => json_encode($path_peserta_laporan),
             ]
         ));
 

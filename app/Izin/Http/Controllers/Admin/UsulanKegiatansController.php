@@ -37,7 +37,19 @@ class UsulanKegiatansController extends Controller
     public function create()
     {
         $user = Auth::user();
-        //$identitas = Identitassurat::findOrFail();
+        
+        // ==============================================
+        // 🔒 CEK APAKAH MASIH ADA USULAN YG BELUM SELESAI
+        // ==============================================
+        /*$unfinished = Izin_Usulankegiatans::where('dibuat_oleh', $user->id)
+            ->whereNotIn('statususulan_kegiatan', ['completed', 'finish'])
+            ->exists();
+
+        if ($unfinished) {
+            return redirect()
+                ->route('admin.usulankegiatan.index')
+                ->with('error', 'Anda tidak dapat membuat usulan baru karena masih ada usulan kegiatan yang belum selesai.');
+        }*/
 
         return view('pages.usulankegiatan.ajukan_usulan_kegiatan', [
             //'identitassurats' => Izin_Identitassurats::select('id', 'nomor_surat', 'tanggal_surat', 'perihal_surat')->get(),
