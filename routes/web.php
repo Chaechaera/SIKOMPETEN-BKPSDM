@@ -26,6 +26,16 @@ Route::middleware('auth')->group(function () {
     // Bagian Admin
     Route::middleware(['role:admin'])->group(function () {
 
+        // Informasi Admin - front End
+        Route::get('/admin/informasi', function () {
+        return view('pages.informasi.admin');
+        })->name('admin.informasi');
+
+        // Rekapitulasi Admin - Front End
+        Route::get('/admin/rekapitulasi', function () {
+        return view('pages.rekapitulasi.admin');
+        })->name('admin.rekapitulasi');
+
         // List semua usulan kegiatan
         Route::get('/admin/usulankegiatan/listusulankegiatan', [UsulanKegiatansController::class, 'index'])->name('admin.usulankegiatan.index');
         
@@ -54,6 +64,41 @@ Route::middleware('auth')->group(function () {
 
     // Bagian Superadmin
     Route::middleware(['role:superadmin'])->group(function () {
+
+        // Informasi SuperAdmin - Front End
+        Route::get('/superadmin/informasi', function () {
+        return view('pages.informasi.superadmin');
+        })->name('superadmin.informasi');
+
+        // Rekapitulasi SuperAdmin - Front End
+        Route::get('/superadmin/rekapitulasi', function () {
+        return view('pages.rekapitulasi.superadmin');
+        })->name('superadmin.rekapitulasi');
+
+        // Daftar Usulan Masuk - Front End
+        Route::get('/usulan-masuk', function () {
+        return view('pages.usulankegiatan.daftar-usulan-masuk');
+        })->name('usulankegiatan.daftar-masuk');
+
+        // Detail Laporan Masuk - Front End
+        Route::get('/detail-usulan', function () {
+        return view('pages.usulankegiatan.detail-usulan-masuk');
+        })->name('detail-usulan');
+
+        // Daftar Laporan Masuk - Front End
+        Route::get('/laporan-masuk', function () {
+        return view('pages.daftar-laporan-masuk');
+        })->name('laporan-masuk');
+
+        // Detail Laporan Masuk - Front End
+        Route::get('/detail-laporan', function () {
+        return view('pages.detail-laporan-masuk');
+        })->name('detail-laporan');
+
+        // Surat Balasan Usulan - Front End
+        Route::get('/balasan-usulan', function () {
+        return view('pages.surat-balasan-usulan');
+        })->name('balasan-usulan');
 
         // List semua usulan yang menunggu review
         Route::get('/superadmin/usulankegiatan/listusulankegiatanpending', [ReviewUsulanKegiatansController::class, 'pendingList'])->name('superadmin.usulankegiatan.pending');

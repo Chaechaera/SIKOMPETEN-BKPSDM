@@ -57,6 +57,16 @@
                 Dashboard
             </a>
 
+            <!-- Informasi -->
+            <a 
+                href="{{ route('admin.informasi') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                {{ Request::is('admin/informasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+            >
+                <img src="{{ Request::is('admin/informasi') ? asset('images/Info-white.png') : asset('images/Info.png') }}" class="w-5">
+                Informasi
+            </a>
+
             <!-- Daftar Usulan -->
             <a 
                 href="{{ route('admin.usulankegiatan.index') }}"
@@ -67,14 +77,14 @@
                 Daftar Usulan
             </a>
 
-            <!-- Pengajuan Usulan -->
+            <!-- Rekapitulasi -->
             <a 
-                href="{{ route('admin.usulankegiatan.create') }}"
+                href="{{ route('admin.rekapitulasi') }}"
                 class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Route::is('admin.usulankegiatan.create') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+                {{ Route::is('admin.rekapitulasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
             >
-                <img src="{{ Route::is('admin.usulankegiatan.create') ? asset('images/briefcase-white.png') : asset('images/briefcase.png') }}" class="w-5">
-                Pengajuan Usulan
+                <img src="{{ Route::is('admin.rekapitulasi') ? asset('images/briefcase-white.png') : asset('images/briefcase.png') }}" class="w-5">
+                Rekapitulasi 
             </a>
 
             <div class="mt-6 text-xs text-gray-400 uppercase">Other</div>

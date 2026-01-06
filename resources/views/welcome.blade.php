@@ -16,29 +16,42 @@
 <body class="bg-white font-sans antialiased">
 
     <!-- ======================= NAVBAR BACKEND (AUTH MASIH BERFUNGSI) ======================= -->
-    <header class="w-full py-6 px-8 flex justify-between items-center bg-gradient-to-r from-[#922B80] to-[#5B2C89] text-white">
+    <header
+    class="w-full py-4 px-8 flex justify-between items-center
+           bg-gradient-to-r from-[#922B80] to-[#5B2C89] text-white">
 
-        <div class="flex items-center gap-3 text-2xl font-bold">
-            <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-36" alt="Logo BKPSDM">
-            <span>SIKOMPETEN</span>
-        </div>
+    <!-- Logo -->
+    <div class="flex items-center gap-3 text-xl font-bold">
+        <img src="{{ asset('images/logo-bkpsdm.png') }}"
+             class="w-28 object-contain"
+             alt="Logo BKPSDM">
+        <span>SIKOMPETEN</span>
+    </div>
 
-        <nav class="hidden md:flex items-center gap-8 font-medium">
-            <a href="#" class="hover:text-yellow-300">Careers</a>
-            <a href="#" class="hover:text-yellow-300">Blog</a>
-            <a href="#" class="hover:text-yellow-300">About Us</a>
+    <!-- Navigation -->
+    <nav class="hidden md:flex items-center gap-6 font-medium text-sm">
+        <a href="#" class="hover:text-yellow-300 transition">Careers</a>
+        <a href="#" class="hover:text-yellow-300 transition">Blog</a>
+        <a href="#" class="hover:text-yellow-300 transition">About Us</a>
 
-            @auth
-                <a href="{{ url('/dashboard') }}" class="bg-[#F7941E] px-6 py-2 rounded-lg font-semibold shadow-lg">
-                    Dashboard
-                </a>
-            @else
-                <a href="{{ route('register') }}" class="bg-[#F7941E] px-6 py-2 rounded-lg font-semibold shadow-lg">Registrasi</a>
-                <a href="{{ route('login') }}" class="bg-[#F7941E] px-6 py-2 rounded-lg font-semibold shadow-lg">Login</a>
-            @endauth
-        </nav>
+        @auth
+            <a href="{{ url('/dashboard') }}"
+               class="bg-[#F7941E] px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#ff9f2a] transition">
+                Dashboard
+            </a>
+        @else
+            <a href="{{ route('register') }}"
+               class="bg-[#F7941E] px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#ff9f2a] transition">
+                Registrasi
+            </a>
+            <a href="{{ route('login') }}"
+               class="bg-[#F7941E] px-5 py-2 rounded-lg font-semibold shadow-md hover:bg-[#ff9f2a] transition">
+                Login
+            </a>
+        @endauth
+    </nav>
 
-    </header>
+</header>
 
     <!-- ======================= HERO SECTION ======================= -->
     <section class="w-full bg-gradient-to-br from-[#922B80] to-[#5B2C89] text-white pb-20 pt-16 px-8">
