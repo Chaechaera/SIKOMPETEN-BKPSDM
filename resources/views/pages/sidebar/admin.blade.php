@@ -57,6 +57,23 @@
                 Dashboard
             </a>
 
+            <!-- Pengaturan Dasar -->
+<a 
+    href="{{ route('admin.pengaturan') }}"
+    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+    {{ request()->routeIs('admin.pengaturan', 'admin-detail.pengaturan')
+        ? 'bg-[#1C1F4A] text-white'
+        : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+>
+    <img 
+        src="{{ request()->routeIs('admin.pengaturan', 'admin-detail.pengaturan')
+            ? asset('images/Settings-white.png')
+            : asset('images/Settings.png') }}"
+        class="w-5"
+    >
+    Pengaturan Dasar
+</a>
+
             <!-- Informasi -->
             <a 
                 href="{{ route('admin.informasi') }}"
@@ -77,6 +94,16 @@
                 Daftar Usulan
             </a>
 
+            <!-- Izin Pengembangan -->
+            <a 
+                href="{{ route('pengajuan.izinpengembangan') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                {{ Route::is('pengajuan.izinpengembangan') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+            >
+                <img src="{{ Route::is('pengajuan.izinpengembangan') ? asset('images/file-white.png') : asset('images/file.png') }}" class="w-5">
+                Izin Pengembangan
+            </a>
+
             <!-- Rekapitulasi -->
             <a 
                 href="{{ route('admin.rekapitulasi') }}"
@@ -87,14 +114,15 @@
                 Rekapitulasi 
             </a>
 
-            <div class="mt-6 text-xs text-gray-400 uppercase">Other</div>
-            <a class="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
-                <i class="fa-solid fa-headset"></i> Support
+            <!-- Sertifikat -->
+            <a 
+                href="{{ route('admin.sertifikat') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                {{ Route::is('admin.sertifikat') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+            >
+                <img src="{{ Route::is('admin.sertifikat') ? asset('images/Award-white.png') : asset('images/Award.png') }}" class="w-5">
+                Sertifikat 
             </a>
-            <a class="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
-                <i class="fa-solid fa-gear"></i> Settings
-            </a>
-
         </nav>
     </aside>
 

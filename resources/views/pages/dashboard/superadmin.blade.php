@@ -1,20 +1,15 @@
-<!-- Dashboard SuperAdmin Page -->
+<!-- Dashboard Super Admin Page -->
 <x-app-layout>
-<div 
-    x-data="{ sidebarOpen: true }"
-    class="min-h-screen bg-gray-50"
->
+<div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-    {{-- Sidebar --}}
-    @include('pages.sidebar.superadmin')
+        {{-- Sidebar --}} 
+        @include('pages.sidebar.superadmin')
 
-    {{-- Main Content --}}
-    <main
-        class="transition-all duration-300"
+        {{-- Main Content --}}
+        <main 
+        class="flex-1 p-6 space-y-6 transition-all duration-300"
         :class="sidebarOpen ? 'ml-64' : 'ml-0'"
     >
-        <div class="max-w-7xl mx-auto px-8 py-6 space-y-6">
-
 
             {{-- HEADER --}}
             <header class="flex items-center justify-between">

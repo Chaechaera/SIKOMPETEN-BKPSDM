@@ -36,6 +36,71 @@ Route::middleware('auth')->group(function () {
         return view('pages.rekapitulasi.admin');
         })->name('admin.rekapitulasi');
 
+        // Pengaturan Dasar - Front End
+        Route::get('/admin/pengaturan', function () {
+        return view('pages.pengaturan.admin');
+        })->name('admin.pengaturan');
+
+        // Detail Pengaturan Dasar - Front End
+        Route::get('/admin/pengaturan/detail', function () {
+        return view('pages.pengaturan.admin-detail');
+        })->name('admin.pengaturan.detail');
+
+        // Sertifikat Admin - Front End
+        Route::get('/admin/sertifikat', function () {
+        return view('pages.sertifikat.admin');
+        })->name('admin.sertifikat');
+
+        // Izin Pengembangan - Front End
+        Route::get('/pengajuan/izinpengembangan', function () {
+        return view('pages.izinpengembangan.pengajuan');
+        })->name('pengajuan.izinpengembangan');
+
+        // Step 1 - Input Data - Front End
+        Route::get('/izinpengembangan/input-data', function () {
+        return view('pages.izinpengembangan.input-data');
+        })->name('izinpengembangan.input-data');
+
+        // Step 2 - Cetak Usulan - Front End
+        Route::get('/izinpengembangan/cetak-usulan', function () {
+        return view('pages.izinpengembangan.cetak-usulan');
+        })->name('izinpengembangan.cetak-usulan');
+
+        // Step 3 - Kirim Usulan - Front End
+        Route::get('/izinpengembangan/kirim-usulan', function () {
+        return view('pages.izinpengembangan.kirim-usulan');
+        })->name('izinpengembangan.kirim-usulan');
+
+        // Step 4 - Input Laporan - Front End
+        Route::get('/izinpengembangan/input-laporan', function () {
+        return view('pages.izinpengembangan.input-laporan');
+        })->name('izinpengembangan.input-laporan');
+
+        // Step 5 - Cetak Laporan - Front End
+        Route::get('/izinpengembangan/cetak-laporan', function () {
+        return view('pages.izinpengembangan.cetak-laporan');
+        })->name('izinpengembangan.cetak-laporan');
+
+        // Step 6 - Kirim Laporan - Front End
+        Route::get('/izinpengembangan/kirim-laporan', function () {
+        return view('pages.izinpengembangan.kirim-laporan');
+        })->name('izinpengembangan.kirim-laporan');
+
+        // Step 7 - Unggah Peserta - Front End
+        Route::get('/izinpengembangan/unggah-peserta', function () {
+        return view('pages.izinpengembangan.unggah-peserta');
+        })->name('izinpengembangan.unggah-peserta');
+
+        // Step 8 - Unggah Template - Front End
+        Route::get('/izinpengembangan/unggah-template', function () {
+        return view('pages.izinpengembangan.unggah-template');
+        })->name('izinpengembangan.unggah-template');
+
+        // Step 9 - Download Sertifikat - Front End
+        Route::get('/izinpengembangan/download-sertifikat', function () {
+        return view('pages.izinpengembangan.download-sertifikat');
+        })->name('izinpengembangan.download-sertifikat');
+
         // List semua usulan kegiatan
         Route::get('/admin/usulankegiatan/listusulankegiatan', [UsulanKegiatansController::class, 'index'])->name('admin.usulankegiatan.index');
         
@@ -74,6 +139,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/rekapitulasi', function () {
         return view('pages.rekapitulasi.superadmin');
         })->name('superadmin.rekapitulasi');
+
+        // Sertifikat SuperAdmin - Front End
+        Route::get('/superadmin/sertifikat', function () {
+        return view('pages.sertifikat.superadmin');
+        })->name('superadmin.sertifikat');
+
+        // Tambah Sertifikat SuperAdmin - Front End
+        Route::get('/superadmin/sertifikat/tambah', function () {
+        return view('pages.sertifikat.superadmin');
+        })->name('superadmin.sertifikat.tambah');
 
         // Daftar Usulan Masuk - Front End
         Route::get('/usulan-masuk', function () {
@@ -114,6 +189,16 @@ Route::middleware('auth')->group(function () {
 
         // Lihat Bukti Pelaksanaan Kegiatan
         Route::get('/superadmin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('superadmin.pelaksanaankegiatan.show');
+
+        // Pengaturan Dasar - Front End
+        Route::get('/superadmin/pengaturan', function () {
+        return view('pages.pengaturan.superadmin');
+        })->name('superadmin.pengaturan');
+
+        // Detail Pengaturan Dasar - Front End
+        Route::get('/superadmin/pengaturan/detail', function () {
+        return view('pages.pengaturan.superadmin-detail');
+        })->name('superadmin.pengaturan.detail');
 
     });
 });

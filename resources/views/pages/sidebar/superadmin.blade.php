@@ -24,7 +24,7 @@
     <i class="fa-solid fa-bars text-xl text-gray-700"></i>
 </button>
 
-     <!-- Sidebar -->
+   <!-- Sidebar -->
     <aside
         class="fixed inset-y-0 left-0 w-64 bg-[#F9FAFC] border-r border-gray-200
                flex flex-col overflow-y-auto transform transition-transform
@@ -53,6 +53,24 @@
             <img src="{{ Request::is('superadmin/dashboard') ? asset('images/grid-white.png') : asset('images/grid.png') }}" class="w-5">
                 Dashboard
             </a>
+
+            <!-- Pengaturan Dasar -->
+<a 
+    href="{{ route('superadmin.pengaturan') }}"
+    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+    {{ request()->routeIs('superadmin.pengaturan', 'superadmin-detail.pengaturan')
+        ? 'bg-[#1C1F4A] text-white'
+        : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+>
+    <img 
+        src="{{ request()->routeIs('superadmin.pengaturan', 'superadmin-detail.pengaturan')
+            ? asset('images/Settings-white.png')
+            : asset('images/Settings.png') }}"
+        class="w-5"
+    >
+    Pengaturan Dasar
+</a>
+
 
             <!-- Informasi -->
             <a 
@@ -99,17 +117,46 @@
                 Rekapitulasi 
             </a>
 
-        <!-- Other -->
-        <div class="mt-6 text-xs text-gray-400 uppercase">Other</div>
-
-        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">
-            <i class="fa-solid fa-headset"></i>
-            Support
-        </a>
-
-        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100">
-            <i class="fa-solid fa-gear"></i>
-            Settings
-        </a>
+            <!-- Sertifikat -->
+            <a 
+                href="{{ route('superadmin.sertifikat') }}"
+                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
+                {{ Route::is('superadmin.sertifikat') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
+            >
+                <img src="{{ Route::is('superadmin.sertifikat') ? asset('images/Award-white.png') : asset('images/Award.png') }}" class="w-5">
+                Sertifikat 
+            </a>
     </nav>
 </aside>
+
+<!-- Wrapper konten -->
+    <div
+        class="transition-all duration-300"
+        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
+    >
+        @yield('content')
+    </div>
+
+</div>
+
+
+<script>
+  const sidebar = document.getElementById("sidebar");
+  const openBtn = document.getElementById("openSidebar");
+  const closeBtn = document.getElementById("closeSidebar");
+
+  // Buka sidebar
+  openBtn.addEventListener("click", () => {
+    sidebar.classList.remove("-translate-x-full");
+    openBtn.classList.add("hidden");
+  });
+
+  // Tutup sidebar
+  closeBtn.addEventListener("click", () => {
+    sidebar.classList.add("-translate-x-full");
+    openBtn.classList.remove("hidden");
+  });
+</script>
+
+
+</body>

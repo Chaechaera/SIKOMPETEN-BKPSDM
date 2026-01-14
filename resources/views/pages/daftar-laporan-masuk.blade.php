@@ -1,4 +1,16 @@
+
 <x-app-layout>
+<div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+
+        {{-- Sidebar --}} 
+        @include('pages.sidebar.superadmin')
+
+        {{-- Main Content --}}
+        <main 
+        class="flex-1 p-6 space-y-6 transition-all duration-300"
+        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
+    >
+
     @php
         $reports = [
             (object)[
@@ -49,10 +61,6 @@
 
             {{-- Header --}}
             <div class="flex items-center gap-4">
-                <a href="superadmin/dashboard"  
-                    class="bg-white text-blue-600 px-6 py-2 rounded-lg text-medium hover:bg-gray-200 transition">
-                    &larr; Kembali
-                </a>
                 <div class="flex-1">
                     <h2 class="text-2xl font-semibold text-[#2B3674]">Daftar Laporan Hasil Kegiatan</h2>
                     <p class="text-sm text-gray-500">Kelola dan verifikasi laporan hasil kegiatan untuk penerbitan sertifikat</p>
