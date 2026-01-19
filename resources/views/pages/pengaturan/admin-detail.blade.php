@@ -17,21 +17,28 @@
     >
 
 
-            {{-- Header --}}
-            <div class="flex items-center gap-4">
-                <a href="{{ route('admin.pengaturan') }}"
-                   class="bg-white text-blue-600 px-6 py-2 rounded-lg text-medium hover:bg-gray-200 transition">
-                    &larr; Kembali
-                </a>
-                <div class="flex-1">
-                    <h2 class="text-2xl font-semibold text-[#2B3674]">
-                        REFERENSI IZIN PENGEMBANGAN KOMPETENSI
-                    </h2>
-                    <p class="text-sm text-gray-500">
-                        Daftar Referensi Izin Pengembangan Kompetensi ASN
-                    </p>
-                </div>
-            </div>
+            {{-- HEADER --}}
+<div class="flex items-center gap-6">
+    <a href="{{ route('admin.pengaturan') }}"
+       class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100
+              flex items-center gap-2 shadow-sm shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 19l-7-7 7-7"/>
+        </svg>
+        Kembali
+    </a>
+
+    <div>
+        <h2 class="text-2xl font-semibold text-[#2B3674]">
+            REFERENSI IZIN PENGEMBANGAN KOMPETENSI
+        </h2>
+        <p class="text-sm text-gray-500">
+            Daftar Referensi Izin Pengembangan Kompetensi ASN
+        </p>
+    </div>
+</div>
 
             {{-- Profil --}}
             <div class="bg-white rounded-lg p-6 shadow-sm">

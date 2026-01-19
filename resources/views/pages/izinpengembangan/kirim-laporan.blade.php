@@ -3,13 +3,19 @@
         Kirim Laporan ke BKPSDM
     </x-slot>
 
+    {{-- Alpine JS --}}
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     {{-- Step Progress --}}
     @include('components.step-progress', ['currentStep' => 6])
 
     <div class="max-w-5xl mx-auto px-6 py-8 text-[#2B3674]">
 
         <!-- Card -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-8 border-2 border-gray-300">
+        <div
+            x-data="{ confirmSend: false }"
+            class="bg-white overflow-hidden shadow-sm sm:rounded-xl p-8 border-2 border-gray-300"
+        >
 
             {{-- Icon --}}
             <div class="flex justify-center mb-4">
@@ -53,35 +59,53 @@
                 >
             </div>
 
-
             {{-- Upload File --}}
-<div class="mb-6">
-    <label class="block text-sm font-medium mb-2">
-        File Kirim (Upload)
-    </label>
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-2">
+                    File Kirim (Upload)
+                </label>
 
-    <div class="border-2 border-gray-300 rounded-lg p-3 bg-white">
-        <input
-            type="file"
-            class="w-full text-sm
-                   file:mr-4 file:py-2 file:px-4
-                   file:rounded-lg file:border-0
-                   file:text-sm file:font-semibold
-                   file:bg-gray-100 file:text-gray-700
-                   hover:file:bg-gray-200"
-        >
-    </div>
+                <div class="border-2 border-gray-300 rounded-lg p-3 bg-white">
+                    <input
+                        type="file"
+                        class="w-full text-sm
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-lg file:border-0
+                               file:text-sm file:font-semibold
+                               file:bg-gray-100 file:text-gray-700
+                               hover:file:bg-gray-200"
+                    >
+                </div>
 
-    <p class="text-xs text-gray-400 mt-2">
-        Upload dokumen laporan yang sudah ditandatangani dan di-scan (Max 5MB)
-    </p>
-</div>
+                <p class="text-xs text-gray-400 mt-2">
+                    Upload dokumen laporan yang sudah ditandatangani dan di-scan (Max 5MB)
+                </p>
+            </div>
 
+            {{-- Checkbox Konfirmasi --}}
+            <div class="mb-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        x-model="confirmSend"
+                        class="mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    >
+                    <span class="text-sm text-gray-700">
+                        Saya menyatakan bahwa laporan yang diunggah sudah benar dan
+                        <strong>yakin untuk mengirim laporan ke BKPSDM</strong>.
+                    </span>
+                </label>
+            </div>
 
-            {{-- Button --}}
+            {{-- Button Kirim --}}
             <button
                 type="submit"
-                class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition">
+                :disabled="!confirmSend"
+                :class="confirmSend
+                    ? 'bg-green-600 hover:bg-green-700 cursor-pointer'
+                    : 'bg-gray-300 cursor-not-allowed'"
+                class="w-full text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition"
+            >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
                      viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -98,34 +122,33 @@
                 </p>
             </div>
 
-            <!-- BUTTON -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-10">
+            <!-- FOOTER ACTION -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-10">
 
-    <!-- STEP INFO -->
-    <div class="text-sm text-gray-500">
-        Step <span class="font-semibold text-[#2B3674]">6</span> dari
-        <span class="font-semibold text-[#2B3674]">9</span>
-    </div>
+                <!-- STEP INFO -->
+                <div class="text-sm text-gray-500">
+                    Step <span class="font-semibold text-[#2B3674]">6</span> dari
+                    <span class="font-semibold text-[#2B3674]">9</span>
+                </div>
 
-    <!-- ACTION BUTTON -->
-    <div class="flex justify-between sm:justify-end gap-3 w-full sm:w-auto">
-        <a href="{{ route('izinpengembangan.cetak-laporan') }}"
-            class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm hover:bg-gray-200 transition">
-            Kembali
-        </a>
+                <!-- ACTION BUTTON -->
+                <div class="flex justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                    <a href="{{ route('izinpengembangan.cetak-laporan') }}"
+                       class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm hover:bg-gray-200 transition">
+                        Kembali
+                    </a>
 
-        <button type="button"
-            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm">
-            Simpan Draft
-        </button>
+                    <button type="button"
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg text-sm">
+                        Simpan Draft
+                    </button>
 
-        <a href="{{ route('izinpengembangan.unggah-peserta') }}"
-   class="bg-[#FFA41B] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#ff9600] transition inline-block">
-    Selanjutnya
-</a>
-
-    </div>
-</div>
+                    <a href="{{ route('izinpengembangan.unggah-peserta') }}"
+                       class="bg-[#FFA41B] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#ff9600] transition inline-block">
+                        Selanjutnya
+                    </a>
+                </div>
+            </div>
 
         </div>
     </div>

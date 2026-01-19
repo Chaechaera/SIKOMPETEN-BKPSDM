@@ -30,9 +30,9 @@
 
     <!-- Navigation -->
     <nav class="hidden md:flex items-center gap-6 font-medium text-sm">
-        <a href="#" class="hover:text-yellow-300 transition">Careers</a>
-        <a href="#" class="hover:text-yellow-300 transition">Blog</a>
-        <a href="#" class="hover:text-yellow-300 transition">About Us</a>
+        <a href="#about-us" class="hover:text-yellow-300 transition">
+        About Us
+        </a>
 
         @auth
             <a href="{{ url('/dashboard') }}"
@@ -54,7 +54,7 @@
 </header>
 
     <!-- ======================= HERO SECTION ======================= -->
-    <section class="w-full bg-gradient-to-br from-[#922B80] to-[#5B2C89] text-white pb-20 pt-16 px-8">
+    <section id="about-us"class="w-full bg-gradient-to-br from-[#922B80] to-[#5B2C89] text-white pb-20 pt-16 px-8">
         <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
 
             <div>
@@ -71,14 +71,127 @@
                     <a href="{{ route('login') }}" class="bg-white text-[#5B2C89] px-6 py-3 rounded-lg font-semibold shadow-lg">
                         Mulai Sekarang
                     </a>
-                    <button class="border border-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20">
+                    <a href="#alur" class="border border-white px-6 py-3 rounded-lg font-semibold hover:bg-white/20">
                         Pelajari Lebih Lanjut
-                    </button>
+                    </a>
                 </div>
             </div>
 
         </div>
     </section>
+
+
+    <!-- ======================= CEK SERTIFIKAT ASN ======================= -->
+<section class="py-10 px-6 bg-gray-50">
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg p-10">
+
+        <h2 class="text-3xl font-bold text-center text-[#2B3674] mb-3">
+            Cek & Unduh Sertifikat ASN
+        </h2>
+
+        <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">
+            Masukkan NIP untuk melihat dan mengunduh sertifikat pengembangan kompetensi.
+        </p>
+
+        <!-- Input -->
+        <div class="max-w-xl mx-auto">
+            <input
+                id="nipInput"
+                type="text"
+                placeholder="Masukkan NIP Anda"
+                class="w-full border-2 border-gray-300 rounded-lg px-4 py-3
+                       focus:outline-none focus:border-purple-600 mb-4"
+            >
+
+            <button
+                onclick="cekSertifikat()"
+                class="w-full bg-gradient-to-r from-[#922B80] to-[#5B2C89]
+                       text-white py-3 rounded-lg font-semibold hover:opacity-90">
+                Cari Sertifikat
+            </button>
+        </div>
+
+        <!-- NOT FOUND -->
+        <div id="notFound"
+             class="hidden mt-8 text-center text-red-600 font-medium">
+            ❌ Sertifikat dengan NIP tersebut tidak ditemukan
+        </div>
+
+        <!-- RESULT -->
+        <div id="result"
+             class="hidden mt-12 border-t pt-10">
+
+            <h3 class="font-semibold text-[#2B3674] mb-6 text-center">
+                Sertifikat Ditemukan
+            </h3>
+
+            <div class="border rounded-xl p-6
+                        flex flex-col sm:flex-row
+                        sm:items-center sm:justify-between gap-6">
+
+                <div>
+                    <p id="namaPelatihan" class="font-semibold text-lg"></p>
+                    <p id="namaASN" class="text-sm text-gray-500"></p>
+                    <p id="nipASN" class="text-xs text-gray-400"></p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button
+                        class="px-5 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-100">
+                        Lihat
+                    </button>
+
+                    <button
+                        class="px-5 py-2 text-sm rounded-lg bg-[#1AB0B0] text-white hover:opacity-90">
+                        Unduh
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ======================= SCRIPT DUMMY ======================= -->
+<script>
+    // DATA DUMMY SERTIFIKAT
+    const dataSertifikat = [
+        {
+            nip: "199012122020121001",
+            nama: "Fica Lidya Latifatulhusna",
+            pelatihan: "Pelatihan Manajemen ASN"
+        },
+        {
+            nip: "198705152019031002",
+            nama: "Andi Saputra",
+            pelatihan: "Pelatihan Kepemimpinan Nasional"
+        }
+    ];
+
+    function cekSertifikat() {
+        const nipInput = document.getElementById("nipInput").value;
+        const result = document.getElementById("result");
+        const notFound = document.getElementById("notFound");
+
+        // reset
+        result.classList.add("hidden");
+        notFound.classList.add("hidden");
+
+        const found = dataSertifikat.find(item => item.nip === nipInput);
+
+        if (found) {
+            document.getElementById("namaPelatihan").innerText = found.pelatihan;
+            document.getElementById("namaASN").innerText = found.nama;
+            document.getElementById("nipASN").innerText = "NIP: " + found.nip;
+
+            result.classList.remove("hidden");
+        } else {
+            notFound.classList.remove("hidden");
+        }
+    }
+</script>
+<!-- ======================= END CEK SERTIFIKAT ASN ======================= -->
 
     <!-- ======================= FITUR SECTION ======================= -->
     <section class="text-center py-16 px-6">
@@ -118,7 +231,7 @@
     </section>
 
     <!-- ======================= ALUR PROSES ======================= -->
-    <section class="py-16 px-8 bg-blue-50">
+    <section id="alur" class="py-16 px-8 bg-blue-50">
         <h2 class="text-center text-2xl font-bold mb-8">
             Alur Proses <span class="text-[#1AB0B0]">SIKOMPETEN</span>
         </h2>

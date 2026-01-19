@@ -33,16 +33,25 @@
 
 
                 <!-- Sifat -->
-                <div class="mb-6">
-                    <label class="text-sm font-medium text-gray-700">
-                        Sifat
-                    </label>
-                    <input type="text" placeholder="Ketik sifat surat (contoh: Biasa, Segera, Sangat Segera, Rahasia)"
-                            class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <p class="text-xs text-gray-400 mt-1">
-                        Ketik manual sesuai kebutuhan surat
-                    </p>
-                </div>
+            <div class="mb-6">
+                <label class="text-sm font-medium text-gray-700">
+                Sifat
+                </label>
+            <select
+                class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                bg-white focus:border-blue-500 focus:ring-blue-500">
+            <option value="" selected disabled>
+                Pilih sifat surat
+            </option>
+            <option value="biasa">Biasa</option>
+            <option value="segera">Segera</option>
+            <option value="sangat_segera">Sangat Segera</option>
+            </select>
+
+            <p class="text-xs text-gray-400 mt-1">
+                Pilih sifat surat sesuai tingkat urgensi
+            </p>
+        </div>
 
                 <!-- Lampiran -->
                 <div class="mb-6">

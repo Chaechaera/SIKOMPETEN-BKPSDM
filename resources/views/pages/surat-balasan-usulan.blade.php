@@ -29,8 +29,6 @@
      Kembali
 </button>
 
-
-
             {{-- INFO --}}
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-medium text-blue-800 flex items-center gap-2">
             <img src="{{ asset('images/Info.png') }}" class="h-5 w-5 flex-shrink-0">
@@ -42,52 +40,52 @@
 
             {{-- DATA SURAT BALASAN --}}
             <div class="bg-white rounded-xl shadow p-6 space-y-4">
-                <h3 class="font-semibold text-gray-800">Data Surat Balasan</h3>
+                <h3 class="text-lg font-semibold text-[#2B3674] mb-1">Data Surat Balasan</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="text-sm text-gray-600">Nomor Surat</label>
-                        <input type="text" class="w-full rounded-lg border-gray-300 mt-1"
+                        <label class="text-sm font-medium text-gray-700">Nomor Surat</label>
+                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                             placeholder="Contoh: 800/01/BKPSDM/2025">
                     </div>
 
                     <div>
-                        <label class="text-sm text-gray-600">Tanggal Surat</label>
-                        <input type="date" class="w-full rounded-lg border-gray-300 mt-1">
+                        <label class="text-sm font-medium text-gray-700">Tanggal Surat</label>
+                        <input type="date" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     </div>
 
                     <div>
-                        <label class="text-sm text-gray-600">Nomor Usulan Terkait</label>
-                        <input type="text" class="w-full rounded-lg border-gray-300 mt-1"
+                        <label class="text-sm font-medium text-gray-700">Nomor Usulan Terkait</label>
+                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                             placeholder="USL-002">
                     </div>
 
                     <div>
-                        <label class="text-sm text-gray-600">Lampiran</label>
-                        <input type="text" class="w-full rounded-lg border-gray-300 mt-1"
+                        <label class="text-sm font-medium text-gray-700">Lampiran</label>
+                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                             placeholder="1 berkas">
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-sm text-gray-600">Perihal</label>
-                    <textarea class="w-full rounded-lg border-gray-300 mt-1"
+                    <label class="text-sm font-medium text-gray-700">Perihal</label>
+                    <textarea class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                         placeholder="Balasan Permohonan Izin Pelaksanaan Pelatihan..."></textarea>
                 </div>
             </div>
 
             {{-- DATA USULAN (READ ONLY) --}}
             <div class="bg-green-50 border border-green-200 rounded-xl p-6 space-y-4">
-                <h3 class="font-semibold text-green-800">Data Usulan</h3>
+                <h3 class="text-lg font-semibold text-green-800">Data Usulan</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p class="text-gray-500">Nama Kegiatan</p>
+                        <p class="text-sm font-medium text-gray-700">Nama Kegiatan</p>
                         <p class="font-medium">Pelatihan SPBE dan Transformasi Digital</p>
                     </div>
 
                     <div>
-                        <p class="text-gray-500">OPD Pengusul</p>
+                        <p class="text-sm font-medium text-gray-700">OPD Pengusul</p>
                         <p class="font-medium">Diskominfo</p>
                     </div>
                 </div>
@@ -95,9 +93,9 @@
 
             {{-- KEPUTUSAN VERIFIKASI --}}
             <div class="bg-white rounded-xl shadow p-6 space-y-4">
-                <h3 class="font-semibold text-gray-800">Keputusan Verifikasi</h3>
+                <h3 class="text-lg font-semibold text-[#2B3674] mb-1">Keputusan Verifikasi</h3>
 
-                <select class="w-full rounded-lg border-gray-300">
+                <select class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     <option {{ $statusVerifikasi=='approved'?'selected':'' }}>
                         Disetujui
                     </option>
@@ -110,23 +108,23 @@
             {{-- DETAIL PERSETUJUAN --}}
             @if($statusVerifikasi == 'approved')
             <div class="bg-green-50 border border-green-200 rounded-xl p-6 space-y-4">
-                <h3 class="font-semibold text-green-800">Detail Persetujuan</h3>
+                <h3 class="text-lg font-semibold text-green-800">Detail Persetujuan</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" class="rounded-lg border-gray-300"
+                    <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                         placeholder="Tempat Pelaksanaan">
 
-                    <input type="number" class="rounded-lg border-gray-300"
-                        placeholder="Jumlah Peserta">
+                    <input type="number" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        placeholder="Peserta">
 
-                    <input type="date" class="rounded-lg border-gray-300">
-                    <input type="date" class="rounded-lg border-gray-300">
+                    <input type="date" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <input type="date" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                 </div>
 
-                <input type="text" class="w-full rounded-lg border-gray-300"
+                <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Anggaran yang Disetujui">
 
-                <textarea class="w-full rounded-lg border-gray-300"
+                <textarea class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Syarat dan ketentuan khusus..."></textarea>
             </div>
             @endif
@@ -134,30 +132,35 @@
             {{-- ALASAN PENOLAKAN --}}
             @if($statusVerifikasi == 'rejected')
             <div class="bg-red-50 border border-red-200 rounded-xl p-6 space-y-4">
-                <h3 class="font-semibold text-red-800">Alasan Penolakan</h3>
+                <h3 class="text-lg font-semibold text-red-800">Alasan Penolakan</h3>
 
-                <textarea class="w-full rounded-lg border-gray-300"
+                <textarea class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Jelaskan alasan penolakan usulan..."></textarea>
             </div>
             @endif
 
             {{-- CATATAN & TINDAK LANJUT --}}
             <div class="bg-white rounded-xl shadow p-6 space-y-4">
-                <h3 class="font-semibold text-gray-800">Catatan dan Tindak Lanjut</h3>
+                <h3 class="text-lg font-semibold text-[#2B3674] mb-1">Catatan dan Tindak Lanjut</h3>
 
-                <textarea class="w-full rounded-lg border-gray-300"
+                <textarea class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Instruksi atau tindak lanjut untuk OPD..."></textarea>
             </div>
 
             {{-- ACTION --}}
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-between sm:justify-end gap-3 w-full sm:w-auto">
                 <button onclick="history.back()"
-                 class="px-4 py-2 rounded-lg border text-gray-700">
+                 class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm hover:bg-gray-200 transition">
                     Batal
                 </button>
-                <button class="px-4 py-2 rounded-lg bg-blue-600 text-white">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm">
                     Preview Surat
                 </button>
+                <a href="{{ route('usulankegiatan.daftar-masuk') }}"
+                class="bg-[#FFA41B] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#ff9600] transition">
+                    Kirim
+                </a>
+
             </div>
 
         </div>

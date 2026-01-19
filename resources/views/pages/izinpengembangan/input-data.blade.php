@@ -45,9 +45,13 @@
                     </div>
 
                     <div class="sm:col-span-2">
-                        <label class="text-sm font-medium text-gray-700">Lampiran Surat</label>
-                        <input type="text" placeholder="Masukkan jumlah lampiran surat"
-                            class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <label class="text-sm font-medium text-gray-700">Sifat Surat</label>
+                        <select class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                            <option>-- Pilih Sifat Surat --</option>
+                            <option>Biasa</option>
+                            <option>Segera</option>
+                            <option>Sangat Segera</option>
+                        </select>
                     </div>
 
                     <div class="sm:col-span-2">
@@ -154,17 +158,18 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="text-sm font-medium text-gray-700">Narasumber</label>
-                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <input type="text" placeholder="Masukkan nama narasumber" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     </div>
 
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Jumlah Peserta</label>
-                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <label class="text-sm font-medium text-gray-700">Peserta</label>
+                        <input type="text" placeholder="Masukkan uraian peserta (berasal dari OPD mana)"
+                         class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     </div>
 
                     <div>
                         <label class="text-sm font-medium text-gray-700">Alokasi Anggaran</label>
-                        <input type="text" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <input type="text" placeholder="Masukkan alokasi anggaran (tidak harus berupa nominal, misal anggaran dibebankan ke siapa)" class="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
                     </div>
 
                     <div>
