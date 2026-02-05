@@ -13,20 +13,21 @@ class Izin_Detaillaporankegiatans extends Model
 
     protected $fillable = [
         'laporankegiatan_id',
+        'atribut_khusus',
         'rincian_laporan',
         'rundown_laporan',
+        'penutup_laporan',
         'peserta_laporan',
-        'undangan_laporan',
-        'materi_laporan',
-        'daftarhadir_laporan',
-        'dokumentasi_laporan',
-        'gambardokumentasi_laporan',
-        'outputkegiatan_laporan',
-        'templatesertifikat_kegiatan',
+        'linkundangan_laporan',
+        'linkmateri_laporan',
+        'linkdaftarhadir_laporan',
+        'linkdokumentasi_laporan',
+        'gambardokumentasi_laporan'
     ];
 
     protected $casts = [
         'gambardokumentasi_laporan' => 'array',
+        'atribut_khusus' => 'array',
     ];
 
     protected $with = [

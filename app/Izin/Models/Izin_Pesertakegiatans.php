@@ -14,7 +14,7 @@ class Izin_Pesertakegiatans extends Model
     protected $fillable = [
         'detaillaporankegiatan_id', 
         'nama_peserta', 
-        'nip_peserta', 
+        'nip_nik_peserta', 
         'jabatan_peserta', 
         'subunitkerja_id_peserta',
         'sertifikat_id',

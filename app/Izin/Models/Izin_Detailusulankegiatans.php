@@ -18,18 +18,23 @@ class Izin_Detailusulankegiatans extends Model
         'uraian_kegiatan',
         'maksud_kegiatan',
         'tujuan_kegiatan',
-        'hasil_kegiatan',
+        'hasillangsung_kegiatan',
+        'hasilmenengah_kegiatan',
+        'hasilpanjang_kegiatan',
         'narasumber_kegiatan',
-        'peserta_kegiatan',
+        'sasaranpeserta_kegiatan',
         'alokasianggaran_kegiatan',
         'jadwalpelaksanaan_kegiatan',
         'metodepelatihan_id',
+        'detailhasil_kegiatan',
+        'penyelenggara_kegiatan',
+        'penutup_kegiatan'
     ];
 
     // RELATIONS
     public function usulankegiatans()
     {
-        return $this->belongsTo(Izin_Usulankegiatans::class, 'identitassurat_id');
+        return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
     }
 
     public function metodepelatihans() 

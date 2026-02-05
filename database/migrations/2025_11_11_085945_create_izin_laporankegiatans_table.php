@@ -13,18 +13,12 @@ return new class extends Migration
     {
         Schema::create('izin_laporankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans');
-            $table->foreignId('identitassurat_id')->constrained('izin_identitassurats');
-            $table->foreignId('carapelatihan_id')->constrained('ref_carapelatihans');
-            $table->json('atribut_khusus')->nullable();
-            $table->time('waktupelaksanaan_laporan');
-            $table->text('latarbelakang_laporan')->nullable();
-            $table->text('dasarhukum_laporan')->nullable();
-            $table->text('maksud_laporan')->nullable();
-            $table->text('tujuan_laporan')->nullable();
-            $table->text('ruanglingkup_laporan')->nullable();
-            $table->foreignId('metodepelatihan_id')->constrained('ref_metodepelatihans');
-            $table->text('narasumber_laporan')->nullable();
+            $table->string('lokasi_kegiatan');
+            $table->date('tanggalmulai_kegiatan');
+            $table->date('tanggalselesai_kegiatan');
+            $table->time('waktumulai_kegiatan');
+            $table->time('waktuselesai_kegiatan');
+            $table->enum('statuslaporan_kegiatan', ['completed', 'pending', 'need_review', 'revisi'])->nullable();
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@
 
                 <div class="mb-4">
                     <label class="block font-medium">Nama Kegiatan</label>
-                    <input type="text" name="nama_kegiatan" value="{{ $usulankegiatans->nama_kegiatan }}" class="border rounded w-full p-2 bg-gray-100" readonly>
+                    <input type="text" name="nama_kegiatan" value="{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan }}" class="border rounded w-full p-2 bg-gray-100" readonly>
                 </div>
 
                 <div class="mb-4">
@@ -18,8 +18,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block font-medium">Lokasi Kegiatan</label>
-                    <input type="date" name="tanggalpelaksanaan_kegiatan" value="{{ $usulankegiatans->tanggalpelaksanaan_kegiatan }}" class="border rounded w-full p-2 bg-gray-100" readonly>
+                    <label class="block font-medium">Tanggal Pelaksanaan Kegiatan</label>
+                    <input type="date" name="tanggalmulai_kegiatan" value="{{ $usulankegiatans->tanggalmulai_kegiatan }}" class="border rounded w-full p-2 bg-gray-100" readonly>
                 </div>
 
                 <div class="mt-4">

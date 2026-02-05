@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('izin_detaillaporankegiatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laporankegiatan_id')->constrained('izin_laporankegiatans');
+            $table->json('atribut_khusus')->nullable();
             $table->text('rincian_laporan')->nullable();
             $table->text('rundown_laporan')->nullable();
+            $table->text('penutup_laporan')->nullable();
             $table->text('peserta_laporan')->nullable();
-            $table->text('undangan_laporan')->nullable();
-            $table->text('materi_laporan')->nullable();
-            $table->text('daftarhadir_laporan')->nullable();
-            $table->text('dokumentasi_laporan')->nullable();
+            $table->text('linkundangan_laporan')->nullable();
+            $table->text('linkmateri_laporan')->nullable();
+            $table->text('linkdaftarhadir_laporan')->nullable();
+            $table->text('linkdokumentasi_laporan')->nullable();
             $table->text('gambardokumentasi_laporan')->nullable();
-            $table->text('outputkegiatan_laporan')->nullable();
-            $table->string('templatesertifikat_kegiatan')->nullable();
             $table->timestamps();
         });
     }

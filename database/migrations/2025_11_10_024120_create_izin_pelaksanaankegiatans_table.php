@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('izin_pelaksanaankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans');
+            $table->foreignId('inputusulankegiatan_id');
             $table->text('buktipelaksanaan_kegiatan')->nullable();
             $table->timestamps();
         });

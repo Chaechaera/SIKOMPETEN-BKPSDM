@@ -18,7 +18,9 @@ class BalasanLaporanKegiatansController extends Controller
      */
     public function create($id)
     {
-        $laporankegiatans = Izin_Laporankegiatans::with('usulankegiatans.carapelatihans', 'usulankegiatans.subunitkerjas')->findOrFail($id);
+        $laporankegiatans = Izin_Laporankegiatans::with('inputlaporankegiatans',
+    'inputlaporankegiatans.inputusulankegiatans',
+    'inputlaporankegiatans.inputusulankegiatans.usulankegiatans', 'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans', 'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.subunitkerjas')->findOrFail($id);
         $subunitkerjas = $laporankegiatans->usulankegiatans->subunitkerjas->sub_unitkerja ?? '-';
         $subunitkerja_id = $laporankegiatans->usulankegiatans->subunitkerja_id ?? null;
         $sertifikat_id = session('sertifikat_id');

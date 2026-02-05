@@ -322,7 +322,7 @@
         }
 
         .kak-section .table {
-            width: 60%;
+            width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
             padding-left: 40px;
@@ -467,6 +467,22 @@
             margin-top: 6px;
         }
 
+        .table td {
+            padding: 2px 4px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .table .label {
+            width: 150px;
+            /* atur sesuai panjang teks */
+        }
+
+        .table .colon {
+            width: 10px;
+            text-align: center;
+        }
+
         th,
         td {
             border: 1px solid black;
@@ -481,10 +497,6 @@
 </head>
 
 <body>
-    @php
-    $user = $user ?? Auth::user();
-    @endphp
-
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
     <div class="kop-container">
         @if($kop_path && file_exists($kop_path))
@@ -509,31 +521,31 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->identitassurats->nomor_surat ?? '....' }}</td>
+                    <td>{{ $usulankegiatans->identitassurats?->nomor_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->sifat_surat ?? 'Biasa' }}</td>
+                    <td>{{ $usulankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->identitassurats->lampiran_surat ?? '-' }}</td>
+                    <td>{{ $usulankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $usulankegiatans->identitassurats->perihal_surat ?? 'Permohonan Rekomendasi Kegiatan Pengembangan Kompetensi' }}</strong></td>
+                    <td><strong>{{ $usulankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $usulankegiatans->identitassurats->tanggal_surat
-                    ? \Carbon\Carbon::parse($usulankegiatans->identitassurats->tanggal_surat)->translatedFormat('d F Y')
-                    : '-' }}
+                {{ $usulankegiatans->identitassurats?->tanggal_surat
+                    ? \Carbon\Carbon::parse($usulankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+                    : '' }}
             </p>
         </div>
     </div>
@@ -547,8 +559,8 @@
 
     <div class="content">
         <p class="indent">
-            Guna meningkatkan kompetensi sumber daya manusia di lingkungan {{ $user->subunitkerjas->sub_unitkerja }} Kota Surakarta serta unit, {{ $user->subunitkerjas->sub_unitkerja }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan kompetensi
-            "{{ $usulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}". Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan "{{ $usulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}" dengan Kerangka Acuan Kegiatan (KAK) sebagaimana terlampir.
+            Guna meningkatkan kompetensi sumber daya manusia di lingkungan {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit, {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan kompetensi
+            "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}". Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}" dengan Kerangka Acuan Kegiatan (KAK) sebagaimana terlampir.
         </p>
         <p class="indent">
             Demikian atas perhatian dan kerja samanya disampaikan terima kasih.
@@ -556,7 +568,7 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas->sub_unitkerja }}</strong></p>
+        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         @php
@@ -621,13 +633,20 @@
         <div class="kak-title">
             <h3>KERANGKA ACUAN KERJA (KAK)</h3>
             <h3>KEGIATAN PENGEMBANGAN KOMPETENSI<br></h3>
-            <h3>TAHUN ANGGARAN 2025<br></h3>
+            <h3>TAHUN ANGGARAN {{ \Carbon\Carbon::now()->year }}<br></h3>
         </div>
 
-        <p class="section-title">A. NAMA KEGIATAN PENGEMBANGAN KOMPETENSI</p>
-        <p>{{ $usulankegiatans->nama_kegiatan ?? '-' }}</p>
+        @php
+        $letterIndex = 0; // mulai dari A
+        function getLetter($i) {
+            $alphabet = range('A', 'Z');
+            return $alphabet[$i] ?? ('Z' . ($i - 25));} // fallback kalau lewat Z
+        @endphp
 
-        <p class="section-title">B. LATAR BELAKANG</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. NAMA KEGIATAN PENGEMBANGAN KOMPETENSI</p>
+        <p>{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}</p>
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. LATAR BELAKANG</p>
         <p class="indent">
             @if(!empty($usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan))
             {!! nl2br(e($usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan)) !!}
@@ -636,7 +655,7 @@
             @endif
         </p>
 
-        <p class="section-title">C. DASAR HUKUM</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. DASAR HUKUM</p>
         <ol>
             @if(!empty($usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan))
             <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan)) !!}</li>
@@ -646,7 +665,7 @@
             @endif
         </ol>
 
-        <p class="section-title">D. URAIAN KEGIATAN</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. URAIAN KEGIATAN</p>
         @php
         $uraian = trim($usulankegiatans->detailusulankegiatans->uraian_kegiatan ?? '');
         @endphp
@@ -671,7 +690,7 @@
         </p>
         @endif
 
-        <p class="section-title">E. MAKSUD DAN TUJUAN</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. MAKSUD DAN TUJUAN</p>
         <div class="kak-maksud-tujuan">
             <ol type="1">
                 <li>MAKSUD
@@ -682,24 +701,89 @@
                 </li>
                 <li>TUJUAN
                     <ol type="1">
-                        <li>Meningkatkan kemampuan teknis tenaga kesehatan.</li>
-                        <li>Memperkuat kapasitas pelayanan kesehatan masyarakat.</li>
+                        <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->tujuan_kegiatan ??
+                            'Meningkatkan kualitas pelaksanaan kegiatan dan kompetensi peserta.')) !!}</li>
                     </ol>
                 </li>
             </ol>
         </div>
 
-        <p class="section-title">F. HASIL YANG DIHARAPKAN</p>
-        <ol type="1">
-            @if(!empty($usulankegiatans->detailusulankegiatans->hasil_kegiatan))
-            <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->hasil_kegiatan)) !!}</li>
-            @else
-            <li>Peningkatan kemampuan tenaga kesehatan dalam deteksi dini tumbuh kembang anak.</li>
-            <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
-            @endif
-        </ol>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL LANGSUNG YANG DIHARAPKAN</p>
+        @php
+        $hasillangsung = trim($usulankegiatans->detailusulankegiatans->hasillangsung_kegiatan ?? '');
+        @endphp
 
-        <p class="section-title">G. NARASUMBER DAN SASARAN PESERTA</p>
+        @if(!empty($hasillangsung))
+        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasillangsung))
+        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        <ol>
+            @foreach(preg_split('/\r\n|\r|\n/', $hasillangsung) as $line)
+            @if(!empty(trim($line)))
+            <li>{{ trim($line, "-•* ") }}</li>
+            @endif
+            @endforeach
+        </ol>
+        @else
+        <p class="indent">{!! nl2br(e($hasillangsung)) !!}</p>
+        @endif
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
+            diskusi, dan simulasi praktik...
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL JANGKA MENENGAH YANG DIHARAPKAN</p>
+        @php
+        $hasilmenengah = trim($usulankegiatans->detailusulankegiatans->hasilmenengah_kegiatan ?? '');
+        @endphp
+
+        @if(!empty($hasilmenengah))
+        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasilmenengah))
+        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        <ol>
+            @foreach(preg_split('/\r\n|\r|\n/', $hasilmenengah) as $line)
+            @if(!empty(trim($line)))
+            <li>{{ trim($line, "-•* ") }}</li>
+            @endif
+            @endforeach
+        </ol>
+        @else
+        <p class="indent">{!! nl2br(e($hasilmenengah)) !!}</p>
+        @endif
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
+            diskusi, dan simulasi praktik...
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL JANGKA PANJANG YANG DIHARAPKAN</p>
+        @php
+        $hasilpanjang = trim($usulankegiatans->detailusulankegiatans->hasilpanjang_kegiatan ?? '');
+        @endphp
+
+        @if(!empty($hasilpanjang))
+        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasilpanjang))
+        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        <ol>
+            @foreach(preg_split('/\r\n|\r|\n/', $hasilpanjang) as $line)
+            @if(!empty(trim($line)))
+            <li>{{ trim($line, "-•* ") }}</li>
+            @endif
+            @endforeach
+        </ol>
+        @else
+        <p class="indent">{!! nl2br(e($hasilpanjang)) !!}</p>
+        @endif
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
+            diskusi, dan simulasi praktik...
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. NARASUMBER DAN SASARAN PESERTA</p>
         <div class="kak-narasumber-peserta">
             <ol type="1">
                 <li>NARASUMBER
@@ -714,44 +798,62 @@
                     </ol>
                     </p>
                 </li>
-                <li>PESERTA
+                <li>SASARAN PESERTA
                     <p class="indent">
-                        Peserta yang mengikuti seminar adalah sebanyak {!! nl2br(e($usulankegiatans->detailusulankegiatans->peserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!} orang yang berasal dari ruang lingkup {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta.
+                        Sasaran peserta yang mengikuti kegiatan ini merupakan orang yang berasal dari ruang lingkup {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta yang mana meliputi {!! nl2br(e($usulankegiatans->detailusulankegiatans->sasaranpeserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!}
                     </p>
                 </li>
             </ol>
         </div>
 
-        <p class="section-title">H. WAKTU DAN TEMPAT</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. WAKTU DAN TEMPAT</p>
         <table class="table">
             <tr>
-                <td class="label">Waktu Pelaksanaan</td>
+                <td class="label">Tanggal Pelaksanaan</td>
                 <td class="colon">:</td>
-                <td>@if($usulankegiatans->tanggalpelaksanaan_kegiatan)
-                    {{ \Carbon\Carbon::parse($usulankegiatans->tanggalpelaksanaan_kegiatan)->translatedFormat('d F Y') }}
+                <td>@if($usulankegiatans->tanggalmulai_kegiatan)
+                    {{ \Carbon\Carbon::parse($usulankegiatans->tanggalmulai_kegiatan)->translatedFormat('d F Y') }}
+                    @else
+                    -
+                    @endif
+                    s/d
+                    @if($usulankegiatans->tanggalselesai_kegiatan)
+                    {{ \Carbon\Carbon::parse($usulankegiatans->tanggalselesai_kegiatan)->translatedFormat('d F Y') }}
                     @else
                     -
                     @endif
                 </td>
             </tr>
             <tr>
-                <td class="label">Tempat</td>
+                <td class="label">Waktu Pelaksanaan</td>
+                <td class="colon">:</td>
+                <td>@if($usulankegiatans->waktumulai_kegiatan)
+                    {{ \Carbon\Carbon::parse($usulankegiatans->waktumulai_kegiatan)->format('H:i') }}
+                    @else
+                    -
+                    @endif
+                    s/d
+                    @if($usulankegiatans->waktuselesai_kegiatan)
+                    {{ \Carbon\Carbon::parse($usulankegiatans->waktuselesai_kegiatan)->format('H:i') }}
+                    @else
+                    -
+                    @endif
+                </td>
+            </tr>
+            <tr>
+                <td class="label">Tempat Pelaksanaan</td>
                 <td class="colon">:</td>
                 <td>{{ $usulankegiatans->lokasi_kegiatan ?? '-' }}</td>
             </tr>
         </table>
 
-        <p class="section-title">I. METODE PELAKSANAAN</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. METODE PELAKSANAAN</p>
         <p>
-            @if(!empty($usulankegiatans->detailusulankegiatans->metodepelatihan_id->metode_pelatihan))
-            {!! nl2br(e($usulankegiatans->detailusulankegiatans->metodepelatihan_id->metode_pelatihan)) !!}
-            @else
-            Kegiatan dilakukan dengan metode
-            {{ $usulankegiatans->detailusulankegiatans->metodepelatihan_id->metode_pelatihan ?? 'Ceramah, diskusi, simulasi, dan tanya jawab.' }}
-            @endif
+            Kegiatan {{ $usulankegiatans->inputusulankegiatans->nama_kegiatan }} dilaksanakan dengan metode
+            {{ $usulankegiatans->detailusulankegiatans?->metodepelatihans->metode_pelatihan ?? 'Ceramah, diskusi, simulasi, dan tanya jawab.' }}
         </p>
 
-        <p class="section-title">J. SUSUNAN ACARA</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. SUSUNAN ACARA</p>
         @if(!empty($jadwalpelaksanaan_kegiatan) && count($jadwalpelaksanaan_kegiatan) > 1)
         <table class="susunan-acara">
             @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
@@ -831,53 +933,53 @@
         <p class="indent">Terlampir dalam jadwal kegiatan.</p>
         @endif
 
-        <p class="section-title">K. PENUTUP</p>
+        <p class="section-title">{{ getLetter($letterIndex++) }}. PENUTUP</p>
         <p class="indent">
-            Demikian Kerangka Acuan Kerja ini dibuat untuk digunakan sebagai pedoman pelaksanaan kegiatan.
+            {{ $usulankegiatans->detailusulankegiatans->penutup_kegiatan ?? 'Demikian Kerangka Acuan Kerja ini dibuat untuk digunakan sebagai pedoman pelaksanaan kegiatan.' }}
         </p>
     </div>
 
-        <div class="ttd">
-            <p><strong>Kepala {{ $user->subunitkerjas->sub_unitkerja }}</strong></p>
-            <p><strong>Kota Surakarta</strong></p>
+    <div class="ttd">
+        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>Kota Surakarta</strong></p>
 
-            @php
-            // 🔍 Langkah 1: ambil dari controller dulu
-            $finalPath = $ttd_path ?? null;
+        @php
+        // 🔍 Langkah 1: ambil dari controller dulu
+        $finalPath = $ttd_path ?? null;
 
-            // 🔍 Langkah 2: fallback dari session
-            if (empty($finalPath) && session()->has('tandatangan_pjkegiatan')) {
-            $finalPath = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-            }
+        // 🔍 Langkah 2: fallback dari session
+        if (empty($finalPath) && session()->has('tandatangan_pjkegiatan')) {
+        $finalPath = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
+        }
 
-            // 🔍 Langkah 3: fallback ke kemungkinan lokasi lain
-            if (empty($finalPath) || !file_exists($finalPath)) {
-            // Coba cek apakah filenya ada di storage/izin/tandatangan_pjkegiatan
-            $possiblePath = storage_path('app/public/izin/tandatangan_pjkegiatan');
-            if (is_dir($possiblePath)) {
-            foreach (glob($possiblePath . '/*.png') as $file) {
-            $finalPath = $file; // ambil file pertama
-            break;
-            }
-            }
-            }
-            @endphp
+        // 🔍 Langkah 3: fallback ke kemungkinan lokasi lain
+        if (empty($finalPath) || !file_exists($finalPath)) {
+        // Coba cek apakah filenya ada di storage/izin/tandatangan_pjkegiatan
+        $possiblePath = storage_path('app/public/izin/tandatangan_pjkegiatan');
+        if (is_dir($possiblePath)) {
+        foreach (glob($possiblePath . '/*.png') as $file) {
+        $finalPath = $file; // ambil file pertama
+        break;
+        }
+        }
+        }
+        @endphp
 
-            @if(!empty($finalPath) && file_exists($finalPath))
-            @php
-            $imageData = base64_encode(file_get_contents($finalPath));
-            @endphp
-            <img src="data:image/png;base64,{{ $imageData }}"
-                alt="Tanda Tangan"
-                style="height:90px; margin-top:5px; margin-right:0; display:inline-block;">
-            @else
-            <p style="color:red; font-size:10pt;">[TTD tidak ditemukan di path {{ $finalPath ?? 'N/A' }}]</p>
-            @endif
+        @if(!empty($finalPath) && file_exists($finalPath))
+        @php
+        $imageData = base64_encode(file_get_contents($finalPath));
+        @endphp
+        <img src="data:image/png;base64,{{ $imageData }}"
+            alt="Tanda Tangan"
+            style="height:90px; margin-top:5px; margin-right:0; display:inline-block;">
+        @else
+        <p style="color:red; font-size:10pt;">[TTD tidak ditemukan di path {{ $finalPath ?? 'N/A' }}]</p>
+        @endif
 
 
-            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
-        </div>
+        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+    </div>
 </body>
 
 </html>

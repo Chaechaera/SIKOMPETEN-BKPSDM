@@ -3,7 +3,9 @@
 namespace App\Izin\Http\Controllers\Admin;
 
 use App\Izin\Http\Controllers\Controller;
+use App\Izin\Models\Izin_Detaillaporankegiatans;
 use App\Izin\Models\Izin_Identitassurats;
+use App\Izin\Models\Izin_Inputlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
@@ -37,20 +39,11 @@ class LaporanKegiatansController extends Controller
     /**
      * Simpan Data Usulan Kegiatan
      */
-    public function store(Request $request, $id)
+    /*public function store(Request $request, $id)
     {
         $user = Auth::user();
 
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
-
-        $identitassurats = Izin_Identitassurats::create([
-            'nomor_surat' => $request->nomor_surat,
-            'tanggal_surat' => $request->tanggal_surat,
-            'perihal_surat' => $request->perihal_surat,
-            'lampiran_surat' => $request->lampiran_surat,
-            'subunitkerja_id' => $user->subunitkerja_id,
-            'dibuat_oleh' => $user->id,
-        ]);
 
         $config = config('atribut_khusus');
         $carapelatihans = Izin_RefCarapelatihans::find($request->carapelatihan_id);
@@ -60,7 +53,7 @@ class LaporanKegiatansController extends Controller
             foreach ($config[$carapelatihans->cara_pelatihan] as $key => $label) {
                 $atributInput[$key] = $request->input($key);
             }
-        }*/
+        }
 
         if ($carapelatihans && isset($config[$carapelatihans->id]['fields'])) {
             foreach ($config[$carapelatihans->id]['fields'] as $key => $field) {
@@ -70,7 +63,6 @@ class LaporanKegiatansController extends Controller
 
         $laporankegiatans = Izin_Laporankegiatans::create([
             'usulankegiatan_id' => $usulankegiatans->id,
-            'identitassurat_id' => $identitassurats->id,
             'carapelatihan_id' => $request->carapelatihan_id,
             'atribut_khusus' => json_encode($atributInput),
             'waktupelaksanaan_laporan' => $request->waktupelaksanaan_laporan,
@@ -83,6 +75,13 @@ class LaporanKegiatansController extends Controller
             'narasumber_laporan' => $request->narasumber_laporan,
         ]);
 
+        // Buat INPUT USULAN (WAJIB ADA)
+        Izin_Inputlaporankegiatans::create([
+            'laporankegiatan_id' => $laporankegiatans->id,
+            'nama_kegiatan' => $request->nama_kegiatan,
+            'pjunitkerja_id' => $user->id
+        ]);
+
         $request->merge(['laporankegiatan_id' => $laporankegiatans->id]);
 
         // Update Status Usulan Kegiatan ke Database
@@ -92,15 +91,122 @@ class LaporanKegiatansController extends Controller
 
         // Lanjut ke controller detail
         return app(DetailLaporanKegiatansController::class)->store($request);
+    }*/
+
+    public function store(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
+
+        // Buat USULAN (data minimal)
+        $laporan = Izin_Laporankegiatans::create([
+            'lokasi_kegiatan' => $request->lokasi_kegiatan,
+            'tanggalmulai_kegiatan' => $request->tanggalmulai_kegiatan,
+            'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
+            'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
+            'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            'statuslaporan_kegiatan' => 'completed'
+        ]);
+
+        // Buat INPUT USULAN (WAJIB ADA)
+        Izin_Inputlaporankegiatans::create([
+            'laporankegiatan_id' => $laporan->id,
+            //'usulankegiatan_id' => $usulan->id,
+            'inputusulankegiatan_id' => $usulankegiatans->inputusulankegiatans->id,
+            'pjunitkerja_id' => $user->id
+        ]);
+
+        // Redirect ke list usulan kegiatan
+        return redirect()->route('admin.laporankegiatan.edit', $usulankegiatans->id)
+            ->with('success', 'Silakan lengkapi data usulan kegiatan.');
+    }
+
+    public function edit($id)
+    {
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputlaporankegiatans.laporankegiatans'
+            //'laporankegiatans.detaillaporankegiatans'
+        ])->findOrFail($id);
+
+        $input = $usulankegiatans->inputlaporankegiatans;
+
+        $laporankegiatans = $input->laporankegiatans;
+
+        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
+            abort(403, 'Usulan sudah tidak dapat diubah.');
+        }
+
+        // 🔥 PASTIKAN DETAIL SELALU ADA (MESKI KOSONG)
+        $detaillaporankegiatans = $laporankegiatans->detaillaporankegiatans ?? new Izin_Detaillaporankegiatans();
+
+        return view('pages.laporankegiatan.lengkapi_laporan_kegiatan', [
+            'usulankegiatans' => $usulankegiatans,
+            'laporankegiatans' => $laporankegiatans,
+            'detaillaporankegiatans' => $detaillaporankegiatans,
+            'subunitkerjas' => $usulankegiatans->subunitkerjas->sub_unitkerja,
+            'unitkerjas' => $usulankegiatans->subunitkerjas->unitkerjas->unitkerja,
+            'nama_kegiatan' => $usulankegiatans->inputusulankegiatans->nama_kegiatan,
+            'carapelatihans' => Izin_RefCarapelatihans::all(),
+            'metodepelatihans' => Izin_RefMetodepelatihans::all(),
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        //$usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        $usulankegiatans = Izin_Usulankegiatans::with(
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans'
+        )->findOrFail($id);
+
+        /*$laporan = Izin_Laporankegiatans::with('detaillaporankegiatans')
+        ->where('usulankegiatan_id', $id)
+        ->firstOrFail();*/
+
+        $input = $usulankegiatans->inputlaporankegiatans;
+
+        $laporankegiatans = $input->laporankegiatans;
+
+        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
+            abort(403);
+        }
+
+        // Update USULAN
+        $laporankegiatans->update([
+            'lokasi_kegiatan' => $request->lokasi_kegiatan,
+            'carapelatihan_id' => $request->carapelatihan_id,
+            'tanggalmulai_kegiatan' => $request->tanggalmulai_kegiatan,
+            'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
+            'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
+            'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            'statuslaporan_kegiatan' => $request->statuslaporan_kegiatan,
+        ]);
+
+        /*$request->merge([
+            'usulankegiatan_id' => $usulan->id
+        ]);*/
+
+        // Lanjut ke controller detail
+        return app(DetailLaporanKegiatansController::class)->store($request);
     }
 
     public function download($id)
     {
         // Ambil data lengkap dengan relasi
         $laporankegiatans = Izin_Laporankegiatans::with([
-            'identitassurats',
+            //'identitassurats',
             'detaillaporankegiatans',
-            'usulankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans',
+            //'usulankegiatans.metodepelatihans',
+            //'usulankegiatans.carapelatihans',
+            //'inputusulankegiatans.usulankegiatans',
+            'detaillaporankegiatans.pesertakegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+            //'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans',
+            //'usulankegiatans',
+            //'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.metodepelatihans',
         ])->findOrFail($id);
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
@@ -178,6 +284,10 @@ class LaporanKegiatansController extends Controller
             }
         }
 
+        // TERBILANG ANGGARAN LAPORAN
+        $anggaran = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->alokasianggaran_kegiatan ?? 0;
+        $anggaranFormat = $this->rupiahTerbilang($anggaran);
+
         // ATRIBUT KHUSUS
         $atribut_khusus = json_decode($laporankegiatans->atribut_khusus, true) ?? [];
 
@@ -186,11 +296,79 @@ class LaporanKegiatansController extends Controller
             'rundown_laporan' => $rundown_laporan,
             'peserta_laporan' => $peserta_laporan,
             'gambardokumentasi_laporan' => $gambardokumentasi_laporan,
+            'format_anggaran' => $anggaranFormat,
             'atribut_khusus' => $atribut_khusus,
             'kop_path' => $kop_path,
             'ttd_path' => $ttd_path,
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Laporan_Hasil_' . $laporankegiatans->usulankegiatans->nama_kegiatan . '.pdf');
+        return $pdf->stream('Laporan Hasil Kegiatan ' . $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
+    }
+
+    private function rupiahTerbilang($angka, $case = 'capital')
+    {
+        if (!is_numeric($angka)) return '-';
+
+        $angka = (int) $angka;
+
+        $formatRupiah = 'Rp ' . number_format($angka, 0, ',', '.') . ',00';
+
+        $huruf = [
+            "",
+            "satu",
+            "dua",
+            "tiga",
+            "empat",
+            "lima",
+            "enam",
+            "tujuh",
+            "delapan",
+            "sembilan",
+            "sepuluh",
+            "sebelas"
+        ];
+
+        $terbilang = function ($x) use (&$terbilang, $huruf) {
+
+            if ($x < 12)
+                return " " . $huruf[$x];
+
+            elseif ($x < 20)
+                return $terbilang($x - 10) . " belas";
+
+            elseif ($x < 100)
+                return $terbilang($x / 10) . " puluh" . $terbilang($x % 10);
+
+            elseif ($x < 200)
+                return " seratus" . $terbilang($x - 100);
+
+            elseif ($x < 1000)
+                return $terbilang($x / 100) . " ratus" . $terbilang($x % 100);
+
+            elseif ($x < 2000)
+                return " seribu" . $terbilang($x - 1000);
+
+            elseif ($x < 1000000)
+                return $terbilang($x / 1000) . " ribu" . $terbilang($x % 1000);
+
+            elseif ($x < 1000000000)
+                return $terbilang($x / 1000000) . " juta" . $terbilang($x % 1000000);
+
+            elseif ($x < 1000000000000)
+                return $terbilang($x / 1000000000) . " miliar" . $terbilang($x % 1000000000);
+
+            elseif ($x < 1000000000000000)
+                return $terbilang($x / 1000000000000) . " triliun" . $terbilang($x % 1000000000000);
+
+            return "";
+        };
+
+        $hasil = trim($terbilang($angka)) . " rupiah";
+
+        if ($case == 'upper') $hasil = strtoupper($hasil);
+        elseif ($case == 'lower') $hasil = strtolower($hasil);
+        else $hasil = ucwords($hasil);
+
+        return $formatRupiah . ' (' . $hasil . ')';
     }
 }

@@ -20,7 +20,7 @@ class SertifikatsController extends Controller
     public function create(Request $request)
     {
         $laporankegiatans = Izin_Laporankegiatans::with([
-            'usulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
             'detaillaporankegiatans.pesertakegiatans'
         ])->findOrFail($request->laporankegiatan_id);
 

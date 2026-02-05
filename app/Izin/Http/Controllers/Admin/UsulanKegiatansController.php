@@ -3,7 +3,9 @@
 namespace App\Izin\Http\Controllers\Admin;
 
 use App\Izin\Http\Controllers\Controller;
+use App\Izin\Models\Izin_Detailusulankegiatans;
 use App\Izin\Models\Izin_Identitassurats;
+use App\Izin\Models\Izin_Inputusulankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_Usulankegiatans;
@@ -20,13 +22,13 @@ class UsulanKegiatansController extends Controller
     public function index()
     {
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'identitassurats:id,nomor_surat,perihal_surat',
-            //'laporankegiatan:id,usulankegiatan_id,statuslaporan_kegiatan',
-            //'laporankegiatan.balasanlaporankegiatan:id,laporan_kegiatan_id,file_surat',
-            //'laporankegiatan.balasanlaporankegiatan.sertifikat:id,balasan_laporan_kegiatan_id,file_path'
-        ])
-            ->select('id', 'nama_kegiatan', 'identitassurat_id', 'tanggalpelaksanaan_kegiatan', 'lokasi_kegiatan', 'statususulan_kegiatan')
-            ->get();
+            'inputusulankegiatans',
+            'cetakusulankegiatans',
+            'verifikasiusulankegiatanterakhir',
+            'pelaksanaankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans'
+        ])->orderBy('created_at', 'desc')->get();
 
         return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
     }
@@ -37,22 +39,9 @@ class UsulanKegiatansController extends Controller
     public function create()
     {
         $user = Auth::user();
-        
-        // ==============================================
-        // 🔒 CEK APAKAH MASIH ADA USULAN YG BELUM SELESAI
-        // ==============================================
-        /*$unfinished = Izin_Usulankegiatans::where('dibuat_oleh', $user->id)
-            ->whereNotIn('statususulan_kegiatan', ['completed', 'finish'])
-            ->exists();
-
-        if ($unfinished) {
-            return redirect()
-                ->route('admin.usulankegiatan.index')
-                ->with('error', 'Anda tidak dapat membuat usulan baru karena masih ada usulan kegiatan yang belum selesai.');
-        }*/
 
         return view('pages.usulankegiatan.ajukan_usulan_kegiatan', [
-            //'identitassurats' => Izin_Identitassurats::select('id', 'nomor_surat', 'tanggal_surat', 'perihal_surat')->get(),
+            'unitkerjas' => $user->subunitkerjas?->unitkerjas?->unitkerja,
             'subunitkerjas' => $user->subunitkerjas->sub_unitkerja ?? null,
             'dibuat_oleh' => $user->nama,
             'carapelatihans' => Izin_RefCarapelatihans::select('id', 'cara_pelatihan')->get(),
@@ -60,10 +49,91 @@ class UsulanKegiatansController extends Controller
         ]);
     }
 
+    public function storeAwal(Request $request)
+    {
+        $request->validate([
+            'nama_kegiatan' => 'required|string|max:255'
+        ]);
+
+        $user = Auth::user();
+
+        // Buat USULAN (data minimal)
+        $usulan = Izin_Usulankegiatans::create([
+            'nama_kegiatan' => $request->nama_kegiatan,
+            'dibuat_oleh' => $user->id,
+            'subunitkerja_id' => $user->subunitkerja_id,
+            'unitkerja_id' => $user->subunitkerjas->unitkerja_id,
+            'statususulan_kegiatan' => 'draft'
+        ]);
+
+        // Buat INPUT USULAN (WAJIB ADA)
+        Izin_Inputusulankegiatans::create([
+            'usulankegiatan_id' => $usulan->id,
+            'nama_kegiatan' => $request->nama_kegiatan,
+            'pjunitkerja_id' => $user->id
+        ]);
+
+        // Redirect ke list usulan kegiatan
+        return redirect()->route('admin.usulankegiatan.edit', $usulan->id)
+            ->with('success', 'Silakan lengkapi data usulan kegiatan.');
+    }
+
+    public function edit($id)
+    {
+        $usulan = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        if ($usulan->statususulan_kegiatan !== 'draft') {
+            abort(403, 'Usulan sudah tidak dapat diubah.');
+        }
+
+        // 🔥 PASTIKAN DETAIL SELALU ADA (MESKI KOSONG)
+        $detail = $usulan->detailusulankegiatans ?? new Izin_Detailusulankegiatans();
+
+        return view('pages.usulankegiatan.lengkapi_usulan_kegiatan', [
+            'usulan' => $usulan,
+            'detail' => $detail,
+            'subunitkerjas' => $usulan->subunitkerjas->sub_unitkerja,
+            'unitkerjas' => $usulan->subunitkerjas->unitkerjas->unitkerja,
+            'nama_kegiatan' => $usulan->inputusulankegiatans->nama_kegiatan,
+            'carapelatihans' => Izin_RefCarapelatihans::all(),
+            'metodepelatihans' => Izin_RefMetodepelatihans::all(),
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        if ($usulan->statususulan_kegiatan !== 'draft') {
+            abort(403);
+        }
+
+        // Update USULAN
+        $usulan->update([
+            'lokasi_kegiatan' => $request->lokasi_kegiatan,
+            'carapelatihan_id' => $request->carapelatihan_id,
+            'tanggalmulai_kegiatan' => $request->tanggalmulai_kegiatan,
+            'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
+            'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
+            'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            //'statususulan_kegiatan' => 'pending'
+        ]);
+
+        $request->merge([
+            'usulankegiatan_id' => $usulan->id
+        ]);
+
+        // Lanjut ke controller detail
+        return app(DetailUsulanKegiatansController::class)->store($request);
+    }
+
     /**
      * Simpan Data Usulan Kegiatan
      */
-    public function store(Request $request)
+    /**public function store(Request $request)
     {
         $user = Auth::user();
 
@@ -114,7 +184,8 @@ class UsulanKegiatansController extends Controller
     {
         // Ambil data lengkap dengan relasi
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'identitassurats',
+            //'identitassurats',
+            'inputusulankegiatans',
             'detailusulankegiatans'
         ])->findOrFail($id);
 
@@ -158,14 +229,17 @@ class UsulanKegiatansController extends Controller
             }
         }
 
+        $user = Auth::user();
+
         $pdf = PDF::loadView('pages.generatepdf.surat_usulan_kegiatan', [
             'usulankegiatans' => $usulankegiatans,
             'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
             'kop_path' => $kop_path,
             'ttd_path' => $ttd_path,
+            'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Surat_Pengajuan_' . $usulankegiatans->nama_kegiatan . '.pdf');
+        return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
 
     public function uploadTTD(Request $request)
@@ -190,4 +264,20 @@ class UsulanKegiatansController extends Controller
     {
         return view('pages.upload_ttd_surat');
     }
+
+    /*public function destroy($id)
+{
+    $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+    // OPTIONAL: proteksi status
+    if ($usulan->status_ui !== 'draft') {
+        return back()->with('error', 'Usulan hanya bisa dihapus saat draft');
+    }
+
+    $usulan->delete();
+
+    return redirect()
+        ->route('admin.usulankegiatan.listusulankegiatan')
+        ->with('success', 'Usulan kegiatan berhasil dihapus');
+}*/
 }

@@ -12,12 +12,11 @@ class Izin_Balasanlaporankegiatans extends Model
     protected $table = 'izin_balasanlaporankegiatans';
 
     protected $fillable = [
-        'identitassurat_id',
-        'laporankegiatan_id',
-        'usulankegiatan_id',
+        'inputusulankegiatan_id',
+        'inputlaporankegiatan_id',
         'sertifikat_id',
-        'totalcapaianjp_kegiatan',
-    ];
+        'totalcapaianjp_kegiatan'
+    ]; 
 
     // RELATION
     public function identitassurats()

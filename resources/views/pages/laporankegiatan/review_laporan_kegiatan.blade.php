@@ -16,17 +16,17 @@
             </button>
 
             <h3 class="text-lg font-semibold mb-4">
-                Review Laporan: {{ $laporankegiatans->usulankegiatans->nama_kegiatan }}
+                Review Laporan: {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->nama_kegiatan }}
             </h3>
 
             <form method="POST" 
                   action="{{ route('superadmin.laporankegiatan.reviewUpload', $laporankegiatans->id) }}">
                 @csrf
                 <div class="mb-4">
-                    <label for="noteusulan_kegiatan" class="font-semibold">Catatan Review (Opsional)</label>
+                    <label for="catatan_verifikasilaporankegiatan" class="font-semibold">Catatan Review (Opsional)</label>
                     <textarea 
-                        name="noteusulan_kegiatan" 
-                        id="noteusulan_kegiatan" 
+                        name="catatan_verifikasilaporankegiatan" 
+                        id="catatan_verifikasilaporankegiatan" 
                         class="border rounded w-full mt-2 p-2"
                         placeholder="Tulis catatan review..."></textarea>
                 </div>
@@ -34,14 +34,14 @@
                 <div class="flex gap-2 justify-end">
                     <button 
                         type="submit" 
-                        name="actionusulan_kegiatan" 
+                        name="actionlaporan_kegiatan" 
                         value="accepted" 
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                         Setujui
                     </button>
                     <button 
                         type="submit" 
-                        name="actionusulan_kegiatan" 
+                        name="actionlaporan_kegiatan" 
                         value="rejected" 
                         class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
                         Tolak

@@ -1,13 +1,19 @@
 <?php
 
+use App\Izin\Http\Controllers\Admin\CetakLaporanKegiatansController;
+use App\Izin\Http\Controllers\Admin\CetakUsulanKegiatansController;
 use App\Izin\Http\Controllers\Admin\DetailLaporanKegiatansController;
 use App\Izin\Http\Controllers\Admin\DetailUsulanKegiatansController;
+use App\Izin\Http\Controllers\Admin\KirimLaporanKegiatansController;
+use App\Izin\Http\Controllers\Admin\KirimUsulanKegiatansController;
 use App\Izin\Http\Controllers\Admin\LaporanKegiatansController;
 use App\Izin\Http\Controllers\Admin\PelaksanaanKegiatansController;
 use App\Izin\Http\Controllers\Admin\UsulanKegiatansController;
 use App\Izin\Http\Controllers\IdentitasSuratsController;
 use App\Izin\Http\Controllers\ProfileController;
 use App\Izin\Http\Controllers\Superadmin\BalasanLaporanKegiatansController;
+use App\Izin\Http\Controllers\Superadmin\BalasanUsulanKegiatansController;
+use App\Izin\Http\Controllers\Superadmin\CetakBalasanUsulanKegiatansController;
 use App\Izin\Http\Controllers\Superadmin\ReviewLaporanKegiatansController;
 use App\Izin\Http\Controllers\Superadmin\ReviewUsulanKegiatansController;
 use App\Izin\Http\Controllers\User\SertifikatsController;
@@ -42,15 +48,39 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/usulankegiatan/listusulankegiatan', [UsulanKegiatansController::class, 'index'])->name('admin.usulankegiatan.index');
         
         // Buat Pengajuan Usulan Kegiatan Pada Form Ajukan Usulan Kegiatan
-        Route::get('/admin/usulankegiatan', [UsulanKegiatansController::class, 'create'])->name('admin.usulankegiatan.create');
-
-        // Submit Pengajuan Usulan Kegiatan
-        Route::post('/admin/usulankegiatan', [UsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.store');
-        Route::post('/admin/usulankegiatan/identitassurat', [IdentitasSuratsController::class, 'store'])->name('admin.identitassurat.store');
-        Route::post('/admin/usulankegiatan/detailusulankegiatan', [DetailUsulanKegiatansController::class, 'store'])->name('admin.detailusulankegiatan.store');
+        Route::get('/admin/usulankegiatan/create', [UsulanKegiatansController::class, 'create'])->name('admin.usulankegiatan.create');
 
         // Hapus Pengajuan Usulan Kegiatan 
-        Route::delete('/admin/usulankegiatan', [UsulanKegiatansController::class, 'destroy'])->name('admin.usulankegiatan.destroy');
+        //Route::delete('/admin/usulankegiatan', [UsulanKegiatansController::class, 'destroy'])->name('admin.usulankegiatan.destroy');
+
+        Route::get('/admin/usulankegiatan/{id}/kirim', [KirimUsulanKegiatansController::class, 'create'])->name('admin.usulankegiatan.kirim');
+        Route::post('/admin/usulankegiatan/{id}/kirim', [KirimUsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.kirim');
+
+        Route::get('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.kirim');
+        Route::post('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.kirim');
+
+        Route::get('/admin/usulankegiatan/{id}/downloadBalasan', [BalasanUsulanKegiatansController::class, 'downloadBalasan'])->name('admin.usulankegiatan.downloadBalasan');
+
+        //Route::post('/admin/usulankegiatan/{id}/kirim', [IdentitasSuratsController::class, 'store'])->name('admin.usulankegiatan.kirim');
+
+        // STEP 1 — Simpan draft
+        Route::post('/admin/usulankegiatan/store-awal', [UsulanKegiatansController::class, 'storeAwal'])->name('admin.usulankegiatan.storeAwal');
+
+        // STEP 2 — Form lengkapi usulan
+        Route::get('/admin/usulankegiatan/{id}/edit', [UsulanKegiatansController::class, 'edit'])->name('admin.usulankegiatan.edit');
+
+        // STEP 2 — Simpan lengkap
+        Route::put('/admin/usulankegiatan/{id}', [UsulanKegiatansController::class, 'update'])->name('admin.usulankegiatan.update');
+
+        // Hapus draft (opsional)
+        Route::delete('/admin/usulankegiatan/{id}', [UsulanKegiatansController::class, 'destroy'])->name('admin.usulankegiatan.destroy');
+
+        Route::post('/admin/usulankegiatan/{id}/cetak', [CetakUsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.cetak');
+
+        // Submit Pengajuan Usulan Kegiatan
+        //Route::post('/admin/usulankegiatan', [UsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.store');
+        //Route::post('/admin/usulankegiatan/identitassurat', [IdentitasSuratsController::class, 'store'])->name('admin.identitassurat.store');
+        //Route::post('/admin/usulankegiatan/detailusulankegiatan', [DetailUsulanKegiatansController::class, 'store'])->name('admin.detailusulankegiatan.store');
 
          // Form & upload tanda tangan pejabat kegiatan
         Route::get('/admin/usulankegiatan/upload-ttd', [UsulanKegiatansController::class, 'createTTD'])->name('admin.usulankegiatan.createTTD');
@@ -60,16 +90,30 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/usulankegiatan/{id}/download', [UsulanKegiatansController::class, 'download'])->name('admin.usulankegiatan.download');
 
         // Submit Pelaksanann Kegiatan
-        Route::get('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'create'])->name('admin.pelaksanaankegiatan.create');
+        Route::get('/admin/pelaksanaankegiatan/{id}/create', [PelaksanaanKegiatansController::class, 'create'])->name('admin.pelaksanaankegiatan.create');
         Route::post('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'store'])->name('admin.pelaksanaankegiatan.store');
+
+        // Lihat Bukti Pelaksanaan Kegiatan
+        Route::get('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('admin.pelaksanaankegiatan.show');
+
+        // STEP 1 — Simpan draft
+        //Route::post('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.store');
+
+        // STEP 2 — Form lengkapi usulan
+        Route::get('/admin/laporankegiatan/{id}/edit', [LaporanKegiatansController::class, 'edit'])->name('admin.laporankegiatan.edit');
+
+        // STEP 2 — Simpan lengkap
+        Route::put('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'update'])->name('admin.laporankegiatan.update');
 
         // Buat Pelaporan Hasil Kegiatan Pada Form Ajukan Laporan Hasil Kegiatan
         Route::get('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.create');
 
         // Submit Pelaporan Hasil Kegiatan
         Route::post('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.store');
-        Route::post('/admin/laporankegiatan/identitassurat/{id}', [IdentitasSuratsController::class, 'store'])->name('admin.identitassurat.store');
-        Route::post('/admin/laporankegiatan/detaillaporankegiatan/{id}', [DetailLaporanKegiatansController::class, 'store'])->name('admin.detaillaporankegiatan.store');
+        //Route::post('/admin/laporankegiatan/identitassurat/{id}', [IdentitasSuratsController::class, 'store'])->name('admin.identitassurat.store');
+        //Route::post('/admin/laporankegiatan/detaillaporankegiatan/{id}', [DetailLaporanKegiatansController::class, 'store'])->name('admin.detaillaporankegiatan.store');
+
+        Route::post('/admin/laporankegiatan/{id}/cetak', [CetakLaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.cetak');
 
         // Download Surat dan Laporan Hasil Kegiatan
         Route::get('/admin/laporankegiatan/{id}/download', [LaporanKegiatansController::class, 'download'])->name('admin.laporankegiatan.download');
@@ -95,6 +139,14 @@ Route::middleware('auth')->group(function () {
 
         // Submit hasil review usulan kegiatan (approve/reject)
         Route::post('/superadmin/usulankegiatan/{id}/review', [ReviewUsulanKegiatansController::class, 'reviewUpload'])->name('superadmin.usulankegiatan.reviewUpload');
+
+        Route::get('/superadmin/balasanusulankegiatan/{id}/downloadBalasan', [BalasanUsulanKegiatansController::class, 'downloadBalasan'])->name('superadmin.usulankegiatan.downloadBalasan');
+
+        Route::post('/superadmin/balasanusulankegiatan/{id}/cetak', [CetakBalasanUsulanKegiatansController::class, 'store'])->name('superadmin.balasanusulankegiatan.cetak');
+
+        Route::get('/superadmin/balasanusulankegiatan/{id}/kirim', [BalasanUsulanKegiatansController::class, 'create'])->name('superadmin.balasanusulankegiatan.kirim');  
+        Route::post('/superadmin/balasanusulankegiatan/{id}/kirim', [BalasanUsulanKegiatansController::class, 'store'])->name('superadmin.balasanusulankegiatan.kirim');
+        //Route::post('/superadmin/balasanusulankegiatan/{id}/kirim', [IdentitasSuratsController::class, 'store'])->name('superadmin.balasanusulankegiatan.kirim');
 
         // Lihat Bukti Pelaksanaan Kegiatan
         Route::get('/superadmin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('superadmin.pelaksanaankegiatan.show');

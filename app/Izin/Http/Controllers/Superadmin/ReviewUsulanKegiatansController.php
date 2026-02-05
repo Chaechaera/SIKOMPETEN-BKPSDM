@@ -4,35 +4,54 @@ namespace App\Izin\Http\Controllers\Superadmin;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Usulankegiatans;
+use App\Izin\Models\Izin_Verifikasiusulankegiatans;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ReviewUsulanKegiatansController extends Controller
 {
     public function pendingList(Request $request)
     {
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'identitassurats:id,nomor_surat,perihal_surat',
-            'laporankegiatans',
-        ])
-            ->select(['id', 'nama_kegiatan', 'subunitkerja_id', 'identitassurat_id', 'tanggalpelaksanaan_kegiatan', 'lokasi_kegiatan', 'statususulan_kegiatan']);
+            //'identitassurats:id,nomor_surat,perihal_surat',
+            //'laporankegiatans',
+            'inputusulankegiatans',
+            'verifikasiusulankegiatanterakhir',
+            'pelaksanaankegiatans',
+            'cetakusulankegiatans',
+            'balasanusulankegiatans'
+        ]);
+            //->select(['id', 'subunitkerja_id', 'tanggalmulai_kegiatan', 'lokasi_kegiatan', 'statususulan_kegiatan', 'created_at']);
         
         /*if ($request->has('statususulan_kegiatan') && $request->statususulan_kegiatan != '') {
             $usulankegiatans->where('statususulan_kegiatan', $request->statususulan_kegiatan);
         } else {
             // Default tetap "pending" biar perilaku lama tidak berubah
             $usulankegiatans->where('statususulan_kegiatan', 'pending');
-        }
+        }*/
 
-        $usulankegiatans = $usulankegiatans->get();*/
+        $usulankegiatans = $usulankegiatans->get();
+
+        if ($request->filled('statususulan_kegiatan')) {
+
+    if (in_array($request->statususulan_kegiatan, ['accepted', 'rejected'])) {
+        $usulankegiatans->whereHas('verifikasiusulankegiatanterakhir', function ($q) use ($request) {
+            $q->where('status_verifikasiusulankegiatan', $request->statususulan_kegiatan);
+        });
+    } else {
+        $usulankegiatans->where('statususulan_kegiatan', $request->statususulan_kegiatan);
+    }
+}
 
         // Jika dropdown status diisi, baru filter
-        if ($request->filled('statususulan_kegiatan')) {
+        /*if ($request->filled('statususulan_kegiatan')) {
             $usulankegiatans->where('statususulan_kegiatan', $request->statususulan_kegiatan);
         }
 
         // Urutkan biar yang terbaru di atas
-        $usulankegiatans = $usulankegiatans->orderByDesc('created_at')->get();
+        $usulankegiatans = $usulankegiatans->orderByDesc('created_at')->get();*/
 
         return view('pages.usulankegiatan.pending_list_usulan_kegiatan', compact('usulankegiatans'));
     }
@@ -40,33 +59,54 @@ class ReviewUsulanKegiatansController extends Controller
     public function reviewForm($id)
     {
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'identitassurats', 
-            'detailusulankegiatans'])
+            //'identitassurats', 
+            'detailusulankegiatans',
+            'inputusulankegiatans'])
             ->findOrFail($id);
 
         return view('pages.usulankegiatan.review_usulan_kegiatan', compact('usulankegiatans'));
     }
 
     public function reviewUpload(Request $request, $id)
-    {
-        // Ambil data usulan
-        $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
-        
+    {   
         // Validasi input
         $request->validate([
             'actionusulan_kegiatan' => 'required|in:accepted,rejected',
-            'noteusulan_kegiatan' => 'nullable|string|max:2000',
-        ]);
-
-        // Simpan hanya status ke database
-        $usulankegiatans->update([
-            'statususulan_kegiatan' => $request->actionusulan_kegiatan,
+            'catatan_verifikasiusulankegiatan' => 'nullable|string|max:2000',
         ]);
 
         // Ambil ID admin yang mengajukan usulan
-        $admin_Id = $usulankegiatans->dibuat_oleh;
+        //$admin_Id = $usulankegiatans->dibuat_oleh;
 
-        // Simpan notes review ke cache untuk admin tersebut
+        DB::transaction(function () use ($request, $id) {
+
+        // Ambil data usulan
+        $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
+
+        // Simpan hanya status ke database
+        /*$usulankegiatans->update([
+            'statususulan_kegiatan' => $request->actionusulan_kegiatan,
+        ]);*/
+
+        // 🔥 PENTING: JANGAN UPDATE STATUS KECUALI REJECTED
+        if ($request->actionusulan_kegiatan === 'rejected') {
+            $usulankegiatans->update([
+                'statususulan_kegiatan' => 'revisi',
+            ]);
+        }
+
+        // Simpan histori verifikasi
+        Izin_Verifikasiusulankegiatans::create([
+            'usulankegiatan_id' => $usulankegiatans->id,
+            'tanggalverifikasi_inputusulankegiatan' => now(),
+            'nipadmin_verifikasiusulankegiatan' => Auth::user()->nip,
+            'status_verifikasiusulankegiatan' => $request->actionusulan_kegiatan,
+            'catatan_verifikasiusulankegiatan' => $request->catatan_verifikasiusulankegiatan,
+            'is_read' => false,
+            ]);
+    });
+
+        /* Simpan notes review ke cache untuk admin tersebut
         Cache::put(
         'pending_note_usulan_kegiatan_for_admin_' . $admin_Id,
         [

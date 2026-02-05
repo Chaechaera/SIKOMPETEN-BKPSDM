@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('izin_usulankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('identitassurat_id')->constrained('izin_identitassurats');
             $table->foreignId('subunitkerja_id')->constrained('ref_subunitkerjas');
-            $table->string('nama_kegiatan');
-            $table->string('lokasi_kegiatan');
-            $table->foreignId('carapelatihan_id')->constrained('ref_carapelatihans');
-            $table->date('tanggalpelaksanaan_kegiatan');
-            $table->enum('statususulan_kegiatan', ['draft', 'pending', 'accepted', 'rejected', 'in_progress', 'completed', 'finish'])->default('draft');
+            $table->foreignId('unitkerja_id')->constrained('ref_unitkerjas');
+            $table->string('lokasi_kegiatan')->nullable();
+            $table->foreignId('carapelatihan_id')->nullable()->constrained('ref_carapelatihans');
+            $table->date('tanggalmulai_kegiatan')->nullable();
+            $table->date('tanggalselesai_kegiatan')->nullable();
+            $table->time('waktumulai_kegiatan')->nullable();
+            $table->time('waktuselesai_kegiatan')->nullable();
+            $table->enum('statususulan_kegiatan', ['draft', 'pending', 'need_review', 'revisi'])->nullable();
             $table->unsignedInteger('dibuat_oleh')->nullable();
             $table->foreign('dibuat_oleh')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();

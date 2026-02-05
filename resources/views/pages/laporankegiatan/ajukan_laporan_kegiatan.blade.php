@@ -8,67 +8,111 @@
         <div class="bg-white shadow-md rounded-lg p-6">
             <form method="POST" action="{{ route('admin.laporankegiatan.store', $usulankegiatans->id) }}" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="laporankegiatan_id" value="{{ $usulankegiatans->laporankegiatans->id ?? '' }}">
 
                 {{-- ===================================================== --}}
-                {{-- BAGIAN 1: IDENTITAS SURAT --}}
+                {{-- BAGIAN 2: LENGKAPI USULAN KEGIATAN --}}
                 {{-- ===================================================== --}}
                 <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Identitas Surat</h2>
+                    <h2 class="text-xl font-semibold mb-4">Lengkapi Laporan Hasil Kegiatan</h2>
 
-                    <div class="mb-4">
-                        <label class="block font-medium">Nomor Surat</label>
-                        <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                            class="border rounded w-full p-2" placeholder="Masukkan nomor surat">
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    <div class="mb-4">
-                        <label class="block font-medium">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                            class="border rounded w-full p-2">
-                    </div>
+                        {{-- Sub Unit Kerja --}}
+                        <div>
+                            <label class="block font-medium">Sub Unit Kerja</label>
+                            <input type="text"
+                                value="{{ $subunitkerjas ?? '' }}"
+                                class="border p-2 w-full bg-gray-100"
+                                readonly>
+                            <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="block font-medium">Perihal Surat</label>
-                        <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                            class="border rounded w-full p-2" placeholder="Masukkan perihal">
-                    </div>
+                        {{-- Unit Kerja --}}
+                        <div>
+                            <label class="block font-medium">Unit Kerja</label>
+                            <input type="text"
+                                value="{{ $unitkerjas ?? '' }}"
+                                class="border p-2 w-full bg-gray-100"
+                                readonly>
+                            <input type="hidden" name="unitkerja_id" value="{{ $unitkerja_id ?? '' }}">
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="block font-medium">Lampiran Surat</label>
-                        <input type="text" name="lampiran_surat" value="1 Bendel"
-                            class="border rounded w-full p-2 bg-gray-100" readonly>
+                        {{-- Nama Kegiatan --}}
+                        <div class="md:col-span-2">
+                            <label class="block font-medium">Nama Kegiatan</label>
+                            <input type="text"
+                                value="{{ $nama_kegiatan ?? '' }}"
+                                class="border p-2 w-full bg-gray-100"
+                                readonly>
+                            <input type="hidden" name="nama_kegiatan" value="{{ $nama_kegiatan ?? '' }}">
+                        </div>
+
+                        {{-- Lokasi Kegiatan --}}
+                        <div>
+                            <label class="block font-medium">Lokasi Kegiatan</label>
+                            <input type="text" name="lokasi_kegiatan"
+                                value="{{ old('lokasi_kegiatan', $usulankegiatans?->lokasi_kegiatan) }}"
+                                class="border p-2 w-full" required>
+                        </div>
+
+                        {{-- Cara Pelatihan --}}
+                        <div>
+                            <label class="block font-medium">Cara Pelatihan</label>
+                            <select name="carapelatihan_id" class="border p-2 w-full" required>
+                                <option value="">-- Pilih Cara Pelatihan --</option>
+                                @foreach($carapelatihans as $c)
+                                <option value="{{ $c->id }}" {{ old('carapelatihan_id', $usulankegiatans?->carapelatihan_id) == $c->id ? 'selected' : '' }}>{{ $c->cara_pelatihan }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Tanggal Mulai --}}
+                        <div>
+                            <label class="block font-medium">Tanggal Mulai</label>
+                            <input type="date" name="tanggalmulai_kegiatan" value="{{ old('tanggalmulai_kegiatan', $usulankegiatans?->tanggalmulai_kegiatan) }}"
+                                class="border p-2 w-full" required>
+                        </div>
+
+                        {{-- Tanggal Selesai --}}
+                        <div>
+                            <label class="block font-medium">Tanggal Selesai</label>
+                            <input type="date" name="tanggalselesai_kegiatan" value="{{ old('tanggalselesai_kegiatan', $usulankegiatans?->tanggalselesai_kegiatan) }}"
+                                class="border p-2 w-full" required>
+                        </div>
+
+                        {{-- Waktu Mulai --}}
+                        <div>
+                            <label class="block font-medium">Waktu Mulai</label>
+                            <input type="time" name="waktumulai_kegiatan" value="{{ old('waktumulai_kegiatan', $usulankegiatans?->waktumulai_kegiatan) }}"
+                                class="border p-2 w-full" required>
+                        </div>
+
+                        {{-- Waktu Selesai --}}
+                        <div>
+                            <label class="block font-medium">Waktu Selesai</label>
+                            <input type="time" name="waktuselesai_kegiatan" value="{{ old('waktuselesai_kegiatan', $usulankegiatans?->waktuselesai_kegiatan) }}"
+                                class="border p-2 w-full" required>
+                        </div>
+
+                        {{-- Diajukan Oleh --}}
+                        <div class="md:col-span-2">
+                            <label class="block font-medium">Diajukan Oleh</label>
+                            <input type="text"
+                                value="{{ auth()->user()->nama }}"
+                                class="border p-2 w-full bg-gray-100"
+                                readonly>
+                            <input type="hidden" name="dibuat_oleh" value="{{ auth()->id() }}">
+                        </div>
+
                     </div>
                 </div>
 
                 {{-- ===================================================== --}}
-                {{-- BAGIAN 2: LAPORAN HASIL KEGIATAN --}}
+                {{-- BAGIAN 1: DETAIL LAPORAN HASIL KEGIATAN --}}
                 {{-- ===================================================== --}}
                 <div class="bg-white shadow-md rounded-lg p-6 mb-8">
                     <h2 class="text-xl font-semibold mb-4">Laporan Hasil Kegiatan</h2>
-
-                    <div class="mb-4">
-                        <label class="block font-medium">Nama Kegiatan</label>
-                        <input type="text" name="nama_kegiatan"
-                            value="{{ $usulankegiatans->nama_kegiatan ?? old('nama_kegiatan') }}"
-                            class="border p-2 w-full bg-gray-100" readonly>
-                        <input type="hidden" name="usulankegiatan_id" value="{{ $usulankegiatans->id }}">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-medium">Cara Pelatihan</label>
-                        <input type="text"
-                            value="{{ $usulankegiatans->carapelatihans->cara_pelatihan ?? 'Tidak Diketahui' }}"
-                            class="border p-2 w-full bg-gray-100" readonly>
-                        <input type="hidden" name="carapelatihan_id"
-                            value="{{ $usulankegiatans->carapelatihans->id ?? '' }}">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-medium">Waktu Pelaksanaan Laporan</label>
-                        <input type="text" name="waktupelaksanaan_laporan"
-                            value="{{ old('waktupelaksanaan_laporan') }}"
-                            class="border p-2 w-full" placeholder="Contoh: 09.00 WIB s.d. 15.00 WIB">
-                    </div>
 
                     @php
                     $fields = [
@@ -76,36 +120,47 @@
                     'dasarhukum_laporan' => 'Dasar Hukum',
                     'maksud_laporan' => 'Maksud Kegiatan',
                     'tujuan_laporan' => 'Tujuan Kegiatan',
-                    'ruanglingkup_laporan' => 'Ruang Lingkup Kegiatan'
+                        'uraian_kegiatan' => 'Uraian Kegiatan',
+                        'hasillangsung_kegiatan' => 'Hasil Langsung Kegiatan',
+                        'hasilmenengah_kegiatan' => 'Hasil Menengah Kegiatan',
+                        'hasilpanjang_kegiatan' => 'Hasil Panjang Kegiatan',
+                        'narasumber_kegiatan' => 'Narasumber Kegiatan',
+                        'sasaranpeserta_kegiatan' => 'Sasaran Peserta Kegiatan',
+                        'detailhasil_kegiatan' => 'Detail Hasil Kegiatan',
+                        'penyelenggara_kegiatan' => 'Penyelenggara Kegiatan',
                     ];
                     @endphp
 
                     @foreach($fields as $name => $label)
                     <div class="mt-4">
                         <label class="block font-medium">{{ $label }}</label>
-                        <textarea name="{{ $name }}" class="mt-1 w-full border p-2 rounded">{{ old($name) }}</textarea>
+                        {{-- <textarea name="{{ $name }}" class="mt-1 w-full border p-2 rounded" readonly>{{ old($name, $usulankegiatans?->$name) }}</textarea> --}}
+                        <textarea class="mt-1 w-full border p-2 rounded bg-gray-100" readonly>{{ $usulankegiatans?->$name }}</textarea>
+                        <input type="hidden" name="{{ $name }}" value="{{ $usulankegiatans?->$name }}">
                     </div>
                     @endforeach
 
                     <div class="mt-4">
                         <label class="block font-medium">Metode Pelatihan</label>
-                        <select name="metodepelatihan_id" class="border p-2 w-full" required>
+                        {{-- <select name="metodepelatihan_id" class="border p-2 w-full" required> --}}
+                        <select class="border p-2 w-full bg-gray-100" disabled>
                             <option value="">-- Pilih Metode Pelatihan --</option>
                             @foreach($metodepelatihans as $m)
-                            <option value="{{ $m->id }}">{{ $m->metode_pelatihan }}</option>
+                            <option value="{{ $m->id }}" {{ old('metodepelatihan_id', $usulankegiatans?->metodepelatihan_id) == $m->id ? 'selected' : '' }}>{{ $m->metode_pelatihan }}</option>
                             @endforeach
                         </select>
+                        <input type="hidden" name="metodepelatihan_id" value="{{ $usulankegiatans?->metodepelatihan_id }}">
                     </div>
 
-                    <div class="mt-4">
+                    {{-- <div class="mt-4">
                         <label class="block font-medium">Narasumber Kegiatan</label>
-                        <input type="text" name="narasumber_laporan" value="{{ old('narasumber_laporan') }}"
+                        <input type="text" name="narasumber_laporan" value="{{ old('narasumber_laporan', $usulankegiatans?->carapelatihan_id) }}"
                             class="border p-2 w-full" placeholder="Nama narasumber kegiatan">
-                    </div>
+                    </div> --}}
 
-                    {{-- ===================================================== --}}
-                    {{-- ATRIBUT KHUSUS OTOMATIS SESUAI CARA PELATIHAN --}}
-                    {{-- ===================================================== --}}
+                {{-- ===================================================== --}}
+                {{-- BAGIAN 2: ATRIBUT KHUSUS --}}
+                {{-- ===================================================== --}}
                     @php
                     $carapelatihanId = $usulankegiatans->carapelatihans->id ?? null;
                     $config = config('atribut_khusus');
@@ -134,108 +189,6 @@
                 </div>
 
                 {{-- ===================================================== --}}
-                {{-- BAGIAN 3: DETAIL LAPORAN KEGIATAN --}}
-                {{-- ===================================================== --}}
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Detail Laporan Kegiatan</h2>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Rincian Laporan</label>
-                        <textarea name="rincian_laporan" class="w-full border p-2 rounded">{{ old('rincian_laporan') }}</textarea>
-                        @error('jadwalpelaksanaan_kegiatan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Output Kegiatan</label>
-                        <textarea name="outputkegiatan_laporan" class="w-full border p-2 rounded">{{ old('outputkegiatan_laporan') }}</textarea>
-                        @error('outputkegiatan_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Rundown (Excel)</label>
-                        <input type="file" name="rundown_laporan" accept=".xls,.xlsx" class="border p-2 w-full">
-                        @error('rundown_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Peserta Kegiatan (Excel)</label>
-                        <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="border p-2 w-full">
-                        @error('peserta_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Undangan</label>
-                        <input type="text" name="undangan_laporan" value="{{ old('undangan_laporan') }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
-                        @error('undangan_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Materi Kegiatan</label>
-                        <input type="text" name="materi_laporan" value="{{ old('materi_laporan') }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
-                        @error('materi_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Daftar Hadir</label>
-                        <input type="text" name="daftarhadir_laporan" value="{{ old('daftarhadir_laporan') }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
-                        @error('daftarhadir_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Dokumentasi Kegiatan</label>
-                        <input type="text" name="dokumentasi_laporan" value="{{ old('dokumentasi_laporan') }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
-                        @error('dokumentasi_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah Gambar Dokumentasi Kegiatan (JPG, PNG, JPEG)</label>
-                        <input type="file" name="gambardokumentasi_laporan[]" accept=".jpg,.png,.jpeg"
-                            class="border p-2 w-full" multiple id="gambardokumentasi_laporanFiles" required>
-                        @error('gambardokumentasi_laporan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-
-                        <!-- Tempat munculnya daftar file -->
-                        <ul id="fileList" class="mt-2 list-disc list-inside text-gray-700"></ul>
-                    </div>
-                </div>
-
-                {{-- ===================================================== --}}
-                {{-- BAGIAN 4: UPLOAD TEMPLATE SERTIFIKAT --}}
-                {{-- ===================================================== --}}
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Template Sertifikat</h2>
-
-                    <div class="mt-4">
-                        <label class="block font-medium">Upload File Template Sertifikat (PNG / JPG)</label>
-                        <input type="file" name="templatesertifikat_kegiatan" accept=".png,.jpg" class="border p-2 w-full">
-                        @error('templatesertifikat_kegiatan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                {{-- ===================================================== --}}
                 {{-- TOMBOL AKSI --}}
                 {{-- ===================================================== --}}
                 <div class="mt-6 flex justify-end gap-3">
@@ -243,7 +196,7 @@
                         class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
                         Batal
                     </a>
-                    <button type="submit" name="statususulan_kegiatan" value="completed"
+                    <button type="submit" name="statuslaporan_kegiatan" value="completed"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                         Kirim Laporan
                     </button>
@@ -251,22 +204,4 @@
             </form>
         </div>
     </div>
-
-    <script>
-        // Ambil elemen input dan daftar file
-        const fileInput = document.getElementById('gambardokumentasi_laporanFiles');
-        const fileList = document.getElementById('fileList');
-
-        // Event ketika user pilih file
-        fileInput.addEventListener('change', function() {
-            fileList.innerHTML = ''; // kosongkan dulu
-
-            // Kalau ada file yang dipilih
-            for (let i = 0; i < this.files.length; i++) {
-                const li = document.createElement('li');
-                li.textContent = `${i + 1}. ${this.files[i].name}`;
-                fileList.appendChild(li);
-            }
-        });
-    </script>
 </x-app-layout>

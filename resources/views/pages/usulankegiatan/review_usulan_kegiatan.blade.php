@@ -16,17 +16,17 @@
             </button>
 
             <h3 class="text-lg font-semibold mb-4">
-                Review Usulan: {{ $usulankegiatans->nama_kegiatan }}
+                Review Usulan: {{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? '-'  }} 
             </h3>
 
             <form method="POST" 
                   action="{{ route('superadmin.usulankegiatan.reviewUpload', $usulankegiatans->id) }}">
                 @csrf
                 <div class="mb-4">
-                    <label for="noteusulan_kegiatan" class="font-semibold">Catatan Review (Opsional)</label>
+                    <label for="catatan_verifikasiusulankegiatan" class="font-semibold">Catatan Review (Opsional)</label>
                     <textarea 
-                        name="noteusulan_kegiatan" 
-                        id="noteusulan_kegiatan" 
+                        name="catatan_verifikasiusulankegiatan" 
+                        id="catatan_verifikasiusulankegiatan" 
                         class="border rounded w-full mt-2 p-2"
                         placeholder="Tulis catatan review..."></textarea>
                 </div>

@@ -16,11 +16,17 @@ class Izin_Identitassurats extends Model
         'tanggal_surat',
         'perihal_surat',
         'lampiran_surat',
+        'sifat_surat',
     ];
 
     // RELATIONS
-    public function usulankegiatans()
+    public function kirimusulankegiatans()
     {
-        return $this->hasOne(Izin_Usulankegiatans::class, 'identitassurat_id');
+        return $this->hasOne(Izin_Kirimusulankegiatans::class, 'identitassurat_id');
+    }
+
+    public function kirimlaporankegiatans()
+    {
+        return $this->hasOne(Izin_Kirimlaporankegiatans::class, 'identitassurat_id');
     }
 }

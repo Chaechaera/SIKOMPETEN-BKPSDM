@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('tanggal_surat')->nullable();
             $table->string('lampiran_surat')->nullable();
             $table->string('perihal_surat')->nullable();
+            $table->enum('sifat_surat', ['rahasia', 'penting'])->nullable();
             $table->timestamps();
         });
     }

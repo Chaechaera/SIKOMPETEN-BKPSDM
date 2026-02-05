@@ -322,11 +322,27 @@
         }
 
         .kak-section .table {
-            width: 60%;
+            width: 100%;
             border-collapse: collapse;
-            margin-top: 6px;
-            padding-left: 40px;
-            padding-right: 40px;
+            margin-top: 4px;
+            /*padding-left: 20px;*/
+            padding-right: 20px;
+        }
+
+        .kak-section .table .td {
+            padding: 2px 4px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .kak-section .table .label {
+            width: 160px;
+            /* atur sesuai panjang teks */
+        }
+
+        .kak-section .table .colon {
+            width: 10px;
+            text-align: center;
         }
 
         .kak-maksud-tujuan {
@@ -509,31 +525,31 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->identitassurats->nomor_surat ?? '....' }}</td>
+                    <td>{{ $laporankegiatans->identitassurats?->nomor_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->sifat_surat ?? 'Biasa' }}</td>
+                    <td>{{ $laporankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->identitassurats->lampiran_surat ?? '-' }}</td>
+                    <td>{{ $laporankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $laporankegiatans->identitassurats->perihal_surat ?? 'Permohonan Rekomendasi Kegiatan Pengembangan Kompetensi' }}</strong></td>
+                    <td><strong>{{ $laporankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $laporankegiatans->identitassurats->tanggal_surat
-                    ? \Carbon\Carbon::parse($laporankegiatans->identitassurats->tanggal_surat)->translatedFormat('d F Y')
-                    : '-' }}
+                {{ $laporankegiatans->identitassurats?->tanggal_surat
+                    ? \Carbon\Carbon::parse($laporankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+                    : '' }}
             </p>
         </div>
     </div>
@@ -547,7 +563,7 @@
 
     <div class="content">
         <p class="indent">
-            Dalam rangka penyelenggaraan kegiatan "{{ $laporankegiatans->usulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }} yang dilaksanakan pada hari {{ $laporankegiatans->tanggalpelaksanaan_kegiatan ?? '18 September 2025' }} di {{ $laporankegiatans->lokasi_kegiatan ?? 'Hotel Alila' }}. Sehubungan dengan hal tersebut, kami mengajukan permohonan penerbitan nomor register guna pembuatan Sertifikat {{ $laporankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}.
+            Dalam rangka penyelenggaraan kegiatan "{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}" yang dilaksanakan pada hari {{ \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->translatedFormat('l, d F Y') ?? 'Kamis, 5 Februari 2025' }} s/d {{ \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->translatedFormat('l, d F Y') ?? 'Sabtu, 7 Februari 2025' }} di {{ $laporankegiatans->lokasi_kegiatan ?? 'Hotel Alila' }}. Sehubungan dengan hal tersebut, kami mengajukan permohonan penerbitan nomor register guna pembuatan Sertifikat {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}.
         </p>
     </div>
 
@@ -616,23 +632,21 @@
     <div class="kak-section">
         <div class="kak-title">
             <h3>LAPORAN HASIL PELAKSANAAN</h3>
-            <h3>{{ $laporankegiatans->usulankegiatans->nama_kegiatan ?? '-' }}<br></h3>
-            <h3>TAHUN ANGGARAN 2025<br></h3>
+            <h3>{{ mb_strtoupper($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-') }}<br></h3>
+            <h3>TAHUN ANGGARAN {{ \Carbon\Carbon::now()->year }}<br></h3>
         </div>
 
         @php
         $letterIndex = 0; // mulai dari A
         function getLetter($i) {
         $alphabet = range('A', 'Z');
-        return $alphabet[$i] ?? ('Z' . ($i - 25)); // fallback kalau lewat Z
-        }
+        return $alphabet[$i] ?? ('Z' . ($i - 25));} // fallback kalau lewat Z
         @endphp
-
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LATAR BELAKANG</p>
         <p class="indent">
-            @if(!empty($laporankegiatans->latarbelakang_laporan))
-            {!! nl2br(e($laporankegiatans->latarbelakang_laporan)) !!}
+            @if(!empty($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan))
+            {!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan)) !!}
             @else
             Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
             @endif
@@ -640,8 +654,8 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. DASAR HUKUM</p>
         <ol>
-            @if(!empty($laporankegiatans->dasarhukum_laporan))
-            <li>{!! nl2br(e($laporankegiatans->dasarhukum_laporan)) !!}</li>
+            @if(!empty($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan))
+            <li>{!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan)) !!}</li>
             @else
             <li>Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara</li>
             <li>Peraturan Menteri Kesehatan Nomor 66 Tahun 2014 tentang Pemantauan Perkembangan Anak</li>
@@ -653,28 +667,18 @@
             <ol type="1">
                 <li>MAKSUD
                     <p class="indent">
-                        {!! nl2br(e($laporankegiatans->maksud_laporan ??
+                        {!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->maksud_kegiatan ??
                         'Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.')) !!}
                     </p>
                 </li>
                 <li>TUJUAN
                     <ol type="1">
-                        <li>Meningkatkan kemampuan teknis tenaga kesehatan.</li>
-                        <li>Memperkuat kapasitas pelayanan kesehatan masyarakat.</li>
+                        <li>{!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->tujuan_kegiatan ??
+                            'Meningkatkan kualitas pelaksanaan kegiatan dan kompetensi peserta.')) !!}</li>
                     </ol>
                 </li>
             </ol>
         </div>
-
-        <p class="section-title">{{ getLetter($letterIndex++) }}. RUANG LINGKUP</p>
-        <ol type="1">
-            @if(!empty($laporankegiatans->ruanglingkup_laporan))
-            <li>{!! nl2br(e($laporankegiatans->ruanglingkup_laporan)) !!}</li>
-            @else
-            <li>Peningkatan kemampuan tenaga kesehatan dalam deteksi dini tumbuh kembang anak.</li>
-            <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
-            @endif
-        </ol>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. RINCIAN KEGIATAN PENGEMBANGAN KOMPETENSI</p>
         <p class="indent">
@@ -687,8 +691,8 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. OUTPUT HASIL KEGIATAN PENGEMBANGAN KOMPETENSI</p>
         <ol type="1">
-            @if(!empty($laporankegiatans->detaillaporankegiatans?->outputkegiatan_laporan))
-            <li>{!! nl2br(e($laporankegiatans->detaillaporankegiatans?->outputkegiatan_laporan)) !!}</li>
+            @if(!empty($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->detailhasil_kegiatan))
+            <li>{!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->detailhasil_kegiatan)) !!}</li>
             @else
             <li>Peningkatan kemampuan tenaga kesehatan dalam deteksi dini tumbuh kembang anak.</li>
             <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
@@ -699,20 +703,20 @@
         <div class="kak-narasumber-peserta">
             <ol type="1">
                 <li>NAMA KEGIATAN
-                    <p class="indent">
-                        {{ $laporankegiatans->usulankegiatans->nama_kegiatan ?? '-' }}
-                    </p>
+                    <div class="indent">
+                        {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
+                    </div>
                 </li>
                 <li>METODE KEGIATAN
-                    <p class="indent">
-                        {{ $laporankegiatans->metodepelatihans->metode_pelatihan ?? 'Klasikal' }}
-                    </p>
+                    <div class="indent">
+                        {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->metodepelatihans->metode_pelatihan ?? 'Klasikal' }}
+                    </div>
                 </li>
                 <li>NARASUMBER KEGIATAN
                     <p class="indent">
                     <ol type="1">
-                        @if(!empty($laporankegiatans->narasumber_laporan))
-                        <li>{!! nl2br(e($laporankegiatans->narasumber_laporan)) !!}</li>
+                        @if(!empty($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->narasumber_kegiatan))
+                        <li>{!! nl2br(e($laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->narasumber_kegiatan)) !!}</li>
                         @else
                         <li>Peningkatan kemampuan tenaga kesehatan dalam deteksi dini tumbuh kembang anak.</li>
                         <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
@@ -721,47 +725,64 @@
                     </p>
                 </li>
                 <li>PELAKSANAAN KEGIATAN
-                    <p class="indent">
-                    <table class="table">
-                        <tr>
-                            <td class="label">Hari, Tanggal</td>
-                            <td class="colon">:</td>
-                            <td>@if($laporankegiatans->usulankegiatans->tanggalpelaksanaan_kegiatan)
-                                {{ \Carbon\Carbon::parse($laporankegiatans->usulankegiatans->tanggalpelaksanaan_kegiatan)->translatedFormat('d F Y') }}
-                                @else
-                                -
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Waktu Pelaksanaan</td>
-                            <td class="colon">:</td>
-                            <td>@if($laporankegiatans->waktupelaksanaan_laporan)
-                                {{ \Carbon\Carbon::parse($laporankegiatans->waktupelaksanaan_laporan)->translatedFormat('d F Y') }}
-                                @else
-                                -
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Tempat Pelaksanaan</td>
-                            <td class="colon">:</td>
-                            <td>{{ $laporankegiatans->usulankegiatans->lokasi_kegiatan ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Organisasi Penyelenggara</td>
-                            <td class="colon">:</td>
-                            <td>{{ $laporankegiatans->usulankegiatans->lokasi_kegiatan ?? '-' }}</td>
-                        </tr>
-                    </table>
-                    </p>
+                    <div class="indent">
+                        <table class="table">
+                            <tr>
+                                <td class="label">Tanggal Pelaksanaan</td>
+                                <td class="colon">:</td>
+                                <td>@if($laporankegiatans->tanggalmulai_kegiatan)
+                                    {{ \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->translatedFormat('d F Y') }}
+                                    @else
+                                    -
+                                    @endif
+                                    s/d
+                                    @if($laporankegiatans->tanggalselesai_kegiatan)
+                                    {{ \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->translatedFormat('d F Y') }}
+                                    @else
+                                    -
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Waktu Pelaksanaan</td>
+                                <td class="colon">:</td>
+                                <td>@if($laporankegiatans->waktumulai_kegiatan)
+                                    {{ \Carbon\Carbon::parse($laporankegiatans->waktumulai_kegiatan)->format('H:i') }}
+                                    @else
+                                    -
+                                    @endif
+                                    s/d
+                                    @if($laporankegiatans->waktuselesai_kegiatan)
+                                    {{ \Carbon\Carbon::parse($laporankegiatans->waktuselesai_kegiatan)->format('H:i') }}
+                                    @else
+                                    -
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Tempat Pelaksanaan</td>
+                                <td class="colon">:</td>
+                                <td>{{ $laporankegiatans->lokasi_kegiatan ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Alokasi Anggaran</td>
+                                <td class="colon">:</td>
+                                <td>{{ $format_anggaran ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Organisasi Penyelenggara</td>
+                                <td class="colon">:</td>
+                                <td>{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->penyelenggara_kegiatan ?? '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </li>
             </ol>
         </div>
 
         {{-- ====================== ATRIBUT KHUSUS DINAMIS ====================== --}}
         @php
-            $hasAtribut = !empty($atribut_khusus) && count(array_filter($atribut_khusus)) > 0;
+        $hasAtribut = !empty($atribut_khusus) && count(array_filter($atribut_khusus)) > 0;
         @endphp
 
         @if($hasAtribut)
@@ -771,34 +792,34 @@
         $letterAbjad = getLetter($letterIndex++);
 
         // ambil label dari config atribut_khusus (kalau ada)
-            $config = config('atribut_khusus');
-            $label = null;
-            foreach ($config as $item) {
-                if (isset($item['fields'][$key]['label'])) {
-                    $label = $item['fields'][$key]['label'];
-                    break;
-                }
-            }
+        $config = config('atribut_khusus');
+        $label = null;
+        foreach ($config as $item) {
+        if (isset($item['fields'][$key]['label'])) {
+        $label = $item['fields'][$key]['label'];
+        break;
+        }
+        }
 
-            // fallback kalau label gak ditemukan → buat dari key
-            if (!$label) {
-                $label = preg_replace('/([a-z])([A-Z])/', '$1 $2', $key);
-                $label = str_replace('_', ' ', $label);
-                $label = ucwords(strtolower($label));
-            }
+        // fallback kalau label gak ditemukan → buat dari key
+        if (!$label) {
+        $label = preg_replace('/([a-z])([A-Z])/', '$1 $2', $key);
+        $label = str_replace('_', ' ', $label);
+        $label = ucwords(strtolower($label));
+        }
 
         // Tambahkan spasi sebelum huruf besar & ubah underscore jadi spasi
         /*$subjudul = strtoupper(
-            trim(
-            preg_replace(
-            ['/([a-z])([A-Z])/', '/_/'], // cari huruf kecil diikuti besar, & underscore
-            ['$1 $2', ' '], // sisipkan spasi
-            $key
-            )
+        trim(
+        preg_replace(
+        ['/([a-z])([A-Z])/', '/_/'], // cari huruf kecil diikuti besar, & underscore
+        ['$1 $2', ' '], // sisipkan spasi
+        $key
+        )
         ));*/
 
-            // Deteksi apakah nilai adalah URL
-            $isUrl = filter_var($value, FILTER_VALIDATE_URL);
+        // Deteksi apakah nilai adalah URL
+        $isUrl = filter_var($value, FILTER_VALIDATE_URL);
         @endphp
 
         <p class="section-title">{{ $letterAbjad }}. {{ strtoupper($label) }}</p>
@@ -819,8 +840,8 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK UNDANGAN KEGIATAN</p>
         <p class="indent">
-            @if(!empty($laporankegiatans->detaillaporankegiatans?->undangan_laporan))
-            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->undangan_laporan)) !!}
+            @if(!empty($laporankegiatans->detaillaporankegiatans?->linkundangan_laporan))
+            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->linkundangan_laporan)) !!}
             @else
             Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
             @endif
@@ -828,8 +849,8 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK MATERI KEGIATAN</p>
         <p class="indent">
-            @if(!empty($laporankegiatans->detaillaporankegiatans?->materi_laporan))
-            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->materi_laporan)) !!}
+            @if(!empty($laporankegiatans->detaillaporankegiatans?->linkmateri_laporan))
+            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->linkmateri_laporan)) !!}
             @else
             Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
             @endif
@@ -837,16 +858,16 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK DAFTAR HADIR KEGIATAN</p>
         <p class="indent">
-            @if(!empty($laporankegiatans->detaillaporankegiatans?->daftarhadir_laporan))
-            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->daftarhadir_laporan)) !!}
+            @if(!empty($laporankegiatans->detaillaporankegiatans?->linkdaftarhadir_laporan))
+            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->linkdaftarhadir_laporan)) !!}
             @else
             Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
             @endif
         </p>
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK DOKUMENTASI KEGIATAN</p>
         <p class="indent">
-            @if(!empty($laporankegiatans->detaillaporankegiatans?->dokumentasi_laporan))
-            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->dokumentasi_laporan)) !!}
+            @if(!empty($laporankegiatans->detaillaporankegiatans?->linkdokumentasi_laporan))
+            {!! nl2br(e($laporankegiatans->detaillaporankegiatans?->linkdokumentasi_laporan)) !!}
             @else
             Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
             @endif
@@ -1014,7 +1035,11 @@
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. PENUTUP</p>
         <p class="indent">
-            Demikian Laporan Kegiatan {{ $laporankegiatans->usulankegiatans->nama_kegiatan ?? '-' }} ini disusun untuk dipergunakan sebagaimana mestinya.
+            @if(!empty($laporankegiatans->detaillaporankegiatans?->penutup_laporan))
+            {!! nl2br(e($laporankegiatans->detaillaporankegiatans->penutup_laporan)) !!}
+            @else
+            Demikian Laporan Kegiatan ini disusun untuk dipergunakan sebagaimana mestinya.
+            @endif
         </p>
     </div>
 

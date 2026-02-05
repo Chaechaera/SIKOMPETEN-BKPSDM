@@ -35,17 +35,25 @@ class DetailLaporanKegiatansController extends Controller
             'gambardokumentasi_laporan.*' => 'required|mimes:jpg,jpeg,png|max:2048'
         ]);*/
 
+        $request->validate([
+            'laporankegiatan_id' => 'required|exists:izin_laporankegiatans,id',
+        ]);
+
         // Data dasar
         $detaillaporankegiatans = $request->only([
             'laporankegiatan_id',
+            'atribut_khusus',
             'rincian_laporan',
-            'undangan_laporan',
-            'materi_laporan',
-            'daftarhadir_laporan',
-            'dokumentasi_laporan',
-            'gambardokumentasi_laporan',
-            'outputkegiatan_laporan',
-            'templatesertifikat_kegiatan',
+            //'rundown_laporan',
+            'penutup_laporan',
+            //'peserta_laporan',
+            'linkundangan_laporan',
+            'linkmateri_laporan',
+            'linkdaftarhadir_laporan',
+            'linkdokumentasi_laporan',
+            //'gambardokumentasi_laporan',
+            //'outputkegiatan_laporan',
+            //'templatesertifikat_kegiatan',
         ]);
 
         // -----------------------------

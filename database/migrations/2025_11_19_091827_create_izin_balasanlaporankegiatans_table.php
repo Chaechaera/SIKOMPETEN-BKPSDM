@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('izin_balasanlaporankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('identitassurat_id')->constrained('izin_identitassurats');
-            $table->foreignId('laporankegiatan_id')->constrained('izin_laporankegiatans');
-            $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans');
+            $table->foreignId('inputusulankegiatan_id');
+            $table->foreignId('inputlaporankegiatan_id');
             $table->foreignId('sertifikat_id')->constrained('izin_sertifikats');
             $table->integer('totalcapaianjp_kegiatan')->nullable();
             $table->timestamps();

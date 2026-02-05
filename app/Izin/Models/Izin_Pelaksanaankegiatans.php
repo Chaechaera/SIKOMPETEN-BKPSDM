@@ -26,4 +26,9 @@ class Izin_Pelaksanaankegiatans extends Model
     {
         return $this->belongsTo(Izin_Usulankegiatans::class, 'identitassurat_id');
     }
+
+    public function inputlaporankegiatans()
+    {
+        return $this->hasOne(Izin_Inputlaporankegiatans::class, 'pelaksanaankegiatan_id');
+    }
 }

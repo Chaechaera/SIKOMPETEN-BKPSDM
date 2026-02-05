@@ -5,17 +5,23 @@ namespace App\Izin\Http\Controllers\Superadmin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Http\Controllers\User\SertifikatsController;
 use App\Izin\Models\Izin_Laporankegiatans;
+use App\Izin\Models\Izin_Sertifikats;
+use App\Izin\Models\Izin_Verifikasilaporankegiatans;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ReviewLaporanKegiatansController extends Controller
 {
     public function reviewForm($id)
     {
         $laporankegiatans = Izin_Laporankegiatans::with([
-            'identitassurats',
+            //'identitassurats',
             'detaillaporankegiatans',
-            'usulankegiatans'
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
         ])
             ->findOrFail($id);
 
@@ -25,18 +31,46 @@ class ReviewLaporanKegiatansController extends Controller
     public function reviewUpload(Request $request, $id)
     {
         // Ambil data usulan
-        $laporankegiatans = Izin_Laporankegiatans::with('usulankegiatans')->findOrFail($id);
+        $laporankegiatans = Izin_Laporankegiatans::findOrFail($id);
 
         // Validasi input
         $request->validate([
-            'actionusulan_kegiatan' => 'required|in:accepted,rejected',
-            'noteusulan_kegiatan' => 'nullable|string|max:2000',
+            'actionlaporan_kegiatan' => 'required|in:accepted,rejected',
+            'catatan_verifikasilaporankegiatan' => 'nullable|string|max:2000',
         ]);
 
-        $statususulan_update = ($request->actionusulan_kegiatan == 'accepted') ? 'finish' : 'completed';
+        //$statususulan_update = ($request->actionusulan_kegiatan == 'accepted') ? 'finish' : 'completed';
+
+        DB::transaction(function () use ($request, $id) {
+
+            // Ambil data usulan
+            $laporankegiatans = Izin_Laporankegiatans::findOrFail($id);
+
+            // Simpan hanya status ke database
+            /*$usulankegiatans->update([
+            'statususulan_kegiatan' => $request->actionusulan_kegiatan,
+        ]);*/
+
+            // 🔥 PENTING: JANGAN UPDATE STATUS KECUALI REJECTED
+            if ($request->actionlaporan_kegiatan === 'rejected') {
+                $laporankegiatans->update([
+                    'statuslaporan_kegiatan' => 'revisi',
+                ]);
+            }
+
+            // Simpan histori verifikasi
+            Izin_Verifikasilaporankegiatans::create([
+                'laporankegiatan_id' => $laporankegiatans->id,
+                'tanggalverifikasi_inputlaporankegiatan' => now(),
+                'nipadmin_verifikasilaporankegiatan' => Auth::user()->nip,
+                'status_verifikasilaporankegiatan' => $request->actionlaporan_kegiatan,
+                'catatan_verifikasilaporankegiatan' => $request->catatan_verifikasilaporankegiatan,
+                'is_read' => false,
+            ]);
+        });
 
         // Simpan hanya status ke database
-        if ($laporankegiatans->usulankegiatans) {
+        /*if ($laporankegiatans->usulankegiatans) {
             $laporankegiatans->usulankegiatans->update([
                 'statususulan_kegiatan' => $statususulan_update,
             ]);
@@ -72,22 +106,30 @@ class ReviewLaporanKegiatansController extends Controller
         Cache::put('pending_note_usulan_kegiatan_for_admin', $noteusulan_kegiatan, now()->addHours(2));*/
 
         // Kalau diterima, generate sertifikat otomatis
-        if ($request->actionusulan_kegiatan === 'accepted') {
+        if ($request->actionlaporan_kegiatan === 'accepted') {
             $sertifikatController = new SertifikatsController();
             $sertifikats = $sertifikatController->create(new Request([
                 'laporankegiatan_id' => $laporankegiatans->id,
                 'tanggalkeluarsertifikat_kegiatan' => now()->toDateString(),
             ]));
 
-            // Redirect ke halaman pending
+            $sertifikat = Izin_Sertifikats::where('laporankegiatan_id', $id)->first();
+
             return redirect()
                 ->route('superadmin.balasanlaporankegiatan.create', ['id' => $id])
-                ->with(['success', "Usulan kegiatan telah berhasil di{$request->actionusulan_kegiatan} dan catatan telah dikirim ke admin.", 'sertifikat_id' => $sertifikats->id]);
+                ->with([
+                    'success' => "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan} dan catatan telah dikirim ke admin.",
+                    'sertifikat_id' => optional($sertifikat)->id
+                ]);
+            /*// Redirect ke halaman pending
+            return redirect()
+                ->route('superadmin.balasanlaporankegiatan.create', ['id' => $id])
+                ->with(['success', "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan} dan catatan telah dikirim ke admin.", 'sertifikat_id' => $sertifikats->id]);*/
         }
+
         // Jika ditolak, kembali ke halaman daftar pending
         return redirect()
             ->route('superadmin.usulankegiatan.pending')
-            ->with('success', "Usulan kegiatan telah berhasil di{$request->actionusulan_kegiatan}.");
-
+            ->with('success', "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan}.");
     }
 }

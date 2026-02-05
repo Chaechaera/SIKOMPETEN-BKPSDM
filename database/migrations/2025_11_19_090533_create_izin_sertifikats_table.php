@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('izin_sertifikats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('laporankegiatan_id')->constrained('izin_laporankegiatans');
-            $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans');
+            $table->foreignId('inputusulankegiatan_id');
+            $table->string('templatesertifikat_kegiatan')->nullable();
             $table->json('fieldstemplatesertifikat_kegiatan')->nullable();
             $table->string('nomorsertifikat_kegiatan')->nullable();
             $table->date('tanggalkeluarsertifikat_kegiatan');

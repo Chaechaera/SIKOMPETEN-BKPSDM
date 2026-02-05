@@ -36,14 +36,14 @@
                         <!-- Nomor Otomatis -->
                         <td class="p-2 text-center">{{ $loop->iteration }}</td>
 
-                        <!-- Nomor Surat -->
-                        <td class="p-2">{{ $u->identitassurats->nomor_surat ?? '-' }}</td>
+                        <!-- Nomor Surat 
+                        <td class="p-2">{{ $u->identitassurats->nomor_surat ?? '-' }}</td>-->
 
-                        <!-- Perihal Surat -->
-                        <td class="p-2">{{ $u->identitassurats->perihal_surat ?? '-' }}</td>
+                        <!-- Perihal Surat
+                        <td class="p-2">{{ $u->identitassurats->perihal_surat ?? '-' }}</td>-->
 
                         <!-- Nama Kegiatan -->
-                        <td class="p-2 font-medium">{{ $u->nama_kegiatan }}</td>
+                        <td class="p-2 font-medium">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
 
                         <!-- Tanggal Pelaksanaan Kegiatan -->
                         <td class="p-2">{{ $u->tanggalpelaksanaan_kegiatan ?? '-' }}</td>
@@ -53,20 +53,8 @@
 
                         <!-- Status Usulan Kegiatan -->
                         <td class="p-2 capitalize font-semibold">
-                            @php
-                            $statususulan_kegiatans = $u->statususulan_kegiatan ?? '-';
-                            $statususulan_kegiatanClass = match($statususulan_kegiatans) {
-                            'pending' => 'text-yellow-600',
-                            'approved' => 'text-green-600',
-                            'in_progress' => 'text-blue-600',
-                            'completed' => 'text-purple-600',
-                            'draft' => 'text-gray-500',
-                            'rejected' => 'text-red-600',
-                            default => 'text-gray-500'
-                            };
-                            @endphp
-                            <span class="{{ $statususulan_kegiatanClass }}">
-                                {{ str_replace('_', ' ', $statususulan_kegiatans) }}
+                            <span class="{{ $u->status_ui_class }}">
+                                {{ str_replace('_', ' ', $u->status_ui) }}
                             </span>
                         </td>
 
@@ -78,13 +66,13 @@
                             </button>
 
                             <div x-show="open" @click.outside="open = false"
-                                 class="absolute mt-2 bg-white border rounded shadow-md p-3 text-sm z-10">
+                                class="absolute mt-2 bg-white border rounded shadow-md p-3 text-sm z-10">
                                 <div class="flex flex-col space-y-1">
                                     <a href="{{ route('superadmin.usulankegiatan.download', $u->id) }}" target="_blank"
-                                       class="text-green-600 hover:text-green-700 underline">
+                                        class="text-green-600 hover:text-green-700 underline">
                                         Lihat Surat Usulan
                                     </a>
-                                    <a href="{{ route('superadmin.pelaksanaankegiatan.show', $u->id) }}" target="_blank" 
+                                    <a href="{{ route('superadmin.pelaksanaankegiatan.show', $u->id) }}" target="_blank"
                                         class="text-green-600 hover:text-green-700 underline">
                                         Lihat Keberjalanan
                                     </a>
@@ -96,7 +84,7 @@
                             </div>
 
                             <!-- Review Usulan -->
-                            @if($u->statususulan_kegiatan === 'pending')
+                            @if($u->isReviewUsulan())
                             <button
                                 onclick="openReviewModal('{{ $u->id }}', 'usulankegiatans')"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
@@ -105,21 +93,64 @@
                             @endif
 
                             <!-- Review Laporan -->
-                            @if($u->statususulan_kegiatan === 'completed')
+                            @if($u->isReviewLaporan())
                             <button
-                                onclick="openReviewModal('{{ $u->laporankegiatans->id }}', 'laporankegiatans')"
+                                onclick="openReviewModal('{{ $u->inputlaporankegiatans->laporankegiatans->id }}', 'laporankegiatans')"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                                 Review Laporan
                             </button>
                             @endif
 
-                            <!-- Hapus -->
-                            <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Apakah kamu yakin ingin menghapus usulan ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline font-medium">Hapus</button>
-                            </form>
+                            {{-- ===================== AKSI ADMINISTRATIF ===================== --}}
+                            <div class="border rounded p-2 bg-white">
+                                <p class="text-xs font-semibold text-gray-500 mb-1">🛠 Administratif</p>
+
+                                <div class="flex flex-wrap gap-2">
+                                    {{-- CETAK --}}
+                                    @if($u->boleh_cetak)
+                                    <form method="POST"
+                                        action="{{ route('superadmin.balasanusulankegiatan.cetak', $u->id) }}" onsubmit="return confirm('Yakin cetak?')">
+                                        @csrf
+                                        <button type="submit"
+                                            class="text-indigo-600 hover:underline">
+                                            Cetak
+                                        </button>
+                                    </form>
+                                    @else
+                                    <span class="text-gray-400 italic">Cetak</span>
+                                    @endif
+
+
+                                    {{-- KIRIM --}}
+                                    {{--@if(in_array($u->status_ui, ['accepted']))
+                                    <a href="{{ route('superadmin.balasanusulankegiatan.kirim', $u->id) }}"
+                                    class="text-indigo-600 hover:underline">
+                                    Kirim
+                                    </a>
+                                    @else
+                                    <span class="text-gray-400 italic">Kirim</span>
+                                    @endif--}}
+
+                                    @if($u->boleh_kirim)
+                                    <a href="{{ route('superadmin.balasanusulankegiatan.kirim', $u->id) }}"
+                                        class="text-indigo-600 hover:underline">
+                                        Kirim
+                                    </a>
+                                    @else
+                                    <span class="text-gray-400 italic">Kirim</span>
+                                    @endif
+
+
+                                    {{-- HAPUS --}}
+                                    <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}" method="POST" class="inline"
+                                        onsubmit="return confirm('Apakah kamu yakin ingin menghapus usulan ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:underline font-medium">Hapus</button>
+                                    </form>
+                                </div>
+                            </div>
+
                         </td>
                     </tr>
                     @empty
@@ -138,7 +169,7 @@
     <div id="reviewModalContainer"></div>
 
     <script>
-        async function openReviewModal(id, type = 'usulankegiatans') {
+        async function openReviewModal(id, type) {
             const container = document.getElementById('reviewModalContainer');
             container.innerHTML = `
                 <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
@@ -147,9 +178,13 @@
             `;
 
             // Tentukan endpoint berdasarkan tipe
-            const url = type === 'laporankegiatans'
-                ? `/superadmin/laporankegiatan/${id}/review`
-                : `/superadmin/usulankegiatan/${id}/review`;
+            let url = '';
+
+            if (type === 'laporankegiatans') {
+                url = `/superadmin/laporankegiatan/${id}/review`;
+            } else {
+                url = `/superadmin/usulankegiatan/${id}/review`;
+            }
 
             try {
                 const response = await fetch(url);

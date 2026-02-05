@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('detaillaporankegiatan_id')->constrained('izin_detaillaporankegiatans');
             $table->string('nama_peserta');
-            $table->string('nip_peserta');
+            $table->string('nip_nik_peserta');
             $table->string('jabatan_peserta');
             $table->foreignId('subunitkerja_id_peserta')->constrained('ref_subunitkerjas');
             $table->timestamps();
