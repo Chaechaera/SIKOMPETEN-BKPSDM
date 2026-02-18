@@ -136,8 +136,7 @@ class SertifikatsController extends Controller
             'isHtml5ParserEnabled' => true,
             'fontHeightRatio' => 1.3,
             'chroot' => public_path(),
-        ])
-            ->setPaper('a4', 'landscape');
+        ])->setPaper('A4', 'landscape');
 
         // Penamaan file sertifikat
         $filename = 'Sertifikat_' . preg_replace('/[^A-Za-z0-9 _-]/', '', $peserta->nama_peserta) . '.pdf';
@@ -231,7 +230,7 @@ class SertifikatsController extends Controller
                 'isHtml5ParserEnabled' => true,
                 'chroot' => public_path(),
                 'fontHeightRatio' => 1.3,
-            ])->setPaper('a4', 'landscape')->output();
+            ])->setPaper('A4', 'landscape')->output();
 
             $zip->addFromString($pdfFileName, $pdfContent);
         }
