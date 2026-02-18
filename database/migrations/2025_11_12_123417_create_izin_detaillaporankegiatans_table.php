@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('izin_detaillaporankegiatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('laporankegiatan_id')->constrained('izin_laporankegiatans');
+            $table->enum('jeniskop_laporankegiatan', ['kop_gambar', 'kop_text'])->nullable();
             $table->json('atribut_khusus')->nullable();
             $table->text('rincian_laporan')->nullable();
             $table->text('rundown_laporan')->nullable();

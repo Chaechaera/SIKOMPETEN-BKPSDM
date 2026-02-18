@@ -21,6 +21,8 @@ class Izin_Verifikasilaporankegiatans extends Model
         'read_at'
     ];
 
+    /* ========== RELATIONS ========== */
+    
     public function laporankegiatans()
     {
         return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');

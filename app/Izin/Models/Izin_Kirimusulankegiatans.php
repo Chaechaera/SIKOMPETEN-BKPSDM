@@ -20,8 +20,15 @@ class Izin_Kirimusulankegiatans extends Model
         'statususulan_kegiatan'
     ];
 
+    /* ========== RELATIONS ========== */
+    
     public function identitassurats()
     {
         return $this->belongsTo(Izin_Identitassurats::class, 'identitassurat_id');
+    }
+
+    public function inputusulankegiatans()
+    {
+        return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
     }
 }

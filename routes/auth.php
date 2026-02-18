@@ -14,23 +14,25 @@ use App\Izin\Http\Controllers\Auth\SuperadminController;
 use App\Izin\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;
 
-
 /*
 |--------------------------------------------------------------------------
 | Dashboard Routes (Role-Based)
 |--------------------------------------------------------------------------
 */
 
+// To Dashboard Superadmin
 Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('/superadmin/dashboard', [SuperadminController::class, 'index'])
         ->name('superadmin.dashboard');
 });
 
-Route::middleware(['auth', 'role:admin', 'noteusulan_kegiatan'])->group(function () {
+// To Dashboard Admin
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])
         ->name('admin.dashboard');
 });
 
+// To Dashboard User
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])
         ->name('user.dashboard');
@@ -53,7 +55,7 @@ Route::middleware('guest')->group(function () {
         ->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    // Forgot / Reset Password
+    // Forgot or Reset Password
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])

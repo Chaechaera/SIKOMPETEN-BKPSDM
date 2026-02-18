@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('izin_inputlaporankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputusulankegiatan_id');
+            $table->foreignId('inputusulankegiatan_id')->constrained('izin_inputusulankegiatans');
             $table->foreignId('laporankegiatan_id')->constrained('izin_laporankegiatans');
+            $table->unsignedBigInteger('kirimbalasanlaporankegiatan_id')->nullable();
             $table->timestamps();
         });
     }

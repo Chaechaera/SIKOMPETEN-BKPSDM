@@ -18,12 +18,8 @@ class Izin_Balasanlaporankegiatans extends Model
         'totalcapaianjp_kegiatan'
     ]; 
 
-    // RELATION
-    public function identitassurats()
-    {
-        return $this->belongsTo(Izin_Identitassurats::class, 'identitassurat_id');
-    }
-
+    /* ========== RELATIONS ========== */
+    
     public function usulankegiatans()
     {
         return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
@@ -31,7 +27,7 @@ class Izin_Balasanlaporankegiatans extends Model
 
     public function laporankegiatans()
     {
-        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');
+        return $this->belongsTo(Izin_Laporankegiatans::class, 'inputlaporankegiatan_id');
     }
 
     public function sertifikats()

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    /* ========== 5 (BIMBINGAN TEKNIS) ========== */
     5 => [
         'cara_pelatihan' => 'Bimbingan Teknis',
         'fields' => [
@@ -17,6 +18,7 @@ return [
         ],
     ],
 
+    /* ========== 18 (WORKSHOP) ========== */
     18 => [
         'cara_pelatihan' => 'Workshop',
         'fields' => [
@@ -33,6 +35,7 @@ return [
         ],
     ],
 
+    /* ========== 19 (SEMINAR) ========== */
     19 => [
         'cara_pelatihan' => 'Seminar',
         'fields' => [
@@ -59,6 +62,7 @@ return [
         ],
     ],
 
+    /* ========== 20 (SOSIALISASI) ========== */
     20 => [
         'cara_pelatihan' => 'Sosialisasi',
         'fields' => [

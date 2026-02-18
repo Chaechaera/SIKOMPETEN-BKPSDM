@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('izin_kirimbalasanusulankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputusulankegiatan_id')->constrained('izin_inputusulankegiatans')->cascadeOnDelete();;
+            $table->foreignId('inputusulankegiatan_id')->constrained('izin_inputusulankegiatans')->cascadeOnDelete();
             $table->foreignId('identitassurat_id')->nullable()->constrained('izin_identitassurats');
             $table->string('nipadmin_kirimbalasanusulankegiatan')->nullable();
             $table->string('filekirim_balasanusulankegiatan')->nullable();

@@ -18,10 +18,8 @@ return new class extends Migration
             $table->string('nipadmin_verifikasiusulankegiatan')->nullable();
             $table->text('catatan_verifikasiusulankegiatan')->nullable();
             $table->enum('status_verifikasiusulankegiatan', ['accepted', 'rejected']);
-            
-            // 🔥 AUTO-HILANG SYSTEM
-            $table->boolean('is_read')->default(false);   // sudah dibaca atau belum
-            $table->timestamp('read_at')->nullable();     // kapan dibaca
+            $table->boolean('is_read')->default(false);   
+            $table->timestamp('read_at')->nullable();   
 
             $table->timestamps();
         });

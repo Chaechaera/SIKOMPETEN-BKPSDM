@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('nip_nik_peserta');
             $table->string('jabatan_peserta');
             $table->foreignId('subunitkerja_id_peserta')->constrained('ref_subunitkerjas');
+            $table->foreignId('sertifikat_id')->nullable()->constrained('izin_sertifikats');
+            $table->string('nomorsertifikatpeserta_kegiatan')->nullable();
             $table->timestamps();
         });
     }

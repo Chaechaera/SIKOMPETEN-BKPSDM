@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('izin_identitassurats', function (Blueprint $table) {
             $table->id();
-            $table->string('nomor_surat')->nullable();
+            $table->string('nomor_surat', 30)->nullable();
             $table->date('tanggal_surat')->nullable();
             $table->string('lampiran_surat')->nullable();
             $table->string('perihal_surat')->nullable();

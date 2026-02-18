@@ -17,7 +17,8 @@ class Izin_RefUnitkerjas extends Model
         'unitkerja'
     ];
 
-    // RELATION
+    /* ========== RELATIONS ========== */
+    
     public function subunitkerjas()
     {
         return $this->hasMany(Izin_RefSubunitkerjas::class, 'unitkerja_id');

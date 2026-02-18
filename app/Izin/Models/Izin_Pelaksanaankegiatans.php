@@ -12,19 +12,19 @@ class Izin_Pelaksanaankegiatans extends Model
     protected $table = 'izin_pelaksanaankegiatans';
 
     protected $fillable = [
-        'usulankegiatan_id',
+        'inputusulankegiatan_id',
         'buktipelaksanaan_kegiatan',
     ];
 
-    // Untuk mengubah kolom JSON jadi array saat diakses
     protected $casts = [
         'buktipelaksanaan_kegiatan' => 'array',
     ];
 
-    // RELATIONS
-    public function usulankegiatans()
+    /* ========== RELATIONS ========== */
+
+    public function inputusulankegiatans()
     {
-        return $this->belongsTo(Izin_Usulankegiatans::class, 'identitassurat_id');
+        return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
     }
 
     public function inputlaporankegiatans()

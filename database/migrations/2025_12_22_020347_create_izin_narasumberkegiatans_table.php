@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('izin_narasumberkegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputusulankegiatan_id');
-            $table->string('nama_narasumber');
-            $table->string('jabatan_narasumber');
+            $table->foreignId('inputusulankegiatan_id')->constrained('izin_inputusulankegiatans')->cascadeOnDelete();
+            $table->string('nama_narasumber')->nullable();
+            $table->string('jabatan_narasumber')->nullable();
             $table->timestamps();
         });
     }

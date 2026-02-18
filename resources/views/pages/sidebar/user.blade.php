@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     @vite(['resources/css/app.css','resources/js/app.js'])
     <title>User Dashboard</title>
 </head>
+
 <body class="bg-gray-100 min-h-screen">
     <!-- Navbar -->
     <nav class="bg-blue-800 text-white p-4 flex justify-between items-center">
@@ -18,4 +20,5 @@
         @yield('content')
     </div>
 </body>
+
 </html>

@@ -13,6 +13,7 @@ class Izin_Detaillaporankegiatans extends Model
 
     protected $fillable = [
         'laporankegiatan_id',
+        'jeniskop_laporankegiatan',
         'atribut_khusus',
         'rincian_laporan',
         'rundown_laporan',
@@ -34,7 +35,8 @@ class Izin_Detaillaporankegiatans extends Model
         'pesertakegiatans'
     ];
 
-    // RELATIONS
+    /* ========== RELATIONS ========== */
+    
     public function laporankegiatans()
     {
         return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id', 'id');

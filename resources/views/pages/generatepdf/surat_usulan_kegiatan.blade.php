@@ -24,6 +24,14 @@
             /* jarak ke garis bawah */
         }
 
+        .kop-gambar-full {
+            width: 100%;
+            /* full lebar surat */
+            max-height: 150px;
+            /* proporsional */
+            display: block;
+        }
+
         .kop-logo,
         .kop-text {
             display: table-cell;
@@ -152,7 +160,14 @@
         }
 
         p.indent {
+            text-align: justify;
+            /* biar teks rata kiri-kanan */
             text-indent: 30px;
+            /* ini kunci: jarak baris pertama menjorok */
+            margin-top: 8px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            /* biar nyaman dibaca */
         }
 
         .ttd {
@@ -168,6 +183,7 @@
             padding-right: 10px;
             /* atur jarak dari tepi kanan */
             line-height: 1.3;
+            page-break-inside: avoid;
         }
 
         .ttd p {
@@ -188,6 +204,44 @@
             position: relative;
             left: 5%;
             /* ⬅️ tambahkan ini */
+        }
+
+        .ttd-wrapper {
+            position: relative;
+            width: 75%;
+            /* perbesar area gabungan */
+            height: 300px;
+            /* tinggi total */
+            margin-top: 5px;
+            margin-bottom: -180px;
+        }
+
+        /* === STEMPEL === */
+        .stempel-layer {
+            position: absolute;
+            left: 30%;
+            /* pusatkan horizontal */
+            top: 15px;
+            /* geser naik biar nyentuh tulisan atas */
+            transform: translateX(-10%) scale(2);
+            /* perbesar proporsional (lebar & tinggi) */
+            transform-origin: center;
+            opacity: 0.6;
+            /* tetap transparan */
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        /* === TTD === */
+        .ttd-layer {
+            position: absolute;
+            left: 40%;
+            top: -90px;
+            /* geser ke bawah biar nempel pas di atas stempel */
+            transform: translateX(5%);
+            width: 100%;
+            /* sedikit lebih kecil dari stempel */
+            z-index: 1;
         }
 
         /* ====================== PEMBATAS HALAMAN ====================== */
@@ -299,6 +353,7 @@
             padding-right: 10px;
             /* atur jarak dari tepi kanan */
             line-height: 1.3;
+            page-break-inside: avoid;
         }
 
         .kak-section .ttd p {
@@ -321,12 +376,65 @@
             /* ⬅️ tambahkan ini */
         }
 
+        .kak-section .ttd-wrapper {
+            position: relative;
+            width: 75%;
+            /* perbesar area gabungan */
+            height: 300px;
+            /* tinggi total */
+            margin-top: 5px;
+        }
+
+        /* === STEMPEL === */
+        .kak-section .stempel-layer {
+            position: absolute;
+            left: 30%;
+            /* pusatkan horizontal */
+            top: 15px;
+            /* geser naik biar nyentuh tulisan atas */
+            transform: translateX(-10%) scale(2);
+            /* perbesar proporsional (lebar & tinggi) */
+            transform-origin: center;
+            opacity: 0.6;
+            /* tetap transparan */
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        /* === TTD === */
+        .kak-section .ttd-layer {
+            position: absolute;
+            left: 40%;
+            top: -90px;
+            /* geser ke bawah biar nempel pas di atas stempel */
+            transform: translateX(5%);
+            width: 100%;
+            /* sedikit lebih kecil dari stempel */
+            z-index: 1;
+        }
+
         .kak-section .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
             padding-left: 40px;
             padding-right: 40px;
+        }
+
+        .kak-section .table .td {
+            padding: 2px 4px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .kak-section .table .label {
+            width: 160px;
+            /* atur sesuai panjang teks */
+        }
+
+        .kak-section .table .colon {
+            width: 10px;
+            text-align: center;
         }
 
         .kak-maksud-tujuan {
@@ -499,18 +607,41 @@
 <body>
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
     <div class="kop-container">
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="kop-logo" alt="Logo Pemerintah Kota Surakarta">
         @endif
+        @endif
+
+        {{-- ================= KOP GAMBAR ================= --}}
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_gambar')
+        @if(!empty($kop?->gambarkop_opd) && file_exists(storage_path('app/public/' . $kop->gambarkop_opd)))
+        <img src="{{ storage_path('app/public/' . $kop->gambarkop_opd) }}" class="kop-gambar-full" alt="Logo OPD">
+        @endif
+
+        {{-- ================= KOP TEXT ================= --}}
+        @elseif($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
 
         <div class="kop-text">
             <h2>PEMERINTAH KOTA SURAKARTA</h2>
-            <h1>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</h1>
-            <p>Jalan Jenderal Sudirman No. 2 Telp. (0271) 632202 Website dinkes.surakarta.go.id</p>
-            <p>Email: dinkes@surakarta.go.id</p>
+            <h1>{{ strtoupper($kop->nama_opd) }}</h1>
+            <p> {{ $kop->lokasi_opd }}
+                @if($kop->telepon_opd)
+                Telp. {{ $kop->telepon_opd }}
+                @endif
+                @if($kop->faxmile_opd)
+                Fax. {{ $kop->faxmile_opd }}
+                @endif
+            </p>
+            <p>Website {{ $kop->website_opd }}
+                @if($kop->email_opd)
+                Email: {{ $kop->email_opd }}
+                @endif
+            </p>
             <p><strong>SURAKARTA</strong></p>
-            <p><strong>57111</strong></p>
+            <p><strong>{{ $kop->kodepos_opd }}</strong></p>
         </div>
+        @endif
     </div>
 
     <div class="kop-line"></div>
@@ -544,8 +675,8 @@
         <div class="meta-right">
             <p>Surakarta,
                 {{ $usulankegiatans->identitassurats?->tanggal_surat
-                    ? \Carbon\Carbon::parse($usulankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
-                    : '' }}
+    ? \Carbon\Carbon::parse($usulankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+    : '' }}
             </p>
         </div>
     </div>
@@ -559,8 +690,14 @@
 
     <div class="content">
         <p class="indent">
-            Guna meningkatkan kompetensi sumber daya manusia di lingkungan {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit, {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan kompetensi
-            "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}". Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}" dengan Kerangka Acuan Kegiatan (KAK) sebagaimana terlampir.
+            Guna meningkatkan kompetensi sumber daya manusia di lingkungan
+            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit,
+            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan
+            kompetensi
+            "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}".
+            Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan
+            "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}"
+            dengan Kerangka Acuan Kegiatan (KAK) sebagaimana terlampir.
         </p>
         <p class="indent">
             Demikian atas perhatian dan kerja samanya disampaikan terima kasih.
@@ -571,39 +708,19 @@
         <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
-        @php
-        // 🔍 Langkah 1: ambil dari controller dulu
-        $finalPath = $ttd_path ?? null;
+        <div class="ttd-wrapper">
 
-        // 🔍 Langkah 2: fallback dari session
-        if (empty($finalPath) && session()->has('tandatangan_pjkegiatan')) {
-        $finalPath = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-        }
+            {{-- ===== STAMPEL ===== --}}
+            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @endif
 
-        // 🔍 Langkah 3: fallback ke kemungkinan lokasi lain
-        if (empty($finalPath) || !file_exists($finalPath)) {
-        // Coba cek apakah filenya ada di storage/izin/tandatangan_pjkegiatan
-        $possiblePath = storage_path('app/public/izin/tandatangan_pjkegiatan');
-        if (is_dir($possiblePath)) {
-        foreach (glob($possiblePath . '/*.png') as $file) {
-        $finalPath = $file; // ambil file pertama
-        break;
-        }
-        }
-        }
-        @endphp
+            {{-- ===== TTD ===== --}}
+            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @endif
 
-        @if(!empty($finalPath) && file_exists($finalPath))
-        @php
-        $imageData = base64_encode(file_get_contents($finalPath));
-        @endphp
-        <img src="data:image/png;base64,{{ $imageData }}"
-            alt="Tanda Tangan"
-            style="height:90px; margin-top:5px; margin-right:0; display:inline-block;">
-        @else
-        <p style="color:red; font-size:10pt;">[TTD tidak ditemukan di path {{ $finalPath ?? 'N/A' }}]</p>
-        @endif
-
+        </div>
 
         <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
         <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
@@ -613,18 +730,41 @@
 
     {{-- ====================== KERANGKA ACUAN KERJA (KAK) ====================== --}}
     <div class="kop-container">
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="kop-logo" alt="Logo Pemerintah Kota Surakarta">
         @endif
+        @endif
+
+        {{-- ================= KOP GAMBAR ================= --}}
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_gambar')
+        @if(!empty($kop?->gambarkop_opd) && file_exists(storage_path('app/public/' . $kop->gambarkop_opd)))
+        <img src="{{ storage_path('app/public/' . $kop->gambarkop_opd) }}" class="kop-gambar-full" alt="Logo OPD">
+        @endif
+
+        {{-- ================= KOP TEXT ================= --}}
+        @elseif($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
 
         <div class="kop-text">
             <h2>PEMERINTAH KOTA SURAKARTA</h2>
-            <h1>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</h1>
-            <p>Jalan Jenderal Sudirman No. 2 Telp. (0271) 632202 Website dinkes.surakarta.go.id</p>
-            <p>Email: dinkes@surakarta.go.id</p>
+            <h1>{{ strtoupper($kop->nama_opd) }}</h1>
+            <p> {{ $kop->lokasi_opd }}
+                @if($kop->telepon_opd)
+                Telp. {{ $kop->telepon_opd }}
+                @endif
+                @if($kop->faxmile_opd)
+                Fax. {{ $kop->faxmile_opd }}
+                @endif
+            </p>
+            <p>Website {{ $kop->website_opd }}
+                @if($kop->email_opd)
+                Email: {{ $kop->email_opd }}
+                @endif
+            </p>
             <p><strong>SURAKARTA</strong></p>
-            <p><strong>57111</strong></p>
+            <p><strong>{{ $kop->kodepos_opd }}</strong></p>
         </div>
+        @endif
     </div>
 
     <div class="kop-line"></div>
@@ -640,49 +780,83 @@
         $letterIndex = 0; // mulai dari A
         function getLetter($i) {
             $alphabet = range('A', 'Z');
-            return $alphabet[$i] ?? ('Z' . ($i - 25));} // fallback kalau lewat Z
+            return $alphabet[$i] ?? ('Z' . ($i - 25));
+        } // fallback kalau lewat Z
         @endphp
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. NAMA KEGIATAN PENGEMBANGAN KOMPETENSI</p>
         <p>{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}</p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LATAR BELAKANG</p>
-        <p class="indent">
-            @if(!empty($usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan))
-            {!! nl2br(e($usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan)) !!}
-            @else
-            Lima tahun pertama kehidupan anak merupakan masa krusial atau golden period sekaligus masa kritis...
-            @endif
-        </p>
-
-        <p class="section-title">{{ getLetter($letterIndex++) }}. DASAR HUKUM</p>
-        <ol>
-            @if(!empty($usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan))
-            <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan)) !!}</li>
-            @else
-            <li>Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara</li>
-            <li>Peraturan Menteri Kesehatan Nomor 66 Tahun 2014 tentang Pemantauan Perkembangan Anak</li>
-            @endif
-        </ol>
-
-        <p class="section-title">{{ getLetter($letterIndex++) }}. URAIAN KEGIATAN</p>
         @php
-        $uraian = trim($usulankegiatans->detailusulankegiatans->uraian_kegiatan ?? '');
+        $latarbelakang = trim($usulankegiatans->detailusulankegiatans->latarbelakang_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $latarbelakang); // pisah tiap paragraf kosong
         @endphp
 
-        @if(!empty($uraian))
-        @if(preg_match('/^\s*[\-\d\•\*]/m', $uraian))
+        @if(!empty($latarbelakang))
+        @foreach($blocks as $block)
+        <p class="indent">{!! nl2br(e(trim($block))) !!}</p>
+        @endforeach
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. DASAR HUKUM</p>
+        @php
+        $dasarhukum = trim($usulankegiatans->detailusulankegiatans->dasarhukum_kegiatan ?? '');
+        @endphp
+
+        @if(!empty($dasarhukum))
+        @if(preg_match('/^\s*[\-\d\•\*]/m', $dasarhukum))
         {{-- Kalau diawali tanda list seperti "-" atau angka --}}
-        <ol>
-            @foreach(preg_split('/\r\n|\r|\n/', $uraian) as $line)
+        <ol type="1">
+            @foreach(preg_split('/\r\n|\r|\n/', $dasarhukum) as $line)
             @if(!empty(trim($line)))
-            <li>{{ trim($line, "-•* ") }}</li>
+            {{-- Hapus angka + titik di awal, juga tanda list lain --}}
+            <li>{{ preg_replace('/^\s*\d+[\.\)]?\s*/', '', trim($line, "-•* ")) }}</li>
             @endif
             @endforeach
         </ol>
         @else
-        <p class="indent">{!! nl2br(e($uraian)) !!}</p>
+        <p class="indent">{!! nl2br(e($dasarhukum)) !!}</p>
         @endif
+        @else
+        {{-- Default kalau kosong --}}
+        <ol type="1">
+            <li>Undang-Undang Nomor 20 Tahun 2023 tentang Aparatur Sipil Negara</li>
+            <li>Peraturan Menteri Kesehatan Nomor 66 Tahun 2014 tentang Pemantauan Perkembangan Anak</li>
+        </ol>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. URAIAN KEGIATAN</p>
+        @php
+        $uraian = trim($usulankegiatans->detailusulankegiatans->uraian_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $uraian); // split per paragraf / blok
+        @endphp
+        @if(!empty($uraian))
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
+        <ol>
+            @endif
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
+        </ol>
+        @php $inList = false; @endphp
+        @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
         @else
         <p class="indent">
             Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
@@ -694,16 +868,47 @@
         <div class="kak-maksud-tujuan">
             <ol type="1">
                 <li>MAKSUD
+                    @php
+                    $maksud = trim($usulankegiatans->detailusulankegiatans->maksud_kegiatan ?? '');
+                    $blocks = preg_split("/\r\n|\r|\n/", $maksud); // pisah tiap paragraf kosong
+                    @endphp
+
+                    @if(!empty($maksud))
+                    @foreach($blocks as $block)
+                    <p class="indent">{!! nl2br(e(trim($block))) !!}</p>
+                    @endforeach
+                    @else
                     <p class="indent">
-                        {!! nl2br(e($usulankegiatans->detailusulankegiatans->maksud_kegiatan ??
-                        'Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.')) !!}
+                        Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.
                     </p>
+                    @endif
                 </li>
                 <li>TUJUAN
+                    @php
+                    $tujuan = trim($usulankegiatans->detailusulankegiatans->tujuan_kegiatan ?? '');
+                    @endphp
+
+                    @if(!empty($tujuan))
+                    @if(preg_match('/^\s*[\-\d\•\*]/m', $tujuan))
+                    {{-- Kalau diawali tanda list seperti "-" atau angka --}}
                     <ol type="1">
-                        <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->tujuan_kegiatan ??
-                            'Meningkatkan kualitas pelaksanaan kegiatan dan kompetensi peserta.')) !!}</li>
+                        @foreach(preg_split('/\r\n|\r|\n/', $tujuan) as $line)
+                        @if(!empty(trim($line)))
+                        {{-- Hapus angka + titik di awal, juga tanda list lain --}}
+                        <li>{{ preg_replace('/^\s*\d+[\.\)]?\s*/', '', trim($line, "-•* ")) }}</li>
+                        @endif
+                        @endforeach
                     </ol>
+                    @else
+                    <p class="indent">{!! nl2br(e($tujuan)) !!}</p>
+                    @endif
+                    @else
+                    {{-- Default kalau kosong --}}
+                    <ol type="1">
+                        <li>Meningkatkan kualitas pelaksanaan kegiatan dan kompetensi peserta.</li>
+                        <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
+                    </ol>
+                    @endif
                 </li>
             </ol>
         </div>
@@ -711,21 +916,30 @@
         <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL LANGSUNG YANG DIHARAPKAN</p>
         @php
         $hasillangsung = trim($usulankegiatans->detailusulankegiatans->hasillangsung_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $hasillangsung); // split per paragraf / blok
         @endphp
-
         @if(!empty($hasillangsung))
-        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasillangsung))
-        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
         <ol>
-            @foreach(preg_split('/\r\n|\r|\n/', $hasillangsung) as $line)
-            @if(!empty(trim($line)))
-            <li>{{ trim($line, "-•* ") }}</li>
             @endif
-            @endforeach
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
         </ol>
-        @else
-        <p class="indent">{!! nl2br(e($hasillangsung)) !!}</p>
+        @php $inList = false; @endphp
         @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
         @else
         <p class="indent">
             Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
@@ -736,21 +950,30 @@
         <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL JANGKA MENENGAH YANG DIHARAPKAN</p>
         @php
         $hasilmenengah = trim($usulankegiatans->detailusulankegiatans->hasilmenengah_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $hasilmenengah);
         @endphp
-
         @if(!empty($hasilmenengah))
-        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasilmenengah))
-        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
         <ol>
-            @foreach(preg_split('/\r\n|\r|\n/', $hasilmenengah) as $line)
-            @if(!empty(trim($line)))
-            <li>{{ trim($line, "-•* ") }}</li>
             @endif
-            @endforeach
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
         </ol>
-        @else
-        <p class="indent">{!! nl2br(e($hasilmenengah)) !!}</p>
+        @php $inList = false; @endphp
         @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
         @else
         <p class="indent">
             Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
@@ -761,21 +984,30 @@
         <p class="section-title">{{ getLetter($letterIndex++) }}. HASIL JANGKA PANJANG YANG DIHARAPKAN</p>
         @php
         $hasilpanjang = trim($usulankegiatans->detailusulankegiatans->hasilpanjang_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $hasilpanjang); // split per paragraf / blok
         @endphp
-
         @if(!empty($hasilpanjang))
-        @if(preg_match('/^\s*[\-\d\•\*]/m', $hasilpanjang))
-        {{-- Kalau diawali tanda list seperti "-" atau angka --}}
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
         <ol>
-            @foreach(preg_split('/\r\n|\r|\n/', $hasilpanjang) as $line)
-            @if(!empty(trim($line)))
-            <li>{{ trim($line, "-•* ") }}</li>
             @endif
-            @endforeach
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
         </ol>
-        @else
-        <p class="indent">{!! nl2br(e($hasilpanjang)) !!}</p>
+        @php $inList = false; @endphp
         @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
         @else
         <p class="indent">
             Kegiatan ini dilaksanakan dengan metode tatap muka yang terdiri dari sesi penyampaian materi,
@@ -787,20 +1019,37 @@
         <div class="kak-narasumber-peserta">
             <ol type="1">
                 <li>NARASUMBER
-                    <p class="indent">
+                    @php
+                    $narasumber = trim($usulankegiatans->detailusulankegiatans->narasumber_kegiatan ?? '');
+                    @endphp
+
+                    @if(!empty($narasumber))
+                    @if(preg_match('/^\s*[\-\d\•\*]/m', $narasumber))
+                    {{-- Kalau diawali tanda list seperti "-" atau angka --}}
                     <ol type="1">
-                        @if(!empty($usulankegiatans->detailusulankegiatans->narasumber_kegiatan))
-                        <li>{!! nl2br(e($usulankegiatans->detailusulankegiatans->narasumber_kegiatan)) !!}</li>
-                        @else
+                        @foreach(preg_split('/\r\n|\r|\n/', $narasumber) as $line)
+                        @if(!empty(trim($line)))
+                        {{-- Hapus angka + titik di awal, juga tanda list lain --}}
+                        <li>{{ preg_replace('/^\s*\d+[\.\)]?\s*/', '', trim($line, "-•* ")) }}</li>
+                        @endif
+                        @endforeach
+                    </ol>
+                    @else
+                    <p class="indent">{!! nl2br(e($narasumber)) !!}</p>
+                    @endif
+                    @else
+                    {{-- Default kalau kosong --}}
+                    <ol type="1">
                         <li>Peningkatan kemampuan tenaga kesehatan dalam deteksi dini tumbuh kembang anak.</li>
                         <li>Peningkatan kualitas layanan kesehatan anak di wilayah kerja Dinas Kesehatan Kota Surakarta.</li>
-                        @endif
                     </ol>
-                    </p>
+                    @endif
                 </li>
                 <li>SASARAN PESERTA
                     <p class="indent">
-                        Sasaran peserta yang mengikuti kegiatan ini merupakan orang yang berasal dari ruang lingkup {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta yang mana meliputi {!! nl2br(e($usulankegiatans->detailusulankegiatans->sasaranpeserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!}
+                        Sasaran peserta yang mengikuti kegiatan ini merupakan orang yang berasal dari ruang lingkup
+                        {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta yang mana meliputi: <br>
+                        {!! nl2br(e($usulankegiatans->detailusulankegiatans->sasaranpeserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!}
                     </p>
                 </li>
             </ol>
@@ -854,14 +1103,16 @@
         </p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. SUSUNAN ACARA</p>
+        <p class="indent">Berikut terlampir dalam rancangan susunan acara untuk kegiatan pengembangan komptensi yang akan dilaksanakan:</p>
         @if(!empty($jadwalpelaksanaan_kegiatan) && count($jadwalpelaksanaan_kegiatan) > 1)
         <table class="susunan-acara">
             @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
             @php
             // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            $row = array_map(function($cell) {
-            if (is_array($cell)) $cell = implode(', ', array_filter($cell));
-            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string)$cell); // hapus karakter kontrol
+            $row = array_map(function ($cell) {
+            if (is_array($cell))
+            $cell = implode(', ', array_filter($cell));
+            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
             $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
             return $cell === '' ? null : $cell;
             }, $row);
@@ -874,7 +1125,8 @@
             break;
             }
             }
-            if (!$hasData) continue; // lewati baris kosong sepenuhnya
+            if (!$hasData)
+            continue; // lewati baris kosong sepenuhnya
 
             // Deteksi header grup seperti "Belanja Operasional Lainnya"
             $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
@@ -895,12 +1147,12 @@
                     @foreach($row as $cell)
                     <th>
                         {{ ucwords(
-        preg_replace(
-            ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], 
-            ['$1 $2', '$1 ('], 
-            $cell
-        )
-    ) }}
+                                        preg_replace(
+                                            ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
+                                            ['$1 $2', '$1 ('],
+                                            $cell
+                                        )
+                                    ) }}
                     </th>
                     @endforeach
                 </tr>
@@ -937,48 +1189,28 @@
         <p class="indent">
             {{ $usulankegiatans->detailusulankegiatans->penutup_kegiatan ?? 'Demikian Kerangka Acuan Kerja ini dibuat untuk digunakan sebagai pedoman pelaksanaan kegiatan.' }}
         </p>
-    </div>
 
-    <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
-        <p><strong>Kota Surakarta</strong></p>
+        <div class="ttd">
+            <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+            <p><strong>Kota Surakarta</strong></p>
 
-        @php
-        // 🔍 Langkah 1: ambil dari controller dulu
-        $finalPath = $ttd_path ?? null;
+            <div class="ttd-wrapper">
 
-        // 🔍 Langkah 2: fallback dari session
-        if (empty($finalPath) && session()->has('tandatangan_pjkegiatan')) {
-        $finalPath = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-        }
+                {{-- ===== STAMPEL ===== --}}
+                @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+                <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+                @endif
 
-        // 🔍 Langkah 3: fallback ke kemungkinan lokasi lain
-        if (empty($finalPath) || !file_exists($finalPath)) {
-        // Coba cek apakah filenya ada di storage/izin/tandatangan_pjkegiatan
-        $possiblePath = storage_path('app/public/izin/tandatangan_pjkegiatan');
-        if (is_dir($possiblePath)) {
-        foreach (glob($possiblePath . '/*.png') as $file) {
-        $finalPath = $file; // ambil file pertama
-        break;
-        }
-        }
-        }
-        @endphp
+                {{-- ===== TTD ===== --}}
+                @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+                <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+                @endif
 
-        @if(!empty($finalPath) && file_exists($finalPath))
-        @php
-        $imageData = base64_encode(file_get_contents($finalPath));
-        @endphp
-        <img src="data:image/png;base64,{{ $imageData }}"
-            alt="Tanda Tangan"
-            style="height:90px; margin-top:5px; margin-right:0; display:inline-block;">
-        @else
-        <p style="color:red; font-size:10pt;">[TTD tidak ditemukan di path {{ $finalPath ?? 'N/A' }}]</p>
-        @endif
+            </div>
 
-
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        </div>
     </div>
 </body>
 

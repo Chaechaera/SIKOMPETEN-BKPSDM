@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('izin_balasanlaporankegiatans', function (Blueprint $table) {
+        Schema::create('izin_ttdunitkerjas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputusulankegiatan_id');
-            $table->foreignId('inputlaporankegiatan_id');
-            $table->foreignId('sertifikat_id')->constrained('izin_sertifikats');
-            $table->integer('totalcapaianjp_kegiatan')->nullable();
+            $table->foreignId('unitkerja_id')->constrained('ref_unitkerjas')->cascadeOnDelete();
+            $table->foreignId('subunitkerja_id')->nullable()->constrained('ref_subunitkerjas')->nullOnDelete();
+            $table->string('gambarttd_opd')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('izin_balasanlaporankegiatans');
+        Schema::dropIfExists('izin_ttdunitkerjas');
     }
 };

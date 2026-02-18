@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('inputusulankegiatan_id')->constrained('izin_inputusulankegiatans');
             $table->string('nipadmin_cetakusulankegiatan')->nullable();
-            //$table->foreign('nipadmin_cetakusulankegiatan')->references('nip')->on('users')->onDelete('set null');
             $table->foreignId('pjunitkerja_id')->nullable();
-            $table->foreignId('ttdunitkerja_id')->nullable();
-            $table->foreignId('stempelunitkerja_id')->nullable();
-            $table->enum('statususulan_kegiatan', ['draft', 'pending', 'accepted', 'rejected', 'in_progress', 'completed', 'finish'])->nullable();
+            $table->foreignId('ttdunitkerja_id')->nullable()->constrained('izin_ttdunitkerjas')->nullOnDelete();
+            $table->foreignId('stempelunitkerja_id')->nullable()->constrained('izin_stempelunitkerjas')->nullOnDelete();
+            $table->enum('statususulan_kegiatan', ['draft', 'pending', 'need_review', 'revisi'])->nullable();
             $table->timestamps();
         });
     }

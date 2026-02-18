@@ -11,9 +11,10 @@
 
         {{-- Konten Utama --}}
         <main class="flex-1 p-6">
-            {{-- Catatan dari Superadmin via Session --}}
-            @if ($catatan_verifikasi->count())
-            @foreach ($catatan_verifikasi as $catatan)
+
+            {{-- Notifikasi Pengumuman Usulan Kegiatan Dari Superadmin --}}
+            @if ($catatan_verifikasi_usulan->count())
+            @foreach ($catatan_verifikasi_usulan as $catatan)
             <div class="p-4 mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 rounded">
                 <h3 class="font-semibold">📢 Catatan Review Usulan Kegiatan</h3>
 
@@ -39,19 +40,37 @@
                 </p>
             </div>
             @endforeach
-
-            {{-- STEP 5: tandai SUDAH dibaca --}}
-            @php
-            \App\Izin\Models\Izin_Verifikasiusulankegiatans::whereIn(
-            'id',
-            $catatan_verifikasi->pluck('id')
-            )->update([
-            'is_read' => true,
-            'read_at' => now(),
-            ]);
-            @endphp
             @endif
 
+            {{-- Notifikasi Pengumuman Laporan Kegiatan DAri Superadmin --}}
+            @if ($catatan_verifikasi_laporan->count())
+            @foreach ($catatan_verifikasi_laporan as $catatan)
+            <div class="p-4 mb-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded">
+                <h3 class="font-semibold">📢 Catatan Review Laporan Kegiatan</h3>
+
+                <p>
+                    <strong>
+                        {{ optional($catatan->laporankegiatans->inputlaporankegiatans->inputusulankegiatans)->nama_kegiatan ?? '-' }}
+                    </strong>
+                    telah
+                    <span class="{{ $catatan->status_verifikasilaporankegiatan === 'accepted'
+                    ? 'text-green-700'
+                    : 'text-red-700' }}">
+                        {{ ucfirst($catatan->status_verifikasilaporankegiatan) }}
+                    </span>.
+                </p>
+
+                <p class="mt-2 italic">
+                    {{ $catatan->catatan_verifikasilaporankegiatan ?: 'Tidak ada catatan tambahan.' }}
+                </p>
+
+                <p class="text-sm text-gray-600 mt-1">
+                    Diverifikasi pada
+                    {{ \Carbon\Carbon::parse($catatan->tanggalverifikasi_inputlaporankegiatan)->format('d/m/Y H:i') }}
+                </p>
+            </div>
+            @endforeach
+            @endif
 
             {{-- Header Dashboard --}}
             <h1 class="text-2xl font-bold mb-4">Dashboard Admin</h1>

@@ -7,6 +7,7 @@
 
     <!-- Menu -->
     <nav class="flex-1 p-4 space-y-2">
+
         <!-- Dashboard -->
         <a href="{{ route('admin.dashboard') }}"
             class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
@@ -20,7 +21,7 @@
             class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
             {{ Request::is('usulan*') ? 'bg-indigo-100 text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
             <i class="fa-solid fa-list"></i>
-            Daftar Usulan
+            Daftar Usulan Kegiatan
         </a>
 
         <!-- Pengajuan Usulan -->
@@ -28,7 +29,15 @@
             class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
             {{ Request::is('admin/usulankegiatan') ? 'bg-indigo-100 text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
             <i class="fa-solid fa-box"></i>
-            Pengajuan Usulan
+            Pengajuan Usulan Kegiatan
+        </a>
+
+        <!-- Lengkapi Data OPD -->
+        <a href="{{ route('admin.kopunitkerja.create') }}"
+            class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
+            {{ Request::is('admin/kopunitkerja') ? 'bg-indigo-100 text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
+            <i class="fa-solid fa-box"></i>
+            Lengkapi Data OPD
         </a>
 
         <!-- Other -->

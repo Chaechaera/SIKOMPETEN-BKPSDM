@@ -9,56 +9,55 @@ use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Verifikasilaporankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ReviewLaporanKegiatansController extends Controller
 {
+    /**
+     * Tampilkan Form Review Laporan Hasil Kegiatan
+     */
     public function reviewForm($id)
     {
+        // Eager load relasi dari model dan temukan laporan kegiatan berdasarkan id
         $laporankegiatans = Izin_Laporankegiatans::with([
-            //'identitassurats',
             'detaillaporankegiatans',
             'inputlaporankegiatans',
             'inputlaporankegiatans.inputusulankegiatans',
             'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
-        ])
-            ->findOrFail($id);
+        ])->findOrFail($id);
 
+        // Redirect ke halaman review laporan kegiatan
         return view('pages.laporankegiatan.review_laporan_kegiatan', compact('laporankegiatans'));
     }
 
+    /**
+     * Simpan Hasil Review Laporan Hasil Kegiatan
+     */
     public function reviewUpload(Request $request, $id)
     {
-        // Ambil data usulan
+        // Ambil data laporan kegiatan
         $laporankegiatans = Izin_Laporankegiatans::findOrFail($id);
 
-        // Validasi input
+        // Validasi request
         $request->validate([
             'actionlaporan_kegiatan' => 'required|in:accepted,rejected',
             'catatan_verifikasilaporankegiatan' => 'nullable|string|max:2000',
         ]);
 
-        //$statususulan_update = ($request->actionusulan_kegiatan == 'accepted') ? 'finish' : 'completed';
-
+        // Transaksi DB berlangsung
         DB::transaction(function () use ($request, $id) {
 
-            // Ambil data usulan
+            // Ambil data laporan kegiatan berdasarkan id
             $laporankegiatans = Izin_Laporankegiatans::findOrFail($id);
 
-            // Simpan hanya status ke database
-            /*$usulankegiatans->update([
-            'statususulan_kegiatan' => $request->actionusulan_kegiatan,
-        ]);*/
-
-            // 🔥 PENTING: JANGAN UPDATE STATUS KECUALI REJECTED
+            // Update status laporan kegiatan jika itu "Rejected"
             if ($request->actionlaporan_kegiatan === 'rejected') {
                 $laporankegiatans->update([
                     'statuslaporan_kegiatan' => 'revisi',
                 ]);
             }
 
-            // Simpan histori verifikasi
+            // Simpan data verifikasi laporan hasil kegiatan
             Izin_Verifikasilaporankegiatans::create([
                 'laporankegiatan_id' => $laporankegiatans->id,
                 'tanggalverifikasi_inputlaporankegiatan' => now(),
@@ -69,65 +68,26 @@ class ReviewLaporanKegiatansController extends Controller
             ]);
         });
 
-        // Simpan hanya status ke database
-        /*if ($laporankegiatans->usulankegiatans) {
-            $laporankegiatans->usulankegiatans->update([
-                'statususulan_kegiatan' => $statususulan_update,
-            ]);
-        }
-
-        // Ambil ID admin yang mengajukan usulan
-        $admin_Id = $laporankegiatans->usulankegiatans->dibuat_oleh;
-        $status_text = $statususulan_update === 'finish' ? 'Disetujui' : 'Ditolak';
-
-        // Simpan notes review ke cache untuk admin tersebut
-        Cache::put(
-            'pending_note_usulan_kegiatan_for_admin_' . $admin_Id,
-            [
-                'id' => $laporankegiatans->usulankegiatans->id,
-                'nama_kegiatan' => $laporankegiatans->usulankegiatans->nama_kegiatan,
-                'statususulan_kegiatan' => $status_text,
-                'noteusulan_kegiatan' => $request->noteusulan_kegiatan,
-                'waktu' => now()->format('d/m/Y H:i'),
-            ],
-            now()->addHours(2)
-        );
-
-        // Simpan notes review ke cache dengan key unik
-        /*$noteusulan_kegiatan = [
-            'id' => $usulankegiatans->id,
-            'nama_kegiatan' => $usulankegiatans->nama_kegiatan,
-            'statususulan_kegiatan' => $request->actionusulan_kegiatan,
-            'noteusulan_kegiatan' => $request->noteusulan_kegiatan,
-            'waktu' => now()->format('d/m/Y H:i'),
-        ];
-
-        // Simpan untuk semua admin 
-        Cache::put('pending_note_usulan_kegiatan_for_admin', $noteusulan_kegiatan, now()->addHours(2));*/
-
-        // Kalau diterima, generate sertifikat otomatis
+        // Generate sertifikat otomatis jika itu "Accepted"
         if ($request->actionlaporan_kegiatan === 'accepted') {
             $sertifikatController = new SertifikatsController();
             $sertifikats = $sertifikatController->create(new Request([
                 'laporankegiatan_id' => $laporankegiatans->id,
-                'tanggalkeluarsertifikat_kegiatan' => now()->toDateString(),
             ]));
 
+            // Ambil sertifikat berdasarkan id laporan kegiatan
             $sertifikat = Izin_Sertifikats::where('laporankegiatan_id', $id)->first();
 
+            // Redirect ke halaman buat balasan laporan hasil kegiatan
             return redirect()
                 ->route('superadmin.balasanlaporankegiatan.create', ['id' => $id])
                 ->with([
                     'success' => "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan} dan catatan telah dikirim ke admin.",
                     'sertifikat_id' => optional($sertifikat)->id
                 ]);
-            /*// Redirect ke halaman pending
-            return redirect()
-                ->route('superadmin.balasanlaporankegiatan.create', ['id' => $id])
-                ->with(['success', "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan} dan catatan telah dikirim ke admin.", 'sertifikat_id' => $sertifikats->id]);*/
         }
 
-        // Jika ditolak, kembali ke halaman daftar pending
+        // Redirect ke halaman daftar usulan kegiatan yang perlu di review jika itu "Rejected"
         return redirect()
             ->route('superadmin.usulankegiatan.pending')
             ->with('success', "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan}.");

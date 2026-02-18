@@ -20,6 +20,8 @@ class Izin_Cetakusulankegiatans extends Model
         'statususulan_kegiatan'
     ];
 
+    /* ========== RELATIONS ========== */
+    
     public function inputusulankegiatans()
     {
         return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');

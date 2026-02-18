@@ -4,10 +4,12 @@ namespace App\Izin\Http\Controllers\Admin;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Detailusulankegiatans;
-use App\Izin\Models\Izin_Identitassurats;
 use App\Izin\Models\Izin_Inputusulankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
+use App\Izin\Models\Izin_Stempelunitkerjas;
+use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,29 +19,33 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class UsulanKegiatansController extends Controller
 {
     /**
-     * Tampilkan List Pengajuan Usulan Kegiatan
+     * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
     public function index()
     {
+        // Eager load relasi dari model
         $usulankegiatans = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
+            'inputusulankegiatans.pelaksanaankegiatans',
             'cetakusulankegiatans',
             'verifikasiusulankegiatanterakhir',
-            'pelaksanaankegiatans',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans'
         ])->orderBy('created_at', 'desc')->get();
 
+        // Redirect ke halaman daftar pengajuan usulan kegiatan
         return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
     }
 
     /**
-     * Tampilkan Form Bagian Usulan Kegiatan Pada Form Ajukan Usulan Kegiatan
+     * Tampilkan Form Ajukan Nama Usulan Kegiatan Pengembangan Kompetensi ASN
      */
     public function create()
     {
+        // Ambil user yang sedang login saat ini
         $user = Auth::user();
 
+        // Redirect ke halaman ajukan pengajuan usulan kegiatan
         return view('pages.usulankegiatan.ajukan_usulan_kegiatan', [
             'unitkerjas' => $user->subunitkerjas?->unitkerjas?->unitkerja,
             'subunitkerjas' => $user->subunitkerjas->sub_unitkerja ?? null,
@@ -49,15 +55,20 @@ class UsulanKegiatansController extends Controller
         ]);
     }
 
+    /**
+     * Simpan Data Awal Pada Form Ajukan Nama Usulan Kegiatan Pengembangan Kompetensi ASN
+     */
     public function storeAwal(Request $request)
     {
+        // Validasi request
         $request->validate([
             'nama_kegiatan' => 'required|string|max:255'
         ]);
 
+        // Ambil user yang sedang login saat ini
         $user = Auth::user();
 
-        // Buat USULAN (data minimal)
+        // Simpan data awal usulankegiatan
         $usulan = Izin_Usulankegiatans::create([
             'nama_kegiatan' => $request->nama_kegiatan,
             'dibuat_oleh' => $user->id,
@@ -66,32 +77,45 @@ class UsulanKegiatansController extends Controller
             'statususulan_kegiatan' => 'draft'
         ]);
 
-        // Buat INPUT USULAN (WAJIB ADA)
+        // Simpan data inputusulankegiatan
         Izin_Inputusulankegiatans::create([
             'usulankegiatan_id' => $usulan->id,
             'nama_kegiatan' => $request->nama_kegiatan,
             'pjunitkerja_id' => $user->id
         ]);
 
-        // Redirect ke list usulan kegiatan
-        return redirect()->route('admin.usulankegiatan.edit', $usulan->id)
-            ->with('success', 'Silakan lengkapi data usulan kegiatan.');
+        // Redirect ke halaman edit usulan kegiatan
+        return redirect()->route('admin.usulankegiatan.edit', $usulan->id)->with('success', 'Silakan lengkapi data usulan kegiatan.');
     }
 
+    /**
+     * Tampilkan Form Edit Ajukan Usulan Kegiatan Pengembangan Kompetensi ASN
+     */
     public function edit($id)
     {
+        // Eager load relasi dari model
         $usulan = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
+            'inputusulankegiatans.kopunitkerjas',
             'detailusulankegiatans'
         ])->findOrFail($id);
 
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
+
+        // Ambil kopunitkerja terakhir user yang sedang login saat ini
+        $kopunitkerja_user = Izin_Kopunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
+        $kopunitkerja_id = $usulan->inputusulankegiatans?->kopunitkerja_id ?? $kopunitkerja_user?->id ?? null;
+        
+        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
         if ($usulan->statususulan_kegiatan !== 'draft') {
             abort(403, 'Usulan sudah tidak dapat diubah.');
         }
 
-        // 🔥 PASTIKAN DETAIL SELALU ADA (MESKI KOSONG)
+        // Pastikan detailusulankegiatan selalu ada
         $detail = $usulan->detailusulankegiatans ?? new Izin_Detailusulankegiatans();
 
+        // Redirect ke halaman lengkapi pengajuan usulan kegiatan
         return view('pages.usulankegiatan.lengkapi_usulan_kegiatan', [
             'usulan' => $usulan,
             'detail' => $detail,
@@ -100,94 +124,61 @@ class UsulanKegiatansController extends Controller
             'nama_kegiatan' => $usulan->inputusulankegiatans->nama_kegiatan,
             'carapelatihans' => Izin_RefCarapelatihans::all(),
             'metodepelatihans' => Izin_RefMetodepelatihans::all(),
+            'kopunitkerja_id' => $kopunitkerja_id,
         ]);
     }
 
+    /**
+     * Update Data Pada Form Edit Ajukan Usulan Kegiatan Pengembangan Kompetensi ASN
+     */
     public function update(Request $request, $id)
     {
-        $usulan = Izin_Usulankegiatans::findOrFail($id);
+        // Temukan usulankegiatan berdasarkan id
+        $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
 
-        if ($usulan->statususulan_kegiatan !== 'draft') {
+        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
+        if ($usulankegiatans->statususulan_kegiatan !== 'draft') {
             abort(403);
         }
 
-        // Update USULAN
-        $usulan->update([
+        // Update data usulankegiatan
+        $usulankegiatans->update([
             'lokasi_kegiatan' => $request->lokasi_kegiatan,
             'carapelatihan_id' => $request->carapelatihan_id,
             'tanggalmulai_kegiatan' => $request->tanggalmulai_kegiatan,
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            //'statususulan_kegiatan' => 'pending'
         ]);
 
+        // Merge request berdasarkan id usulankegiatan
         $request->merge([
-            'usulankegiatan_id' => $usulan->id
+            'usulankegiatan_id' => $usulankegiatans->id
         ]);
 
-        // Lanjut ke controller detail
+        // Lanjutkan proses store ke controller detailusulankegiatan
         return app(DetailUsulanKegiatansController::class)->store($request);
     }
 
     /**
-     * Simpan Data Usulan Kegiatan
-     */
-    /**public function store(Request $request)
-    {
-        $user = Auth::user();
-
-        $identitassurats = Izin_Identitassurats::create([
-            'nomor_surat' => $request->nomor_surat,
-            'tanggal_surat' => $request->tanggal_surat,
-            'perihal_surat' => $request->perihal_surat,
-            'lampiran_surat' => $request->lampiran_surat,
-            'subunitkerja_id' => $user->subunitkerja_id,
-            'dibuat_oleh' => $user->id,
-        ]);
-
-        // Mapping status untuk memastikan sesuai enum
-        $statususulan_kegiatanMapping = [
-            'submit' => 'pending', // jika masih ada yang kirim 'submit'
-            'draft' => 'draft',
-            'pending' => 'pending',
-            'accepted' => 'accepted',
-            'rejected' => 'rejected',
-            'in_progress' => 'in_progress',
-            'completed' => 'completed',
-            'finish' => 'finish',
-        ];
-
-        $statususulan_kegiatan = $statususulan_kegiatanMapping[$request->statususulan_kegiatan ?? 'draft'] ?? 'draft';
-
-        $usulankegiatans = Izin_Usulankegiatans::create([
-            'identitassurat_id' => $identitassurats->id,
-            'subunitkerja_id' => $user->subunitkerja_id,
-            'nama_kegiatan' => $request->nama_kegiatan,
-            'lokasi_kegiatan' => $request->lokasi_kegiatan,
-            'carapelatihan_id' => $request->carapelatihan_id,
-            'tanggalpelaksanaan_kegiatan' => $request->tanggalpelaksanaan_kegiatan,
-            'statususulan_kegiatan' => $statususulan_kegiatan,
-            'dibuat_oleh' => $user->id,
-        ]);
-
-        $request->merge(['usulankegiatan_id' => $usulankegiatans->id]);
-
-        // Lanjut ke controller detail
-        return app(DetailUsulanKegiatansController::class)->store($request);
-    }
-
-    /**
-     * Download Surat dan KAK Pengajuan Usulan Kegiatan
+     * Download Surat dan KAK Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN
      */
     public function download($id)
     {
-        // Ambil data lengkap dengan relasi
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
+
+        // Eager load relasi dari model dan temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::with([
-            //'identitassurats',
             'inputusulankegiatans',
+            'inputusulankegiatans.kopunitkerjas',
             'detailusulankegiatans'
         ])->findOrFail($id);
+
+        // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
+        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -195,21 +186,7 @@ class UsulanKegiatansController extends Controller
             $kop_path = null; // fallback kalau tidak ada file kop
         }
 
-        $ttd_path = null;
-        if (!empty($usulankegiatans->tandatangan_pjkegiatan)) {
-            $tandatangan_path = storage_path('app/public/' . $usulankegiatans->tandatangan_pjkegiatan);
-            if (file_exists($tandatangan_path)) {
-                $ttd_path = $tandatangan_path;
-            }
-        } elseif (session()->has('tandatangan_pjkegiatan')) {
-            // fallback kalau diambil dari upload session
-            $tandatangan_path = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-            if (file_exists($tandatangan_path)) {
-                $ttd_path = $tandatangan_path;
-            }
-        }
-
-        // --- baca file Excel jadwal kalau ada ---
+        // Baca file excel jadwal kegiatan kalau ada
         $jadwalpelaksanaan_kegiatan = [];
         if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
             $path = storage_path('app/public/' . $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan);
@@ -229,55 +206,18 @@ class UsulanKegiatansController extends Controller
             }
         }
 
-        $user = Auth::user();
-
+        // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.surat_usulan_kegiatan', [
             'usulankegiatans' => $usulankegiatans,
             'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
             'kop_path' => $kop_path,
-            'ttd_path' => $ttd_path,
+            'kop' => $kop,
+            'ttd' => $ttd,
+            'stempel' => $stempel,
             'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
+        // Redirect dan simpan file PDF
         return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
-
-    public function uploadTTD(Request $request)
-    {
-        $request->validate([
-            'tandatangan_pjkegiatan' => 'required|image|mimes:png,jpg,jpeg|max:2048',
-        ]);
-
-        // File upload
-        if ($request->hasFile('tandatangan_pjkegiatan')) {
-            $ttd_path = $request->file('tandatangan_pjkegiatan')
-                ->store('izin/tandatangan_pjkegiatan', 'public');
-        }
-
-        // Simpan path ke session biar bisa dipakai lagi saat generate PDF
-        session(['tandatangan_pjkegiatan' => $ttd_path]);
-
-        return back()->with('success', 'Tanda tangan berhasil diupload!');
-    }
-
-    public function createTTD()
-    {
-        return view('pages.upload_ttd_surat');
-    }
-
-    /*public function destroy($id)
-{
-    $usulan = Izin_Usulankegiatans::findOrFail($id);
-
-    // OPTIONAL: proteksi status
-    if ($usulan->status_ui !== 'draft') {
-        return back()->with('error', 'Usulan hanya bisa dihapus saat draft');
-    }
-
-    $usulan->delete();
-
-    return redirect()
-        ->route('admin.usulankegiatan.listusulankegiatan')
-        ->with('success', 'Usulan kegiatan berhasil dihapus');
-}*/
 }

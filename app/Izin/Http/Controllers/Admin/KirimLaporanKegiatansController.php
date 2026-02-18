@@ -15,84 +15,75 @@ use Illuminate\Support\Facades\DB;
 class KirimLaporanKegiatansController extends Controller
 {
     /**
-     * Tampilkan Form Kirim Usulan Kegiatan
+     * Tampilkan Form Kirim Laporan Hasil Kegiatan Final
      */
     public function create($laporankegiatan_id)
     {
+        // Temukan laporankegiatan berdasarkan id laporankegiatan
         $laporankegiatans = Izin_Laporankegiatans::findOrFail($laporankegiatan_id);
 
-        //return view('pages.laporankegiatan.kirim_laporan_kegiatan', compact('usulankegiatan'));
-        return view('pages.laporankegiatan.kirim_laporan_kegiatan', [
-            'laporankegiatans' => $laporankegiatans,
-            //'metodepelatihans' => Izin_RefMetodepelatihans::select('id', 'metode_pelatihan')->get(),
-        ]);
+        // Redirect ke halaman kirim laporan hasil kegiatan
+        return view('pages.laporankegiatan.kirim_laporan_kegiatan', ['laporankegiatans' => $laporankegiatans]);
     }
 
     /**
-     * Simpan file usulan kegiatan dari admin
+     * Simpan File Kirim Laporan Hasil Kegiatan Final
      */
     public function store(Request $request, IdentitasSuratsService $identitassuratservice)
     {
-        // Validasi input
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
+
+        // Validasi request
         $request->validate([
             'filekirim_inputlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
-            //'identitassurat_id' => 'required|exists:izin_identitassurats,id',
             'laporankegiatan_id' => 'required',
         ]);
 
-        $user = Auth::user();
-
+        // Transaksi DB berlangsung
         DB::transaction(function () use ($request, $identitassuratservice, $user) {
 
-        // 1️⃣ Ambil laporan + inputlaporan
-        $laporan = Izin_Laporankegiatans::with('inputlaporankegiatans')
-            ->findOrFail($request->laporankegiatan_id);
+            // Eager load relasi dari model dan temukan laporan berdasarkan request id laporankegiatan
+            $laporan = Izin_Laporankegiatans::with('inputlaporankegiatans')->findOrFail($request->laporankegiatan_id);
 
-        // 1️⃣ Simpan identitas surat
-        $identitassurats = $identitassuratservice->create(
-            $request->only([
-                'nomor_surat',
-                'tanggal_surat',
-                'perihal_surat',
-                'sifat_surat',
-                'lampiran_surat',
-            ])
-        );
+            // Simpan identitassurat
+            $identitassurats = $identitassuratservice->create(
+                $request->only([
+                    'nomor_surat',
+                    'tanggal_surat',
+                    'perihal_surat',
+                    'sifat_surat',
+                    'lampiran_surat',
+                ])
+            );
 
-        // Ambil Usulan Kegiatan
-        //$usulan = Izin_Usulankegiatans::findOrFail($request->usulankegiatan_id);
+            // Upload file kirim laporan hasil kegiatan final
+            if ($request->hasFile('filekirim_inputlaporankegiatan')) {
+                $kirimlaporankegiatans = $request->file('filekirim_inputlaporankegiatan')
+                    ->storeAs(
+                        'izin/filekirim_inputlaporankegiatan',
+                        time() . '_' . $request->file('filekirim_inputlaporankegiatan')->getClientOriginalName(),
+                        'public'
+                    );
+            }
 
-        // Upload file
-        if ($request->hasFile('filekirim_inputlaporankegiatan')) {
-            $kirimlaporankegiatans = $request->file('filekirim_inputlaporankegiatan')
-                ->storeAs(
-                    'izin/filekirim_inputlaporankegiatan',
-                    time() . '_' . $request->file('filekirim_inputlaporankegiatan')->getClientOriginalName(),
-                    'public'
-                );
-        }
+            // Simpan data kirim laporan hasil kegiatan final
+            Izin_Kirimlaporankegiatans::create([
+                'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
+                'identitassurat_id' => $identitassurats->id,
+                'filekirim_inputlaporankegiatan' => $kirimlaporankegiatans,
+                'tanggalkirim_inputlaporankegiatan' => now(),
+                'nipadmin_inputlaporankegiatan' => $user->nip,
+                'statuslaporan_kegiatan' => 'need_review',
+            ]);
 
-        // Simpan ke tabel Kirim Usulan Kegiatan
-        Izin_Kirimlaporankegiatans::create([
-            'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
-            'identitassurat_id' => $identitassurats->id,
-            'filekirim_inputlaporankegiatan' => $kirimlaporankegiatans,
-            'tanggalkirim_inputlaporankegiatan' => now(),
-            'nipadmin_inputlaporankegiatan' => $user->nip,
-            'statuslaporan_kegiatan' => 'need_review',
-        ]);
-
-        // 🔥 UPDATE STATUS USULAN
-        $laporan->update([
-            'statuslaporan_kegiatan' => 'need_review',
-        ]);
-        /*Izin_Laporankegiatans::where('id', $request->laporankegiatan_id)
-            ->update([
-                'statuslaporan_kegiatan' => 'need_review'
-            ]);*/
+            // Update status laporan kegiatan menjadi "need review"
+            $laporan->update([
+                'statuslaporan_kegiatan' => 'need_review',
+            ]);
         });
 
-        // Redirect dengan notifikasi sukses
+        // Redirect ke halaman daftar pengajuan usulan kegiatan
         return redirect()->route('admin.usulankegiatan.index')->with('success', 'Usulan kegiatan berhasil dikirim!');
     }
 }

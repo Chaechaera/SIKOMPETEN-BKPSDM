@@ -4,12 +4,12 @@ namespace App\Izin\Http\Controllers\Admin;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Detaillaporankegiatans;
-use App\Izin\Models\Izin_Identitassurats;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
-use App\Izin\Models\Izin_Sertifikats;
+use App\Izin\Models\Izin_Stempelunitkerjas;
+use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,15 +19,22 @@ use Barryvdh\DomPDF\Facade\PDF;
 class LaporanKegiatansController extends Controller
 {
     /**
-     * Tampilkan Form Bagian Usulan Kegiatan Pada Form Ajukan Usulan Kegiatan
+     * Tampilkan Form Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
      */
     public function create($id)
     {
+        // Ambil user yang sedang login saat ini
         $user = Auth::user();
-        $usulankegiatans = Izin_Usulankegiatans::with('carapelatihans')->findOrFail($id);
 
+        // Eager load relasi dari model dan temukan usulankegiatan dari id
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        // Redirect ke halaman ajukan laporan kegiatan
         return view('pages.laporankegiatan.ajukan_laporan_kegiatan', [
-            //'identitassurats' => Izin_Identitassurats::select('id', 'nomor_surat', 'tanggal_surat', 'perihal_surat')->get(),
+            'unitkerjas' => $user->subunitkerjas?->unitkerjas?->unitkerja,
             'subunitkerjas' => $user->subunitkerjas->sub_unitkerja ?? null,
             'dibuat_oleh' => $user->nama,
             'usulankegiatans' => $usulankegiatans,
@@ -37,70 +44,18 @@ class LaporanKegiatansController extends Controller
     }
 
     /**
-     * Simpan Data Usulan Kegiatan
+     * Simpan Data Pada Form Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
      */
-    /*public function store(Request $request, $id)
-    {
-        $user = Auth::user();
-
-        $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
-
-        $config = config('atribut_khusus');
-        $carapelatihans = Izin_RefCarapelatihans::find($request->carapelatihan_id);
-        $atributInput = [];
-
-        /*if ($carapelatihans && isset($config[$carapelatihans->cara_pelatihan])) {
-            foreach ($config[$carapelatihans->cara_pelatihan] as $key => $label) {
-                $atributInput[$key] = $request->input($key);
-            }
-        }
-
-        if ($carapelatihans && isset($config[$carapelatihans->id]['fields'])) {
-            foreach ($config[$carapelatihans->id]['fields'] as $key => $field) {
-                $atributInput[$key] = $request->input($key);
-            }
-        }
-
-        $laporankegiatans = Izin_Laporankegiatans::create([
-            'usulankegiatan_id' => $usulankegiatans->id,
-            'carapelatihan_id' => $request->carapelatihan_id,
-            'atribut_khusus' => json_encode($atributInput),
-            'waktupelaksanaan_laporan' => $request->waktupelaksanaan_laporan,
-            'latarbelakang_laporan' => $request->latarbelakang_laporan,
-            'dasarhukum_laporan' => $request->dasarhukum_laporan,
-            'maksud_laporan' => $request->maksud_laporan,
-            'tujuan_laporan' => $request->tujuan_laporan,
-            'ruanglingkup_laporan' => $request->ruanglingkup_laporan,
-            'metodepelatihan_id' => $request->metodepelatihan_id,
-            'narasumber_laporan' => $request->narasumber_laporan,
-        ]);
-
-        // Buat INPUT USULAN (WAJIB ADA)
-        Izin_Inputlaporankegiatans::create([
-            'laporankegiatan_id' => $laporankegiatans->id,
-            'nama_kegiatan' => $request->nama_kegiatan,
-            'pjunitkerja_id' => $user->id
-        ]);
-
-        $request->merge(['laporankegiatan_id' => $laporankegiatans->id]);
-
-        // Update Status Usulan Kegiatan ke Database
-        $usulankegiatans->update([
-            'statususulan_kegiatan' => 'completed',
-        ]);
-
-        // Lanjut ke controller detail
-        return app(DetailLaporanKegiatansController::class)->store($request);
-    }*/
-
     public function store(Request $request, $id)
     {
+        // Ambil user yang sedang login saat ini
         $user = Auth::user();
 
+        // Temukan usulankegiatan dari id
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
 
-        // Buat USULAN (data minimal)
-        $laporan = Izin_Laporankegiatans::create([
+        // Simpan data awal laporankegiatan
+        $laporankegiatans = Izin_Laporankegiatans::create([
             'lokasi_kegiatan' => $request->lokasi_kegiatan,
             'tanggalmulai_kegiatan' => $request->tanggalmulai_kegiatan,
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
@@ -109,70 +64,72 @@ class LaporanKegiatansController extends Controller
             'statuslaporan_kegiatan' => 'completed'
         ]);
 
-        // Buat INPUT USULAN (WAJIB ADA)
+        // Simpan data inputlaporankegiatan
         Izin_Inputlaporankegiatans::create([
-            'laporankegiatan_id' => $laporan->id,
-            //'usulankegiatan_id' => $usulan->id,
+            'laporankegiatan_id' => $laporankegiatans->id,
             'inputusulankegiatan_id' => $usulankegiatans->inputusulankegiatans->id,
             'pjunitkerja_id' => $user->id
         ]);
 
-        // Redirect ke list usulan kegiatan
-        return redirect()->route('admin.laporankegiatan.edit', $usulankegiatans->id)
-            ->with('success', 'Silakan lengkapi data usulan kegiatan.');
+        // Redirect ke halaman edit laporan kegiatan
+        return redirect()->route('admin.laporankegiatan.edit', $usulankegiatans->id)->with('success', 'Silakan lengkapi data usulan kegiatan.');
     }
 
+    /**
+     * Tampilkan Form Edit Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
+     */
     public function edit($id)
     {
+        // Eager load relasi dari model
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'inputlaporankegiatans.laporankegiatans'
-            //'laporankegiatans.detaillaporankegiatans'
+            'inputusulankegiatans',
+            'detailusulankegiatans'
         ])->findOrFail($id);
 
-        $input = $usulankegiatans->inputlaporankegiatans;
+        // Ambil laporan kegiatan
+        $inputlaporankegiatans = $usulankegiatans->inputlaporankegiatans;
+        $laporankegiatans = $inputlaporankegiatans->laporankegiatans;
 
-        $laporankegiatans = $input->laporankegiatans;
-
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
         if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
             abort(403, 'Usulan sudah tidak dapat diubah.');
         }
 
-        // 🔥 PASTIKAN DETAIL SELALU ADA (MESKI KOSONG)
+        // Pastikan detaillaporankegiatan selalu ada
         $detaillaporankegiatans = $laporankegiatans->detaillaporankegiatans ?? new Izin_Detaillaporankegiatans();
 
+        // Redirect ke halaman lengkapi laporan hasil kegiatan
         return view('pages.laporankegiatan.lengkapi_laporan_kegiatan', [
             'usulankegiatans' => $usulankegiatans,
             'laporankegiatans' => $laporankegiatans,
             'detaillaporankegiatans' => $detaillaporankegiatans,
             'subunitkerjas' => $usulankegiatans->subunitkerjas->sub_unitkerja,
             'unitkerjas' => $usulankegiatans->subunitkerjas->unitkerjas->unitkerja,
-            'nama_kegiatan' => $usulankegiatans->inputusulankegiatans->nama_kegiatan,
             'carapelatihans' => Izin_RefCarapelatihans::all(),
             'metodepelatihans' => Izin_RefMetodepelatihans::all(),
         ]);
     }
 
+    /**
+     * Update Data Pada Form Edit Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
+     */
     public function update(Request $request, $id)
     {
-        //$usulan = Izin_Usulankegiatans::findOrFail($id);
-
+        // Temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::with(
             'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans'
         )->findOrFail($id);
 
-        /*$laporan = Izin_Laporankegiatans::with('detaillaporankegiatans')
-        ->where('usulankegiatan_id', $id)
-        ->firstOrFail();*/
+        // Ambil laporan kegiatan
+        $inputlaporan = $usulankegiatans->inputlaporankegiatans;
+        $laporankegiatans = $inputlaporan->laporankegiatans;
 
-        $input = $usulankegiatans->inputlaporankegiatans;
-
-        $laporankegiatans = $input->laporankegiatans;
-
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
         if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
             abort(403);
         }
 
-        // Update USULAN
+        // Update data laporankegiatan
         $laporankegiatans->update([
             'lokasi_kegiatan' => $request->lokasi_kegiatan,
             'carapelatihan_id' => $request->carapelatihan_id,
@@ -183,31 +140,32 @@ class LaporanKegiatansController extends Controller
             'statuslaporan_kegiatan' => $request->statuslaporan_kegiatan,
         ]);
 
-        /*$request->merge([
-            'usulankegiatan_id' => $usulan->id
-        ]);*/
-
-        // Lanjut ke controller detail
+        // Lanjutkan proses store ke controller detaillaporankegiatan
         return app(DetailLaporanKegiatansController::class)->store($request);
     }
 
+    /**
+     * Download Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
+     */
     public function download($id)
     {
-        // Ambil data lengkap dengan relasi
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
+
+        // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
         $laporankegiatans = Izin_Laporankegiatans::with([
-            //'identitassurats',
             'detaillaporankegiatans',
             'inputlaporankegiatans',
             'inputlaporankegiatans.inputusulankegiatans',
-            //'usulankegiatans.metodepelatihans',
-            //'usulankegiatans.carapelatihans',
-            //'inputusulankegiatans.usulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
             'detaillaporankegiatans.pesertakegiatans',
             'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
-            //'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans',
-            //'usulankegiatans',
-            //'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.metodepelatihans',
         ])->findOrFail($id);
+
+        // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
+        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -215,21 +173,7 @@ class LaporanKegiatansController extends Controller
             $kop_path = null; // fallback kalau tidak ada file kop
         }
 
-        $ttd_path = null;
-        if (!empty($laporankegiatans->tandatangan_pjkegiatan)) {
-            $tandatangan_path = storage_path('app/public/' . $laporankegiatans->tandatangan_pjkegiatan);
-            if (file_exists($tandatangan_path)) {
-                $ttd_path = $tandatangan_path;
-            }
-        } elseif (session()->has('tandatangan_pjkegiatan')) {
-            // fallback kalau diambil dari upload session
-            $tandatangan_path = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-            if (file_exists($tandatangan_path)) {
-                $ttd_path = $tandatangan_path;
-            }
-        }
-
-        // RUNDOWN KEGIATAN (Excel)
+        // Baca file excel rundown laporan kegiatan kalau ada
         $rundown_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->rundown_laporan) {
             $path = storage_path('app/public/' . $laporankegiatans->detaillaporankegiatans->rundown_laporan);
@@ -249,7 +193,7 @@ class LaporanKegiatansController extends Controller
             }
         }
 
-        // PESERTA KEGIATAN (Excel)
+        // Baca file excel peserta kegiatan kalau ada
         $peserta_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->peserta_laporan) {
             $path = storage_path('app/public/' . $laporankegiatans->detaillaporankegiatans->peserta_laporan);
@@ -269,11 +213,10 @@ class LaporanKegiatansController extends Controller
             }
         }
 
-        // DOKUMENTASI GAMBAR (multiple)
+        // Baca file gambar dokumentasi laporan kegiatan kalau ada
         $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
-            $files_gambardokumentasi = json_decode($laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan, true) ?? [];
-
+            $files_gambardokumentasi = $laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan ?? [];
             foreach ($files_gambardokumentasi as $file) {
                 $path = storage_path("app/public/" . $file);
                 if (file_exists($path)) {
@@ -284,13 +227,14 @@ class LaporanKegiatansController extends Controller
             }
         }
 
-        // TERBILANG ANGGARAN LAPORAN
+        // Ambil terbilang angka untuk laporan kegiatan
         $anggaran = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->detailusulankegiatans->alokasianggaran_kegiatan ?? 0;
         $anggaranFormat = $this->rupiahTerbilang($anggaran);
 
-        // ATRIBUT KHUSUS
-        $atribut_khusus = json_decode($laporankegiatans->atribut_khusus, true) ?? [];
+        // Ambil atribut khusus untuk laporan kegiatan
+        $atribut_khusus = $laporankegiatans->detaillaporankegiatans->atribut_khusus ?? [];
 
+        // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.laporan_hasil_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
             'rundown_laporan' => $rundown_laporan,
@@ -299,12 +243,19 @@ class LaporanKegiatansController extends Controller
             'format_anggaran' => $anggaranFormat,
             'atribut_khusus' => $atribut_khusus,
             'kop_path' => $kop_path,
-            'ttd_path' => $ttd_path,
+            'kop' => $kop,
+            'ttd' => $ttd,
+            'stempel' => $stempel,
+            'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
+        // Redirect dan simpan file PDF
         return $pdf->stream('Laporan Hasil Kegiatan ' . $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
 
+    /**
+     * Helper Konversi Nilai Angka Rupiah Menjadi Terbilang Nominal
+     */
     private function rupiahTerbilang($angka, $case = 'capital')
     {
         if (!is_numeric($angka)) return '-';
@@ -330,36 +281,27 @@ class LaporanKegiatansController extends Controller
 
         $terbilang = function ($x) use (&$terbilang, $huruf) {
 
+            // Konversikan terbilang nominal berdasarkan tingkatan
             if ($x < 12)
                 return " " . $huruf[$x];
-
             elseif ($x < 20)
                 return $terbilang($x - 10) . " belas";
-
             elseif ($x < 100)
                 return $terbilang($x / 10) . " puluh" . $terbilang($x % 10);
-
             elseif ($x < 200)
                 return " seratus" . $terbilang($x - 100);
-
             elseif ($x < 1000)
                 return $terbilang($x / 100) . " ratus" . $terbilang($x % 100);
-
             elseif ($x < 2000)
                 return " seribu" . $terbilang($x - 1000);
-
             elseif ($x < 1000000)
                 return $terbilang($x / 1000) . " ribu" . $terbilang($x % 1000);
-
             elseif ($x < 1000000000)
                 return $terbilang($x / 1000000) . " juta" . $terbilang($x % 1000000);
-
             elseif ($x < 1000000000000)
                 return $terbilang($x / 1000000000) . " miliar" . $terbilang($x % 1000000000);
-
             elseif ($x < 1000000000000000)
                 return $terbilang($x / 1000000000000) . " triliun" . $terbilang($x % 1000000000000);
-
             return "";
         };
 

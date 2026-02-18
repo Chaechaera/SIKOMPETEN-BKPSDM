@@ -12,6 +12,7 @@ class Izin_Sertifikats extends Model
     protected $table = 'izin_sertifikats';
 
     protected $fillable = [
+        'laporankegiatan_id',
         'inputusulankegiatan_id',
         'templatesertifikat_kegiatan',
         'fieldstemplatesertifikat_kegiatan',
@@ -23,15 +24,16 @@ class Izin_Sertifikats extends Model
         'fieldstemplatesertifikat_kegiatan' => 'array',
     ];
 
-    // RELATION
+    /* ========== RELATIONS ========== */
+    
     public function balasanlaporankegiatans()
     {
         return $this->hasOne(Izin_Balasanlaporankegiatans::class, 'sertifikat_id');
     }
 
-    public function usulankegiatans()
+    public function inputusulankegiatans()
     {
-        return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
+        return $this->belongsTo(Izin_Usulankegiatans::class, 'inputusulankegiatan_id');
     }
 
     public function laporankegiatans()

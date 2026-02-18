@@ -16,5 +16,4 @@ class Izin_RefMetodepelatihans extends Model
         'kode_metodepelatihan', 
         'metode_pelatihan'
     ];
-
 }

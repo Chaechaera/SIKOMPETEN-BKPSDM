@@ -55,19 +55,24 @@ class User extends Authenticatable
         ];
     }
 
-    // HELPER PEMBACA ENUM ROLE
+    /**
+     * Helper untuk membaca enum role
+     */ 
     public function enumRole(): ?string
     {
         return $this->role;
     }
 
-    // USER YANG DAPAT MENGAKSES PANEL
+    /**
+     * Helper untuk mengarahkan ke panel akses
+     */
     public function canAccessPanel($panel): bool
     {
         return $this->hasAnyRole(['admin', 'superadmin']);
     }
 
-    // RELATION
+    /* ========== RELATIONS ========== */
+
     public function subunitkerjas()
     {
         return $this->belongsTo(Izin_RefSubunitkerjas::class, 'subunitkerja_id');

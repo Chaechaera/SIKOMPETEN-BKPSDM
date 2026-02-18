@@ -14,6 +14,10 @@ class Izin_Kirimbalasanlaporankegiatans extends Model
     protected $fillable = [
         'inputlaporankegiatan_id',
         'identitassurat_id',
-        'balasanlaporankegiatan_id'
+        'nipadmin_kirimbalasanlaporankegiatan',
+        'filekirim_balasanlaporankegiatan',
+        'tanggalkirim_balasanlaporankegiatan',
+        'nipadmin_cetakbalasanlaporankegiatan',
+        'tanggalcetak_balasanlaporankegiatan'
     ];
 }

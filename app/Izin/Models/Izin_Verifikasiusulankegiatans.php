@@ -21,6 +21,8 @@ class Izin_Verifikasiusulankegiatans extends Model
         'read_at'
     ];
 
+    /* ========== RELATIONS ========== */
+
     public function usulankegiatans()
     {
         return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');

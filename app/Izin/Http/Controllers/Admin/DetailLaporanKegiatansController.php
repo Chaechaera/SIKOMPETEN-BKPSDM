@@ -7,6 +7,7 @@ use App\Izin\Models\Izin_Detaillaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Pesertakegiatans;
 use App\Izin\Models\Izin_RefSubunitkerjas;
+use App\Izin\Models\Izin_Sertifikats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -14,67 +15,73 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class DetailLaporanKegiatansController extends Controller
 {
     /**
-     * Tampilkan Form Bagian Detail Usulan Kegiatan Pada Form Ajukan Usulan Kegiatan
+     * Tampilkan Form Lengkapi Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
      */
     public function create($laporankegiatan_id)
     {
+        // Temukan laporankegiatan berdasarkan id
         $laporankegiatans = Izin_Laporankegiatans::findOrFail($laporankegiatan_id);
 
+        // Redirect ke halaman ajukan laporan hasil kegiatan
         return view('pages.laporankegiatan.ajukan_laporan_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
-            //'metodepelatihans' => Izin_RefMetodepelatihans::select('id', 'metode_pelatihan')->get(),
         ]);
     }
 
     /**
-     * Simpan Data Detail Usulan Kegiatan
+     * Simpan Data Tambahan Pada Form Lengkapi Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
      */
     public function store(Request $request)
     {
-        /*$request->validate([
-            'gambardokumentasi_laporan.*' => 'required|mimes:jpg,jpeg,png|max:2048'
-        ]);*/
-
+        // Validasi request
         $request->validate([
             'laporankegiatan_id' => 'required|exists:izin_laporankegiatans,id',
+            'jeniskop_laporankegiatan' => 'required|in:kop_text,kop_gambar',
         ]);
 
-        // Data dasar
+        // Ambil data atribut khusus pada file khusus
+        $config = config('atribut_khusus');
+        $atributInput = [];
+
+        if (isset($config[$request->carapelatihan_id]['fields'])) {
+            foreach ($config[$request->carapelatihan_id]['fields'] as $key => $field) {
+                $atributInput[$key] = $request->input($key);
+            }
+        }
+
+        // Request data detaillaporankegiatan
         $detaillaporankegiatans = $request->only([
             'laporankegiatan_id',
-            'atribut_khusus',
+            'jeniskop_laporankegiatan',
             'rincian_laporan',
-            //'rundown_laporan',
             'penutup_laporan',
-            //'peserta_laporan',
             'linkundangan_laporan',
             'linkmateri_laporan',
             'linkdaftarhadir_laporan',
             'linkdokumentasi_laporan',
-            //'gambardokumentasi_laporan',
-            //'outputkegiatan_laporan',
-            //'templatesertifikat_kegiatan',
         ]);
 
-        // -----------------------------
-        // UPLOAD RUNDOWN FILE
-        // -----------------------------
-
+        // Upload file rundown laporan kegiatan
         if ($request->hasFile('rundown_laporan')) {
             $detaillaporankegiatans['rundown_laporan'] = $request->file('rundown_laporan')->store('izin/rundown_laporan', 'public');
         }
 
-        // -----------------------------
-        // UPLOAD TEMPLATE SERTIFIKAT
-        // -----------------------------
+        // Upload template sertifikat kegiatan
+        $sertifikats = [
+            'laporankegiatan_id' => $request->laporankegiatan_id
+        ];
 
         if ($request->hasFile('templatesertifikat_kegiatan')) {
-            $detaillaporankegiatans['templatesertifikat_kegiatan'] = $request->file('templatesertifikat_kegiatan')->store('izin/template_sertifikat', 'public');
+            $sertifikats['templatesertifikat_kegiatan'] = $request->file('templatesertifikat_kegiatan')->store('izin/template_sertifikat', 'public');
         }
 
-        // -----------------------------
-        // UPLOAD PESERTA EXCEL
-        // -----------------------------
+        // Simpan dan update sertifikat
+        Izin_Sertifikats::updateOrCreate(
+            ['laporankegiatan_id' => $request->laporankegiatan_id],
+            $sertifikats
+        );
+
+        // Upload file peserta kegiatan
         $path_peserta_laporan = [];
         if ($request->hasFile('peserta_laporan')) {
             $detaillaporankegiatans['peserta_laporan'] = $request->file('peserta_laporan')->store('izin/peserta_laporan', 'public');
@@ -87,9 +94,7 @@ class DetailLaporanKegiatansController extends Controller
             }
         }
 
-        // -----------------------------
-        // GAMBAR DOKUMENTASI (MULTIPLE)
-        // -----------------------------
+        // Upload gambar dokumentasi laporan kegiatan
         $path_gambardokumentasi = [];
 
         if ($request->hasFile('gambardokumentasi_laporan')) {
@@ -98,49 +103,47 @@ class DetailLaporanKegiatansController extends Controller
             }
         }
 
-        // -----------------------------
-        // INSERT DETAIL LAPORAN
-        // -----------------------------
+        // Simpan dan update data detaillaporankegiatan
+        $detaillaporan = Izin_Detaillaporankegiatans::updateOrCreate(
+            ['laporankegiatan_id' => $request->laporankegiatan_id], // key unik
+            array_merge(
+                $detaillaporankegiatans,
+                [
+                    'gambardokumentasi_laporan' => $path_gambardokumentasi,
+                    'atribut_khusus' => $atributInput,
+                ]
+            )
+        );
 
-        $detaillaporan = Izin_Detaillaporankegiatans::create(array_merge(
-            $detaillaporankegiatans,
-            [
-                'gambardokumentasi_laporan' => json_encode($path_gambardokumentasi),
-            ]
-        ));
-
-        // ==============================================
-        // AMBIL DATA SUBUNIT KERJA UNTUK MAPPING
-        // ==============================================
+        // Ambil data subunitkerja untuk mapping peserta kegiatan
         $subunitkerja = Izin_RefSubunitkerjas::pluck('id', 'sub_unitkerja')->toArray();
         $subunitkerja_singkatan = Izin_RefSubunitkerjas::pluck('id', 'singkatan')->toArray();
 
-        // -----------------------------
-        // INSERT PESERTA KE TABEL
-        // -----------------------------
+        // Simpan data peserta kegiatan
         if (!empty($path_peserta_laporan)) {
 
             foreach (array_slice($path_peserta_laporan, 1) as $row) {
 
                 $namaSubunitkerja = trim($row[3] ?? "");
 
-                // CARI ID DARI NAMA
+                // Cari id dari nama
                 $subunitkerja_id = $subunitkerja[$namaSubunitkerja] ?? null;
 
-                // CARI ID DARI SINGKATAN
+                // Cari id dari singkatan
                 if (!$subunitkerja_id) {
                     $subunitkerja_id = $subunitkerja_singkatan[$namaSubunitkerja] ?? null;
                 }
 
-                // JIKA MASIH NULL → FUZZY MATCHING
+                // Jika null maka lakukan fuzzy matching untuk menemukan kesamaan
                 if (!$subunitkerja_id) {
 
+                    // Fuzzy match ke nama
                     $subunitkerja_id = $this->fuzzyMatch(
                         $namaSubunitkerja,
                         array_keys($subunitkerja)
                     );
 
-                    // kalau masih null, coba fuzzy ke singkatan
+                    // Fuzzy match ke singkatan jika masih null
                     if (!$subunitkerja_id) {
                         $subunitkerja_id = $this->fuzzyMatch(
                             $namaSubunitkerja,
@@ -162,17 +165,20 @@ class DetailLaporanKegiatansController extends Controller
                 Izin_Pesertakegiatans::create([
                     'detaillaporankegiatan_id' => $detaillaporan->id,
                     'nama_peserta' => $row[0] ?? '-',
-                    'nip_peserta' => $row[1] ?? null,
+                    'nip_nik_peserta' => $row[1] ?? null,
                     'jabatan_peserta' => $row[2] ?? null,
                     'subunitkerja_id_peserta' => $subunitkerja_id,
                 ]);
             }
         }
 
-        return redirect()->route('admin.dashboard')
-            ->with('success', 'Usulan Kegiatan Berhasil Disimpan Secara Lengkap!');
+        // Redirect ke halaman dashboard admin
+        return redirect()->route('admin.dashboard')->with('success', 'Usulan Kegiatan Berhasil Disimpan Secara Lengkap!');
     }
 
+    /**
+     * Helper Untuk Mencocokan Kesamaan Subunitkerja Peserta Kegiatan
+     */
     private function fuzzyMatch($input, $list)
     {
         $input = strtolower(trim($input));

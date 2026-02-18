@@ -14,8 +14,13 @@ return new class extends Migration
         Schema::create('izin_kirimbalasanlaporankegiatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('inputlaporankegiatan_id');
-            $table->foreignId('identitassurat_id')->constrained('izin_identitassurats');
-            $table->foreignId('balasanlaporankegiatan_id');
+            $table->foreign('inputlaporankegiatan_id','inputlaporankegiatan_i')->references('id')->on('izin_inputlaporankegiatans')->cascadeOnDelete();
+            $table->foreignId('identitassurat_id')->nullable()->constrained('izin_identitassurats');
+            $table->string('nipadmin_kirimbalasanlaporankegiatan')->nullable();
+            $table->string('filekirim_balasanlaporankegiatan')->nullable();
+            $table->date('tanggalkirim_balasanlaporankegiatan')->nullable();
+            $table->string('nipadmin_cetakbalasanlaporankegiatan')->nullable();
+            $table->date('tanggalcetak_balasanlaporankegiatan')->nullable();
             $table->timestamps();
         });
     }

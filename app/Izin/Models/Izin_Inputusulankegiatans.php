@@ -20,11 +20,16 @@ class Izin_Inputusulankegiatans extends Model
         'nama_kegiatan'
     ];
 
-    // ================= RELATION =================
+    /* ========== RELATIONS ========== */
 
     public function usulankegiatans()
     {
         return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
+    }
+
+    public function kopunitkerjas()
+    {
+        return $this->belongsTo(Izin_Kopunitkerjas::class, 'kopunitkerja_id');
     }
 
     public function narasumberKegiatan()
@@ -37,7 +42,12 @@ class Izin_Inputusulankegiatans extends Model
         return $this->hasOne(Izin_Cetakusulankegiatans::class, 'inputusulankegiatan_id');
     }
 
-    public function pelaksanaanKegiatan()
+    public function kirimusulankegiatans()
+    {
+        return $this->hasOne(Izin_Kirimusulankegiatans::class, 'inputusulankegiatan_id');
+    }
+
+    public function pelaksanaankegiatans()
     {
         return $this->hasOne(Izin_Pelaksanaankegiatans::class, 'inputusulankegiatan_id');
     }

@@ -21,7 +21,8 @@ class Izin_Pesertakegiatans extends Model
         'nomorsertifikatpeserta_kegiatan',
     ];
 
-    // RELATION
+    /* ========== RELATIONS ========== */
+    
     public function detaillaporankegiatans()
     {
         return $this->belongsTo(Izin_Detaillaporankegiatans::class, 'detaillaporankegiatan_id');

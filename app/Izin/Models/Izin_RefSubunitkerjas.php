@@ -18,7 +18,8 @@ class Izin_RefSubunitkerjas extends Model
         'singkatan'
     ];
 
-    // RELATION
+    /* ========== RELATIONS ========== */
+    
     public function unitkerjas()
     {
         return $this->belongsTo(Izin_RefUnitkerjas::class, 'unitkerja_id');

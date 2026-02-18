@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('izin_laporankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->string('lokasi_kegiatan');
-            $table->date('tanggalmulai_kegiatan');
-            $table->date('tanggalselesai_kegiatan');
-            $table->time('waktumulai_kegiatan');
-            $table->time('waktuselesai_kegiatan');
+            $table->string('lokasi_kegiatan')->nullable();
+            $table->date('tanggalmulai_kegiatan')->nullable();
+            $table->date('tanggalselesai_kegiatan')->nullable();
+            $table->time('waktumulai_kegiatan')->nullable();
+            $table->time('waktuselesai_kegiatan')->nullable();
             $table->enum('statuslaporan_kegiatan', ['completed', 'pending', 'need_review', 'revisi'])->nullable();
             $table->timestamps();
         });

@@ -18,10 +18,6 @@
             <a href="{{ route('admin.usulankegiatan.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                 + Buat Usulan Baru
             </a>
-
-            <a href="{{ route('admin.usulankegiatan.createTTD') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                + Tambah Kop dan TTD
-            </a>
         </div>
 
         <!-- Tabel Daftar Usulan -->
@@ -52,10 +48,17 @@
                         <td class="p-2">{{ $u->identitassurats->perihal_surat ?? '-' }}</td>-->
 
                         <!-- Nama Kegiatan -->
-                        <td class="p-2 font-medium">{{ $u->nama_kegiatan }}</td>
+                        <td class="p-2 font-medium">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
 
                         <!-- Tanggal Pelaksanaan Kegiatan -->
-                        <td class="p-2">{{ $u->tanggalpelaksanaan_kegiatan ?? '-' }}</td>
+                        <td class="p-2">
+                            {{
+        $u->tanggalmulai_kegiatan && $u->tanggalselesai_kegiatan
+        ? \Carbon\Carbon::parse($u->tanggalmulai_kegiatan)->format('d-m-Y') . ' s/d ' .
+          \Carbon\Carbon::parse($u->tanggalselesai_kegiatan)->format('d-m-Y')
+        : '-'
+    }}
+                        </td>
 
                         <!-- Status Usulan Kegiatan -->
                         <td class="p-2 capitalize font-semibold">
@@ -100,6 +103,12 @@
                                         target="_blank"
                                         class="text-green-600 hover:underline">
                                         Lihat Surat Balasan
+                                    </a>
+
+                                    <a href="{{ route('admin.sertifikat.download', $u->id) }}"
+                                        target="_blank"
+                                        class="text-green-600 hover:underline">
+                                        Download Sertifikat
                                     </a>
                                 </div>
                             </div>
@@ -148,10 +157,11 @@
                                         Edit
                                     </a>
                                     @elseif(
-                                    $u->status_ui === 'accepted' &&
-                                    isset($u->inputlaporankegiatans) &&
-                                    isset($u->inputlaporankegiatans->laporankegiatans) &&
-                                    in_array($u->inputlaporankegiatans->laporankegiatans->status_laporan_ui, ['rejected'])
+                                    //$u->status_ui === 'accepted' &&
+                                    $u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan()
+                                    //isset($u->inputlaporankegiatans) &&
+                                    //isset($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
+                                    //&& in_array($u->inputlaporankegiatans?->laporankegiatans->status_laporan_ui, ['completed', 'rejected'])
                                     )
                                     <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
                                         class="text-indigo-600 hover:underline">

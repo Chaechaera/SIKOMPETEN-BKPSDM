@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('izin_detailusulankegiatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans')->cascadeOnDelete();
+            $table->enum('jeniskop_usulankegiatan', ['kop_gambar', 'kop_text'])->nullable();
             $table->longText('latarbelakang_kegiatan')->nullable();
             $table->longText('dasarhukum_kegiatan')->nullable();
             $table->longText('uraian_kegiatan')->nullable();

@@ -13,6 +13,7 @@ class Izin_Detailusulankegiatans extends Model
 
     protected $fillable = [
         'usulankegiatan_id',
+        'jeniskop_usulankegiatan',
         'latarbelakang_kegiatan',
         'dasarhukum_kegiatan',
         'uraian_kegiatan',
@@ -31,7 +32,8 @@ class Izin_Detailusulankegiatans extends Model
         'penutup_kegiatan'
     ];
 
-    // RELATIONS
+    /* ========== RELATIONS ========== */
+    
     public function usulankegiatans()
     {
         return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');

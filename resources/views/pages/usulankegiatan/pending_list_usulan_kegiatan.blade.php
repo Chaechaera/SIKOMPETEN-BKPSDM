@@ -116,6 +116,15 @@
                                             Cetak
                                         </button>
                                     </form>
+                                    @elseif($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
+                                    <form method="POST"
+                                        action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->id) }}" onsubmit="return confirm('Yakin cetak?')">
+                                        @csrf
+                                        <button type="submit"
+                                            class="text-indigo-600 hover:underline">
+                                            Cetak
+                                        </button>
+                                    </form>
                                     @else
                                     <span class="text-gray-400 italic">Cetak</span>
                                     @endif
@@ -133,6 +142,11 @@
 
                                     @if($u->boleh_kirim)
                                     <a href="{{ route('superadmin.balasanusulankegiatan.kirim', $u->id) }}"
+                                        class="text-indigo-600 hover:underline">
+                                        Kirim
+                                    </a>
+                                    @elseif($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_laporan)
+                                    <a href="{{ route('superadmin.balasanlaporankegiatan.kirim', $u->id) }}"
                                         class="text-indigo-600 hover:underline">
                                         Kirim
                                     </a>

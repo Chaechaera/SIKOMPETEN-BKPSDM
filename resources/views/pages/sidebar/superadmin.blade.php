@@ -7,6 +7,7 @@
 
     <!-- Menu -->
     <nav class="flex-1 p-4 space-y-2">
+
         <!-- Dashboard -->
         <a href="{{ route('superadmin.dashboard') }}"
             class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
@@ -17,18 +18,18 @@
 
         <!-- Daftar Usulan Yang Masuk -->
         <a href="{{ route('superadmin.usulankegiatan.pending') }}"
-           class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
+            class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
            {{ Request::is('/superadmin/usulankegiatan/listusulankegiatanpending') ? 'bg-indigo-100 text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
             <i class="fa-solid fa-list"></i>
             <span>Daftar Usulan Kegiatan</span>
         </a>
 
-        <!-- Pengakuan PK ASN -->
+        <!-- Manajemen User ASN -->
         <a href="#"
-           class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
+            class="flex items-center gap-2 px-3 py-2 rounded-lg font-medium 
            {{ Request::is('identitas/create') ? 'bg-indigo-100 text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
             <i class="fa-solid fa-box"></i>
-            <span>Pengajuan Usulan</span>
+            <span>Manajemen User</span>
         </a>
 
         <!-- Other -->

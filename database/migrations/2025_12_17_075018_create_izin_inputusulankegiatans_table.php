@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('izin_inputusulankegiatans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usulankegiatan_id')->constrained('izin_usulankegiatans');
-            $table->foreignId('kirimbalasanusulankegiatan_id')->nullable();
+            $table->unsignedBigInteger('kirimbalasanusulankegiatan_id')->nullable();
             $table->foreignId('pjunitkerja_id')->nullable();
-            $table->foreignId('kopunitkerja_id')->nullable();
+            $table->foreignId('kopunitkerja_id')->nullable()->constrained('izin_kopunitkerjas')->nullOnDelete();
             $table->string('nama_kegiatan');
             $table->timestamps();
         });

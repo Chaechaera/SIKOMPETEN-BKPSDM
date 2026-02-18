@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('izin_cetaklaporankegiatans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputlaporankegiatan_id');
+            $table->foreignId('inputlaporankegiatan_id')->constrained('izin_inputlaporankegiatans');
             $table->string('nipadmin_cetaklaporankegiatan')->nullable();
-            //$table->foreign('nipadmin_cetaklaporankegiatan')->references('nip')->on('users')->onDelete('set null');
             $table->foreignId('pjunitkerja_id')->nullable();
-            $table->foreignId('ttdunitkerja_id')->nullable();
-            $table->foreignId('stempelunitkerja_id')->nullable();
-            $table->enum('statuslaporan_kegiatan', ['draft', 'pending', 'accepted', 'rejected', 'in_progress', 'completed', 'finish'])->default('draft');
+            $table->foreignId('ttdunitkerja_id')->nullable()->constrained('izin_ttdunitkerjas')->nullOnDelete();
+            $table->foreignId('stempelunitkerja_id')->nullable()->constrained('izin_stempelunitkerjas')->nullOnDelete();
+            $table->enum('statuslaporan_kegiatan', ['completed', 'pending', 'need_review', 'revisi'])->nullable();
             $table->timestamps();
         });
     }

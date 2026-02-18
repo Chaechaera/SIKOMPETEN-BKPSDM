@@ -16,7 +16,7 @@ class RoleCheckMiddleware
      */
     public function handle(Request $request, Closure $next, $roles): Response
     {
-        // Cek apakah user sudah login dan punya role yang sesuai
+        // Cek apakah user telah login dan memiliki role?
         if (!Auth::check()) {
             return redirect()->route('login');
         }
@@ -24,14 +24,14 @@ class RoleCheckMiddleware
         // Ambil user saat ini
         $user = Auth::user();
 
-        // Jika middleware dipanggil seperti 'role:superadmin|admin', ubah string jadi array
+        // Jika middleware untuk role dipanggil maka ubah string jadi array
         $roles = is_array($roles) ? $roles : explode('|', $roles);
 
-        // Kalau pakai kolom `role` di tabel users
+        // Jika menggunakan kolom role pada database user
         if (!in_array($user->role, $roles)) {
             abort(403, 'Unauthorized Access');
         }
 
-        return $next($request);
+        return $next($request); // Tampilkan hasil request
     }
 }

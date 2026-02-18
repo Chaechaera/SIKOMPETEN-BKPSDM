@@ -18,5 +18,4 @@ class Izin_RefCarapelatihans extends Model
         'pengertian', 
         'pemberlakuan'
     ];
-
 }

@@ -15,38 +15,27 @@ class Izin_Inputlaporankegiatans extends Model
 
     protected $fillable = [
         'inputusulankegiatan_id',
-        'laporankegiatan_id'
+        'laporankegiatan_id',
+        'kirimbalasanlaporankegiatan_id'
     ];
 
-    // ================= RELATION =================
-
-    /*public function laporankegiatans()
-    {
-        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id', 'id');
-    }*/
+    /* ========== RELATIONS ========== */
 
     public function laporankegiatans()
-{
-    return $this->belongsTo(
-        Izin_Laporankegiatans::class,
-        'laporankegiatan_id'
-    );
-}
-
-public function inputusulankegiatans()
     {
-        return $this->belongsTo(
-            Izin_Inputusulankegiatans::class,
-            'inputusulankegiatan_id'
-        );
+        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');
     }
 
-    /*public function laporankegiatans()
-{
-    return $this->hasOne(Izin_Laporankegiatans::class, 'inputlaporankegiatan_id');
-}*/
+    public function inputusulankegiatans()
+    {
+        return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
+    }
 
-    
+    public function kirimlaporankegiatans()
+    {
+        return $this->hasOne(Izin_Kirimlaporankegiatans::class, 'inputlaporankegiatan_id');
+    }
+
     public function pelaksanaanKegiatan()
     {
         return $this->belongsTo(Izin_Pelaksanaankegiatans::class, 'pelaksanaankegiatan_id');

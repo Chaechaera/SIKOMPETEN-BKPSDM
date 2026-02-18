@@ -7,9 +7,8 @@ use App\Izin\Models\Izin_Identitassurats;
 class IdentitasSuratsService
 {
     /**
-     * Simpan Data Identitas Surat
+     * Buat dan Simpan Data Identitas Surat
      */
-
     public function create(array $data): Izin_Identitassurats
     {
         return Izin_Identitassurats::create([
@@ -20,4 +19,4 @@ class IdentitasSuratsService
             'lampiran_surat' => $data['lampiran_surat'] ?? '1 bendel',
         ]);
     }
-    }
+}

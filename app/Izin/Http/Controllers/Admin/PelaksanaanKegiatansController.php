@@ -10,36 +10,37 @@ use Illuminate\Http\Request;
 class PelaksanaanKegiatansController extends Controller
 {
     /**
-     * Tampilkan Form Pelaksanaan Kegiatan 
+     * Tampilkan Form Upload Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
      */
     public function create($id)
     {
+        // Temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
+
+        // Redirect ke halaman upload pelaksanaan kegiatan
         return view('pages.pelaksanaankegiatan.upload_pelaksanaan_kegiatan', compact('usulankegiatans'));
     }
 
     /**
-     * Simpan Data Pelaksanaan Kegiatan
+     * Simpan Data Upload Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
      */
     public function store(Request $request)
     {
-        // Validasi file terlebih dahulu
+        // Validasi request
         $request->validate([
             'buktipelaksanaan_kegiatan.*' => 'required|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Ambil id usulan dari route
-        $usulankegiatan_id = $request->route('id');
+        // Ambil usulankegiatan dari id route
+        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans')->findOrFail($request->route('id'));
+        $inputusulankegiatan_id = $usulankegiatan->inputusulankegiatans->id;
 
         // Simpan semua file ke array
         $path_buktipelaksanaan = [];
 
-        // Cek apakah ada file diunggah
+        // Cek apakah terdapat file bukti yang diunggah
         if ($request->hasFile('buktipelaksanaan_kegiatan')) {
             foreach ($request->file('buktipelaksanaan_kegiatan') as $file_buktipelaksanaan_kegiatan) {
-
-                // Simpan setiap file ke folder public storage
-                //$path_buktipelaksanaan[] = $file_buktipelaksanaan_kegiatan->store('izin/buktipelaksanaan_kegiatan', 'public');
                 $path_buktipelaksanaan[] = $file_buktipelaksanaan_kegiatan->storeAs(
                     'izin/buktipelaksanaan_kegiatan',
                     time() . '_' . uniqid() . '_' . $file_buktipelaksanaan_kegiatan->getClientOriginalName(),
@@ -47,29 +48,27 @@ class PelaksanaanKegiatansController extends Controller
                 );
             }
 
-            // Simpan ke tabel
+            // Simpan data pelaksanaankegiatan
             Izin_Pelaksanaankegiatans::create([
-                'usulankegiatan_id' => $usulankegiatan_id,
+                'inputusulankegiatan_id' => $inputusulankegiatan_id,
                 'buktipelaksanaan_kegiatan' => json_encode($path_buktipelaksanaan),
             ]);
 
-            // Update Status Usulan Kegiatan ke Database
-            /*Izin_Usulankegiatans::where('id', $usulankegiatan_id)
-                ->update(['statususulan_kegiatan' => 'in_progress']);*/
-
-            return redirect()
-                ->route('admin.usulankegiatan.index')
-                ->with('success', 'Bukti Pelaksanaan Kegiatan Berhasil Diunggah!');
+            // Redirect ke halaman daftar usulankegiatan yang diajukan
+            return redirect()->route('admin.usulankegiatan.index')->with('success', 'Bukti Pelaksanaan Kegiatan Berhasil Diunggah!');
         }
     }
 
     /**
-     * Tampilkan Bukti Pelaksanaan Kegiatan
+     * Tampilkan Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
      */
     public function show($id)
     {
-        $pelaksanaankegiatans = Izin_Pelaksanaankegiatans::where('usulankegiatan_id', $id)->first();
+        // Temukan usulankegiatan berdasarkan id
+        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans.pelaksanaankegiatans')->findOrFail($id);
 
+        // Ambil data pelaksanaankegiatan pada database
+        $pelaksanaankegiatans = $usulankegiatan->inputusulankegiatans?->pelaksanaankegiatans;
         if (!$pelaksanaankegiatans) {
             return redirect()->back()->with('error', 'Data pelaksanaan kegiatan belum tersedia.');
         }
@@ -77,13 +76,7 @@ class PelaksanaanKegiatansController extends Controller
         // Decode JSON dari kolom buktipelaksanaan_kegiatan
         $buktipelaksanaan_kegiatanFiles = json_decode($pelaksanaankegiatans->buktipelaksanaan_kegiatan, true) ?? [];
 
-        $usulankegiatans = Izin_Usulankegiatans::find($id);
-
-        return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', [
-            'usulankegiatans' => $usulankegiatans,
-            'buktipelaksanaan_kegiatanFiles' => $buktipelaksanaan_kegiatanFiles,
-        ]);
-
-        //return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', compact('pelaksanaankegiatans', 'usulankegiatans', 'buktipelaksanaan_kegiatanFiles'));
+        // Redirect ke halaman lihat preview gambar bukti pelaksanaan kegiatan
+        return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', ['usulankegiatans' => $usulankegiatan, 'buktipelaksanaan_kegiatanFiles' => $buktipelaksanaan_kegiatanFiles,]);
     }
 }

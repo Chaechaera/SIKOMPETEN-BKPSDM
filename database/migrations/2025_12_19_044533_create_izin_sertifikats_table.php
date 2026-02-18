@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('izin_sertifikats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inputusulankegiatan_id');
+            $table->foreignId('laporankegiatan_id')->nullable()->constrained('izin_laporankegiatans')->nullOnDelete();
+            $table->foreignId('inputusulankegiatan_id')->nullable()->constrained('izin_inputusulankegiatans')->nullOnDelete();
             $table->string('templatesertifikat_kegiatan')->nullable();
             $table->json('fieldstemplatesertifikat_kegiatan')->nullable();
             $table->string('nomorsertifikat_kegiatan')->nullable();
-            $table->date('tanggalkeluarsertifikat_kegiatan');
+            $table->date('tanggalkeluarsertifikat_kegiatan')->nullable();
             $table->timestamps();
         });
     }

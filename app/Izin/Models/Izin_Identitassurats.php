@@ -19,7 +19,8 @@ class Izin_Identitassurats extends Model
         'sifat_surat',
     ];
 
-    // RELATIONS
+    /* ========== RELATIONS ========== */
+    
     public function kirimusulankegiatans()
     {
         return $this->hasOne(Izin_Kirimusulankegiatans::class, 'identitassurat_id');

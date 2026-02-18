@@ -24,6 +24,14 @@
             /* jarak ke garis bawah */
         }
 
+        .kop-gambar-full {
+            width: 100%;
+            /* full lebar surat */
+            max-height: 150px;
+            /* proporsional */
+            display: block;
+        }
+
         .kop-logo,
         .kop-text {
             display: table-cell;
@@ -152,7 +160,14 @@
         }
 
         p.indent {
+            text-align: justify;
+            /* biar teks rata kiri-kanan */
             text-indent: 30px;
+            /* ini kunci: jarak baris pertama menjorok */
+            margin-top: 8px;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            /* biar nyaman dibaca */
         }
 
         .ttd {
@@ -168,6 +183,7 @@
             padding-right: 10px;
             /* atur jarak dari tepi kanan */
             line-height: 1.3;
+            page-break-inside: avoid;
         }
 
         .ttd p {
@@ -190,281 +206,69 @@
             /* ⬅️ tambahkan ini */
         }
 
+        .ttd-wrapper {
+            position: relative;
+            width: 75%;
+            /* perbesar area gabungan */
+            height: 300px;
+            /* tinggi total */
+            margin-top: 5px;
+            margin-bottom: -180px;
+        }
+
+        /* === STEMPEL === */
+        .stempel-layer {
+            position: absolute;
+            left: 30%;
+            /* pusatkan horizontal */
+            top: 15px;
+            /* geser naik biar nyentuh tulisan atas */
+            transform: translateX(-10%) scale(2);
+            /* perbesar proporsional (lebar & tinggi) */
+            transform-origin: center;
+            opacity: 0.6;
+            /* tetap transparan */
+            z-index: 1;
+            mix-blend-mode: multiply;
+        }
+
+        /* === TTD === */
+        .ttd-layer {
+            position: absolute;
+            left: 40%;
+            top: -90px;
+            /* geser ke bawah biar nempel pas di atas stempel */
+            transform: translateX(5%);
+            width: 100%;
+            /* sedikit lebih kecil dari stempel */
+            z-index: 1;
+        }
+
         /* ====================== PEMBATAS HALAMAN ====================== */
         .page-break {
             page-break-after: always;
-        }
-
-        /* ====================== BAGIAN KAK ====================== */
-        .kak-section {
-            margin-top: 10px;
-            font-size: 12pt;
-            line-height: 1.4;
-        }
-
-        .kak-section .kak-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 10px;
-            line-height: 1.1;
-            margin-top: 10px;
-        }
-
-        .kak-section .kak-title h3 {
-            font-size: 14pt;
-            margin: 0;
-            font-weight: bold;
-        }
-
-        .kak-section .section-title {
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 16px;
-            margin-bottom: 6px;
-            text-align: justify;
-            padding-left: 20px;
-            padding-right: 20px;
-        }
-
-        .kak-section .subsection-title {
-            font-weight: bold;
-            margin-top: 8px;
-            margin-bottom: 2px;
-            margin-left: 40px;
-        }
-
-        .kak-section p {
-            margin: 4px 0;
-            text-align: justify;
-            padding-left: 40px;
-            padding-right: 40px;
-        }
-
-        .kak-section p.indent {
-            text-indent: 30px;
-            margin-top: 0;
-            margin-bottom: 8px;
-            padding-left: 40px;
-            padding-right: 40px;
-            text-align: justify;
-        }
-
-        .kak-section ol,
-        .kak-section ul {
-            margin: 4px 0 4px 40px;
-            padding-left: 20px;
-            padding-right: 40px;
-            line-height: 1.4;
-        }
-
-        .kak-section ol li,
-        .kak-section ul li {
-            text-align: justify;
-            margin-bottom: 3px;
-        }
-
-        .kak-section ol ol {
-            margin-left: 25px;
-            list-style-type: decimal;
-        }
-
-        .kak-section table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 6px;
-        }
-
-        .kak-section th,
-        .kak-section td {
-            border: 1px solid black;
-            padding: 6px;
-            font-size: 11pt;
-            border: none;
-        }
-
-        .kak-section th {
-            text-align: center;
-        }
-
-        .kak-section .ttd {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            /* ⬅️ ini yang bikin ke kanan */
-            width: 50%;
-            /* batasi lebar area tanda tangan */
-            margin-left: auto;
-            margin-top: 30px;
-            padding-right: 10px;
-            /* atur jarak dari tepi kanan */
-            line-height: 1.3;
-        }
-
-        .kak-section .ttd p {
-            margin: 2px 0;
-            text-align: left;
-            font-size: 12pt;
-        }
-
-        .kak-section .ttd img {
-            display: inline-block;
-            /* bukan block */
-            height: 100px;
-            margin: 0;
-            align-items: flex-end;
-            /* dorong ke kanan */
-            margin-left: auto;
-            /* ini kunci biar ke kanan */
-            position: relative;
-            left: 5%;
-            /* ⬅️ tambahkan ini */
-        }
-
-        .kak-section .table {
-            width: 60%;
-            border-collapse: collapse;
-            margin-top: 6px;
-            padding-left: 40px;
-            padding-right: 40px;
-        }
-
-        .kak-maksud-tujuan {
-            margin-left: 15px;
-            padding-left: 20px;
-            padding-right: 0;
-        }
-
-        .kak-maksud-tujuan ol {
-            list-style-type: decimal;
-            margin-left: 25px;
-            padding-left: 0;
-        }
-
-        .kak-maksud-tujuan li {
-            text-align: justify;
-            margin-bottom: 6px;
-        }
-
-        .kak-maksud-tujuan p.indent {
-            text-indent: 30px;
-            margin: 0px 0 0px 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        .kak-narasumber-peserta {
-            margin-left: 15px;
-            padding-left: 20px;
-            padding-right: 0;
-        }
-
-        .kak-narasumber-peserta ol {
-            list-style-type: decimal;
-            margin-left: 25px;
-            padding-left: 0;
-        }
-
-        .kak-narasumber-peserta li {
-            text-align: justify;
-            margin-bottom: 6px;
-        }
-
-        .kak-narasumber-peserta p.indent {
-            text-indent: 30px;
-            margin: 0px 0 0px 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        .susunan-acara {
-            width: 100%;
-            border-collapse: collapse;
-            border-spacing: 0;
-            table-layout: auto;
-            font-size: 10.5pt;
-            margin-top: 8px;
-        }
-
-        .susunan-acara th,
-        .susunan-acara td {
-            border: 0.7px solid #000;
-            padding: 2.5px 3.5px;
-            word-wrap: break-word;
-            vertical-align: middle;
-            line-height: 1.2;
-        }
-
-        .susunan-acara th {
-            font-weight: bold;
-            text-align: center;
-            background-color: #fdfdfd;
-            font-size: 10.5pt;
-            padding: 3px 4px;
-        }
-
-        .susunan-acara td {
-            text-align: left;
-            font-size: 10.3pt;
-        }
-
-        /* Kolom angka */
-        .susunan-acara td:nth-child(n+6) {
-            text-align: right;
-        }
-
-        /* Judul Grup (Belanja Bahan Habis Pakai, dsb) */
-        .susunan-acara tr.group-row td {
-            font-weight: bold;
-            text-align: left;
-            padding: 4px 5px;
-            background-color: #f7f7f7;
-            border: 0.7px solid #000;
-            font-size: 10.7pt;
-            word-spacing: 2px;
-            text-transform: capitalize;
-        }
-
-        /* Kolom Nomor agar kecil dan proporsional */
-        .susunan-acara td:first-child {
-            text-align: center;
-            width: 30px;
-            font-size: 9.5pt;
-        }
-
-        /* Agar teks kata panjang seperti “Belanja Operasional Lainnya” tidak nempel */
-        .susunan-acara td,
-        .susunan-acara th {
-            white-space: normal;
-            overflow-wrap: break-word;
-        }
-
-        /* Kolom nomor kecil & center */
-        .susunan-acara .td-nomor {
-            text-align: center;
-            width: 22px;
-            /* sebelumnya 30px, sekarang lebih rapat */
-            font-size: 9pt;
-            /* sedikit lebih kecil */
-            padding: 1px 2px;
-            /* padding diperkecil */
-            vertical-align: middle;
-            white-space: nowrap;
-            /* biar angka nggak turun ke bawah */
-        }
-
-        /* Kolom isi umum */
-        .susunan-acara .td-isi {
-            text-align: left;
-            padding: 3px 4px;
-            font-size: 10.3pt;
-            line-height: 1.2;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
+        }
+
+        .table td {
+            padding: 2px 4px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .table .label {
+            width: 150px;
+            /* atur sesuai panjang teks */
+        }
+
+        .table .colon {
+            width: 10px;
+            text-align: center;
         }
 
         th,
@@ -481,24 +285,44 @@
 </head>
 
 <body>
-    @php
-    $user = $user ?? Auth::user();
-    @endphp
 
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
     <div class="kop-container">
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="kop-logo" alt="Logo Pemerintah Kota Surakarta">
         @endif
+        @endif
+
+        {{-- ================= KOP GAMBAR ================= --}}
+        @if($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_gambar')
+        @if(!empty($kop?->gambarkop_opd) && file_exists(storage_path('app/public/' . $kop->gambarkop_opd)))
+        <img src="{{ storage_path('app/public/' . $kop->gambarkop_opd) }}" class="kop-gambar-full" alt="Logo OPD">
+        @endif
+
+        {{-- ================= KOP TEXT ================= --}}
+        @elseif($usulankegiatans->detailusulankegiatans->jeniskop_usulankegiatan === 'kop_text')
 
         <div class="kop-text">
             <h2>PEMERINTAH KOTA SURAKARTA</h2>
-            <h1>BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA</h1>
-            <p>Jalan Jenderal Sudirman No. 2 Telp. (0271) 632202 Website dinkes.surakarta.go.id</p>
-            <p>Email: dinkes@surakarta.go.id</p>
+            <h1>{{ strtoupper($kop->nama_opd) }}</h1>
+            <p> {{ $kop->lokasi_opd }}
+                @if($kop->telepon_opd)
+                Telp. {{ $kop->telepon_opd }}
+                @endif
+                @if($kop->faxmile_opd)
+                Fax. {{ $kop->faxmile_opd }}
+                @endif
+            </p>
+            <p>Website {{ $kop->website_opd }}
+                @if($kop->email_opd)
+                Email: {{ $kop->email_opd }}
+                @endif
+            </p>
             <p><strong>SURAKARTA</strong></p>
-            <p><strong>57111</strong></p>
+            <p><strong>{{ $kop->kodepos_opd }}</strong></p>
         </div>
+        @endif
     </div>
 
     <div class="kop-line"></div>
@@ -548,7 +372,8 @@
     {{-- =================== ISI SURAT =================== --}}
     <div class="content">
         <p class="indent">Menindaklanjuti surat Kepala {{ $user->subunitkerjas->sub_unitkerja }} Kota Surakarta nomor
-            <strong>{{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->nomor_surat ?? '-' }}</strong> tanggal {{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->tanggal_surat ?? '-' }} perihal {{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->perihal_surat ?? '-' }}, bersama ini kami sampaikan hal-hal berikut:
+            <strong>{{ $usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->nomor_surat ?? '-' }}</strong> tanggal {{ \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y') ?? '-' }} 
+            perihal {{ $usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->perihal_surat ?? '-' }}, bersama ini kami sampaikan hal-hal berikut:
         </p>
 
         <ol>
@@ -564,42 +389,22 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas->sub_unitkerja }}</strong></p>
+        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
-        @php
-        // 🔍 Langkah 1: ambil dari controller dulu
-        $finalPath = $ttd_path ?? null;
+        <div class="ttd-wrapper">
 
-        // 🔍 Langkah 2: fallback dari session
-        if (empty($finalPath) && session()->has('tandatangan_pjkegiatan')) {
-        $finalPath = storage_path('app/public/' . session('tandatangan_pjkegiatan'));
-        }
+            {{-- ===== STAMPEL ===== --}}
+            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @endif
 
-        // 🔍 Langkah 3: fallback ke kemungkinan lokasi lain
-        if (empty($finalPath) || !file_exists($finalPath)) {
-        // Coba cek apakah filenya ada di storage/izin/tandatangan_pjkegiatan
-        $possiblePath = storage_path('app/public/izin/tandatangan_pjkegiatan');
-        if (is_dir($possiblePath)) {
-        foreach (glob($possiblePath . '/*.png') as $file) {
-        $finalPath = $file; // ambil file pertama
-        break;
-        }
-        }
-        }
-        @endphp
+            {{-- ===== TTD ===== --}}
+            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @endif
 
-        @if(!empty($finalPath) && file_exists($finalPath))
-        @php
-        $imageData = base64_encode(file_get_contents($finalPath));
-        @endphp
-        <img src="data:image/png;base64,{{ $imageData }}"
-            alt="Tanda Tangan"
-            style="height:90px; margin-top:5px; margin-right:0; display:inline-block;">
-        @else
-        <p style="color:red; font-size:10pt;">[TTD tidak ditemukan di path {{ $finalPath ?? 'N/A' }}]</p>
-        @endif
-
+        </div>
 
         <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
         <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
