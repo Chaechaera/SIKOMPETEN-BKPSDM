@@ -1,11 +1,18 @@
 <x-app-layout>
+<div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-    <div class="max-w-5xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-6">
-            Form Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN
-        </h1>
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <form method="POST" action="{{ route('admin.usulankegiatan.storeAwal') }}">
+    <!-- SIDEBAR -->
+    @include('pages.sidebar.admin')
+
+    {{-- Main Content --}}
+        <main 
+        class="flex-1 p-6 space-y-6 transition-all duration-300"
+        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
+        >
+
+            
+            {{-- 📝 FORM PENGAJUAN USULAN --}}
+            <form method="POST" action="{{ route('admin.usulankegiatan.store') }}" enctype="multipart/form-data">
                 @csrf
 
                 {{-- ===================================================== --}}
@@ -51,6 +58,6 @@
                     </button>
                 </div>
             </form>
-        </div>
+        </main>
     </div>
 </x-app-layout>

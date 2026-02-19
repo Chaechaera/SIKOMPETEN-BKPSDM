@@ -1,39 +1,63 @@
 <x-app-layout>
-    @php $unfinished = $usulankegiatans->where('statususulan_kegiatan', '!=', 'finish')->count() > 0; @endphp
+<div class="min-h-screen bg-gray-50">
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-full">
 
-    <div class="p-6 space-y-6">
+    <!-- SIDEBAR -->
+    @include('pages.sidebar.admin')
 
-        <!-- Judul Halaman -->
-        <h1 class="text-2xl font-bold mb-4">Daftar Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN</h1>
+    {{-- Main Content --}}
+        <main 
+        class="flex-1 p-6 space-y-6 transition-all duration-300"
+        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
+        >
 
-        <!-- Bagian Progress Stepper -->
-        <div class="bg-gray-50 p-4 rounded-xl shadow-sm border">
-            <h2 class="text-lg font-semibold mb-3">Progress Pengajuan</h2>
-            {{-- Komponen Stepper (bisa dijadikan partial blade include) --}}
-            @include('components.proggres-stepper', ['processStatus' => $usulankegiatans[0]->process_status ?? null])
+        <!-- JUDUL -->
+        <div class="bg-white rounded-xl shadow p-6 mb-10">
+            <h1 class="text-2xl font-semibold text-[#2B3674]">
+                DAFTAR PENGAJUAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN
+            </h1>
+            <p class="text-sm text-gray-500 max-w-2xl">
+                Daftar usulan kegiatan yang saat ini sedang dalam proses pengajuan.
+            </p>
         </div>
 
-        <!-- Tombol Aksi -->
-        <div class="flex gap-3 mt-4">
-            <a href="{{ route('admin.usulankegiatan.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        <!-- PROGRES -->
+        <div class="w-full bg-white rounded-xl shadow p-6 mb-8">
+            <h2 class="text-lg font-semibold text-[#2B3674] mb-6">PROGRES PENGAJUAN</h2>
+
+            @include('components.proggres-stepper', [
+                'processStatus' => $usulankegiatans[0]->process_status ?? null
+            ])
+        </div>
+
+        <!-- BUTTON TAMBAH -->
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end mb-2">
+            <a href="{{ route('admin.usulankegiatan.create') }}"
+                class="bg-[#FFA41B] text-white px-4 py-2 rounded-lg hover:bg-[#ff9600] transition">
                 + Buat Usulan Baru
+            </a>
+
+            <a href="{{ route('admin.usulankegiatan.createTTD') }}"
+                class="bg-[#FFA41B] text-white px-4 py-2 rounded-lg hover:bg-[#ff9600] transition">
+                + Tambah Kop dan TTD
             </a>
         </div>
 
-        <!-- Tabel Daftar Usulan -->
-        <div class="overflow-x-auto">
-            <table class="w-full border border-gray-300 rounded-lg mt-4 text-sm">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr>
-                        <th class="p-2 text-left w-10">No</th>
-                        <!--<th class="p-2 text-left">Nomor Surat</th>
-                        <th class="p-2 text-left">Perihal Surat</th>-->
-                        <th class="p-2 text-left">Nama Kegiatan</th>
-                        <th class="p-2 text-left">Tanggal Pelaksanaan Kegiatan</th>
-                        <th class="p-2 text-left">Status Usulan Kegiatan</th>
-                        <th class="p-2 text-left">Aksi</th>
-                    </tr>
-                </thead>
+        <!-- TABLE -->
+        <section class="bg-white rounded-xl shadow p-4 sm:p-6">
+            <div class="overflow-x-auto w-full">
+                <table class="min-w-full text-sm text-gray-600">
+                    <thead class="border-b text-gray-700 bg-[#FAFAFB]">
+                        <tr>
+                            <th class="py-3 px-4 text-left font-semibold">No</th>
+                            <th class="py-3 px-4 text-left font-semibold">Nomor Surat</th>
+                            <th class="py-3 px-4 text-left font-semibold">Perihal Surat</th>
+                            <th class="py-3 px-4 text-left font-semibold">Nama Kegiatan</th>
+                            <th class="py-3 px-4 text-left font-semibold">Tanggal Pelaksanaan</th>
+                            <th class="py-3 px-4 text-left font-semibold">Status</th>
+                            <th class="py-3 px-4 text-left font-semibold">Aksi</th>
+                        </tr>
+                    </thead>
 
                 <tbody>
                     @forelse ($usulankegiatans as $u)

@@ -1,17 +1,17 @@
 @props(['statususulan_kegiatanSaatini' => null])
 
 @php
-// Daftar semua langkah
-$steps = [
-    ['key' => 'draft', 'label' => 'Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN'],
-    ['key' => 'pending', 'label' => 'Menunggu Verifikasi Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN'],
-    ['key' => 'accepted', 'label' => 'Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN Diterima'],
-    ['key' => 'rejected', 'label' => 'Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN Ditolak'],
-    ['key' => 'in_progress', 'label' => 'Pelaksanaan Kegiatan Pengembangan Kompetensi ASN'],
-    ['key' => 'completed', 'label' => 'Upload Bukti Hasil Pelaksanaan Kegiatan Pengembangan Kompetensi ASN'],
-    ['key' => 'in_review', 'label' => 'Peninjauan Pengakuan JP Dari Kegiatan Pengembangan Kompetensi ASN Yang Terlaksana'],
-    ['key' => 'finish', 'label' => 'Proses Selesai dan Sertifikat Pengakuan JP Peserta Dapat Diakses'],
-];
+    // Daftar semua langkah
+    $steps = [
+        ['key' => 'draft', 'label' => 'Pengajuan Usulan'],
+        ['key' => 'pending', 'label' => 'Menunggu Verifikasi'],
+        ['key' => 'accepted', 'label' => 'Pengajuan Diterima'],
+        ['key' => 'rejected', 'label' => 'Pengajuan Ditolak'],
+        ['key' => 'in_progress', 'label' => 'Pelaksanaan Kegiatan'],
+        ['key' => 'completed', 'label' => 'Upload Laporan'],
+        ['key' => 'in_review', 'label' => 'Peninjauan Laporan'],
+        ['key' => 'finish', 'label' => 'Selesai'],
+    ];
 
 // Filter untuk hide accepted/rejected sesuai aturan
 /*if ($statususulan_kegiatanSaatini === 'rejected') {
