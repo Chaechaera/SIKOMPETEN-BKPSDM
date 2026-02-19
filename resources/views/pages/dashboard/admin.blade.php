@@ -38,7 +38,7 @@
             @endforeach
             @endif
 
-            {{-- Notifikasi Pengumuman Laporan Kegiatan DAri Superadmin --}}
+            {{-- Notifikasi Pengumuman Laporan Kegiatan Dari Superadmin --}}
             @if ($catatan_verifikasi_laporan->count())
             @foreach ($catatan_verifikasi_laporan as $catatan)
             <div class="p-4 mb-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded">
