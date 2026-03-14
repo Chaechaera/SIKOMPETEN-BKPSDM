@@ -1,110 +1,156 @@
 <x-app-layout>
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-    <div class="max-w-5xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-6">
-            Form Balasan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
-        </h1>
+        {{-- Sidebar --}}
+        @include('pages.sidebar.admin')
 
-        <div class="bg-white shadow-md rounded-lg p-6">
+        {{-- Main Content --}}
+        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+
+            {{-- Header --}}
+            @include('layouts.navigation')
+
+            {{-- 📝 FORM BALASAN LAPORAN HASIL KEGIATAN --}}
             <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.store', $laporankegiatans->id) }}" enctype="multipart/form-data">
                 @csrf
+
+                <div class="bg-white rounded-xl shadow p-6 mb-4">
+                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                    <p class="text-sm text-gray-500 max-w-4xl">
+                        Silahkan lengkapi data balasan laporan hasil kegiatan pada form ini dan pastikan data balasan laporan hasil kegiatan yang diisikan telah sesuai sebelum dicetak.
+                    </p>
+                </div>
 
                 {{-- ========================================================= --}}
                 {{-- ======== BAGIAN 1: BUAT BALASAN LAPORAN KEGIATAN ======== --}}
                 {{-- ========================================================= --}}
-                <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Buat Balasan Laporan Kegiatan</h2>
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Preview Data Utama Kegiatan</h2>
 
-                    {{-- Sub Unit Kerja --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Sub Unit Kerja yang Menyelenggarakan Kegiatan</label>
-                        <input type="text"
-                            value="{{ $subunitkerjas ?? '' }}"
-                            class="border p-2 w-full bg-gray-100"
-                            readonly>
-                        <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
-                    </div>
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    {{-- Nama Kegiatan --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Nama Kegiatan yang Diselenggarakan</label>
-                        <input type="text"
-                            value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '' }}"
-                            class="border p-2 w-full bg-gray-100"
-                            readonly>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    {{-- Cara Pelatihan --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Cara Pelatihan yang Digunakan</label>
-                        <input type="text"
-                            value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->carapelatihans->cara_pelatihan ?? '' }}"
-                            class="border p-2 w-full bg-gray-100"
-                            readonly>
-                    </div>
+                        {{-- Nama Kegiatan --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nama Kegiatan yang Diselenggarakan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
+                            </div>
+                        </div>
 
-                    {{-- Tanggal Pelaksanaan Kegiatan --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Tanggal Kegiatan Terlaksana</label>
-                        <input type="text"
-                            value="{{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan
+                        {{-- Sub Unit Kerja --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sub Unit Kerja yang Menyelenggarakan Kegiatan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $subunitkerjas ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
+                                <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
+                            </div>
+                        </div>
+
+                        {{-- Cara Pelatihan --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan yang Digunakan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->carapelatihans->cara_pelatihan ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
+                            </div>
+                        </div>
+
+                        {{-- Tanggal Pelaksanaan Kegiatan --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan Terlaksana</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan
                             ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
                             \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}"
-                            class="border p-2 w-full"
-                            readonly>
-                        @error('tanggalpelaksanaan_kegiatan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                                    class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
+                                @error('tanggalpelaksanaan_kegiatan')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
 
-                    {{-- Lama Kegiatan Terlaksana  --}}
-                    @php
-                    $lamaHari = '-';
-                    if($laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan)
-                    {
-                    $start = \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan);
-                    $end = \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan);
-                    $lamaHari = $start->diffInDays($end) + 1;
-                    }
-                    @endphp
+                        {{-- Lama Kegiatan Terlaksana  --}}
+                        @php
+                        $lamaHari = '-';
+                        if($laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan)
+                        {
+                        $start = \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan);
+                        $end = \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan);
+                        $lamaHari = $start->diffInDays($end) + 1;
+                        }
+                        @endphp
 
-                    <div class="mb-4">
-                        <label class="block font-medium">Lama Kegiatan Terlaksana</label>
-                        <input type="text"
-                            value="{{ $lamaHari != '-' ? $lamaHari.' hari' : '-' }}"
-                            class="border p-2 w-full bg-gray-100"
-                            readonly>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lama Kegiatan Terlaksana</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $lamaHari != '-' ? $lamaHari.' hari' : '-' }}"
+                                    class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {{-- ============================================================= --}}
                 {{-- ======== BAGIAN 2: LENGKAPI BALASAN LAPORAN KEGIATAN ======== --}}
                 {{-- ============================================================= --}}
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Lengkapi Balasan Laporan Kegiatan</h2>
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Lengkapi Balasan Laporan Kegiatan</h2>
+
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-gray-200"></div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     {{-- Nomor Sertifikat Kegiatan  --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Nomor Sertifikat Kegiatan</label>
-                        <input type="text" name="nomorsertifikat_kegiatan" value="{{ $sertifikats->nomorsertifikat_kegiatan ?? '-' }}" class="border p-2 w-full" readonly>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Sertifikat Kegiatan</label>
+                        <input type="text" name="nomorsertifikat_kegiatan" value="{{ $sertifikats->nomorsertifikat_kegiatan ?? '-' }}" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" readonly>
                         <input type="hidden" name="sertifikat_id" value="{{ $sertifikats->id ?? '' }}">
                     </div>
 
                     {{-- Capaian JP Kegiatan  --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Capaian JP Kegiatan</label>
+                    <div>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Capaian JP Kegiatan</label>
                         <input type="text" name="totalcapaianjp_kegiatan" value="{{ old('totalcapaianjp_kegiatan') }}"
-                            class="border p-2 w-full">
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                         @error('totalcapaianjp_kegiatan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     {{-- Tanggal Keluar Sertifikat  --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Tanggal Sertifikat Kegiatan Dikeluarkan</label>
+                    <div>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Sertifikat Kegiatan Dikeluarkan</label>
                         <input type="date" name="tanggalkeluarsertifikat_kegiatan" value="{{ old('tanggalkeluarsertifikat_kegiatan') }}"
-                            class="border p-2 w-full" required>
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                         @error('tanggalkeluarsertifikat_kegiatan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -113,8 +159,8 @@
                     {{-- =============================================================-==== --}}
                     {{-- ======== BAGIAN 3: CANVAS DRAG AND DROP ELEMEN SERTIFIKAT ======== --}}
                     {{-- ================================================================== --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Canvas Desain Sertifikat Kegiatan OPD</label>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Canvas Desain Sertifikat Kegiatan OPD</label>
 
                         {{-- Ukuran Canvas Desain Srertifikat  --}}
                         <div id="designArea" class="relative border rounded bg-gray-100 mx-auto"></div>
@@ -138,19 +184,20 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                </div>
 
-                    {{-- =========================================== --}}
-                    {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
-                    {{-- =========================================== --}}
-                    <div class="mt-6 flex justify-end gap-3">
-                        <button type="submit"
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                            Kirim Balasan
-                        </button>
-                    </div>
+                {{-- =========================================== --}}
+                {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
+                {{-- =========================================== --}}
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="submit"
+                        class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
+                        Kirim Balasan
+                    </button>
                 </div>
             </form>
-        </div>
+        </main>
     </div>
 
     <script>

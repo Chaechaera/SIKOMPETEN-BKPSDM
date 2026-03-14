@@ -6,6 +6,7 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Http\Controllers\User\SertifikatsController;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Sertifikats;
+use App\Izin\Models\Izin_Usulankegiatans;
 use App\Izin\Models\Izin_Verifikasilaporankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,38 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewLaporanKegiatansController extends Controller
 {
+    /**
+     * Tampilkan Daftar Usulan Kegiatan yang Perlu Direview
+     */
+    public function pendingList(Request $request)
+    {
+        // Eager load relasi dari model
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
+            'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans'
+        ])->whereHas('inputlaporankegiatans.laporankegiatans');
+
+        // Urutkan usulankegiatan yang perlu direview berdasarkan statusnya
+        if ($request->filled('statuslaporan_kegiatan')) {
+            if (in_array($request->statuslaporan_kegiatan, ['accepted', 'rejected'])) {
+                $usulankegiatans->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
+                    $q->where('status_verifikasilaporankegiatan', $request->statuslaporan_kegiatan);
+                });
+            } else {
+                $usulankegiatans->where('statuslaporan_kegiatan', $request->statuslaporan_kegiatan);
+            }
+        }
+
+        // paginate TERAKHIR
+    $usulankegiatans = $usulankegiatans->paginate(20);
+
+        // Redirect ke halaman daftar usulan kegiatan yang perlu direview
+        return view('pages.laporankegiatan.pending_list_laporan_kegiatan', compact('usulankegiatans'));
+    }
+
     /**
      * Tampilkan Form Review Laporan Hasil Kegiatan
      */

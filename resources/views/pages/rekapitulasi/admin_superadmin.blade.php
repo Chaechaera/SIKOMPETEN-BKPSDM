@@ -3,7 +3,11 @@
     <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
         {{-- Sidebar --}}
+        @if(auth()->user()->role === 'superadmin')
+        @include('pages.sidebar.superadmin')
+        @else
         @include('pages.sidebar.admin')
+        @endif
 
         {{-- Main Content --}}
         <main
@@ -62,7 +66,6 @@
                                     <tr class="border-b text-gray-700 bg-[#FAFAFB]">
                                         <th class="py-3 px-4 text-left font-semibold">NO</th>
                                         <th class="py-3 px-4 text-left font-semibold">Unit Kerja / Sub Unit</th>
-                                        <th class="py-3 px-4 text-left font-semibold">Jumlah Pegawai</th>
                                         <th class="py-3 px-4 text-left font-semibold">Jumlah Kegiatan Bangkom</th>
                                         <th class="py-3 px-4 text-left font-semibold">0 - 10 JP</th>
                                         <th class="py-3 px-4 text-left font-semibold">11 - 19 JP</th>
@@ -72,31 +75,39 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php
-                                        $data = [
-                                            [1,'BKPSDM Surakarta',69,12,0,0,69,69,'100%'],
-                                            [2,'DINKES Surakarta',56,8,1,0,55,55,'90%'],
-                                            [3,'DISDIK Surakarta',40,6,2,3,35,40,'87%'],
-                                            [4,'DISKOMINFO Surakarta',30,5,3,2,25,30,'83%'],
-                                            [5,'SETDA Surakarta',50,9,4,1,45,50,'90%'],
-                                            [6,'SATPOL PP Surakarta',28,4,5,0,23,28,'82%'],
-                                        ];
-                                    @endphp
-
-                                    @foreach ($data as $row)
-                                    <tr class="border-b hover:bg-gray-50 table-row">
-                                        <td class="p-4 border-r">{{ $row[0] }}</td>
-                                        <td class="p-4 border-r unit-kerja font-semibold">{{ $row[1] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[2] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[3] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[4] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[5] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[6] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[7] }}</td>
-                                        <td class="p-4 text-center">{{ $row[8] }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
+@forelse ($rekap as $index => $row)
+<tr class="border-b hover:bg-gray-50 table-row">
+    <td class="p-4 border-r">{{ $index + 1 }}</td>
+    <td class="p-4 border-r unit-kerja font-semibold">
+        {{ $row['nama'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jumlah_kegiatan'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp0_10'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp11_19'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp20'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['total'] }}
+    </td>
+    <td class="p-4 text-center">
+        {{ $row['persen_20'] }}
+    </td>
+</tr>
+@empty
+<tr>
+    <td colspan="8" class="text-center py-6 text-gray-500">
+        Tidak ada data
+    </td>
+</tr>
+@endforelse
+</tbody>
                             </table>
                         </div>
                     </div>

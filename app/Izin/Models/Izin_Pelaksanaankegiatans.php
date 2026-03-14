@@ -26,9 +26,4 @@ class Izin_Pelaksanaankegiatans extends Model
     {
         return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
     }
-
-    public function inputlaporankegiatans()
-    {
-        return $this->hasOne(Izin_Inputlaporankegiatans::class, 'pelaksanaankegiatan_id');
-    }
 }

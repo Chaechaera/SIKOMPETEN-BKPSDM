@@ -19,6 +19,34 @@ use Barryvdh\DomPDF\Facade\PDF;
 class LaporanKegiatansController extends Controller
 {
     /**
+     * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
+     */
+    public function index()
+    {
+        $user = Auth::user();
+
+        // Eager load relasi dari model
+        $usulankegiatans = Izin_Usulankegiatans::with([
+        'inputusulankegiatans',
+        'inputusulankegiatans.pelaksanaankegiatans',
+        'inputlaporankegiatans.laporankegiatans',
+        ])->whereHas('inputusulankegiatans.pelaksanaankegiatans')->orderByDesc('created_at');
+
+        if ($user->role == 'admin') {
+            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        }
+
+        if ($user->role == 'user') {
+            $usulankegiatans->where('dibuat_oleh', $user->id);
+        }
+
+        $usulankegiatans = $usulankegiatans->paginate(20);
+
+        // Redirect ke halaman daftar pengajuan usulan kegiatan
+        return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
+    }
+
+    /**
      * Tampilkan Form Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
      */
     public function create($id)
@@ -29,8 +57,13 @@ class LaporanKegiatansController extends Controller
         // Eager load relasi dari model dan temukan usulankegiatan dari id
         $usulankegiatans = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
-            'detailusulankegiatans'
+            'detailusulankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans',
         ])->findOrFail($id);
+
+        // Ambil laporan kegiatan
+        $laporankegiatans = $usulankegiatans->inputlaporankegiatans?->laporankegiatans;
 
         // Redirect ke halaman ajukan laporan kegiatan
         return view('pages.laporankegiatan.ajukan_laporan_kegiatan', [
@@ -38,6 +71,7 @@ class LaporanKegiatansController extends Controller
             'subunitkerjas' => $user->subunitkerjas->sub_unitkerja ?? null,
             'dibuat_oleh' => $user->nama,
             'usulankegiatans' => $usulankegiatans,
+            'laporankegiatans' => $laporankegiatans,
             'carapelatihans' => Izin_RefCarapelatihans::select('id', 'cara_pelatihan')->get(),
             'metodepelatihans' => Izin_RefMetodepelatihans::select('id', 'metode_pelatihan')->get(),
         ]);
@@ -137,7 +171,6 @@ class LaporanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            'statuslaporan_kegiatan' => $request->statuslaporan_kegiatan,
         ]);
 
         // Lanjutkan proses store ke controller detaillaporankegiatan

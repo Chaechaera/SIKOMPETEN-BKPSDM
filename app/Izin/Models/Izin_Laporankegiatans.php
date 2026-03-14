@@ -106,14 +106,14 @@ class Izin_Laporankegiatans extends Model
     public function getStatusLaporanUiClassAttribute()
     {
         return match ($this->status_laporan_ui) {
-            'completed' => 'text-purple-600',
-            'pending'     => 'text-yellow-600',
-            'need_review' => 'text-blue-600',
-            'revisi'      => 'text-red-600',
-            'rejected' => 'text-red-600',
-            'accepted' => 'text-green-600',
-            'finish' => 'text-emerald-700',
-            default       => 'text-gray-400',
+            'completed' => 'px-3 py-1 text-xs rounded-full bg-purple-100 text-gray-500 font-medium',
+            'pending'     => 'px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 font-medium',
+            'need_review' => 'px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-600 font-medium',
+            'revisi'      => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
+            'rejected' => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
+            'accepted' => 'px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-medium',
+            'finish' => 'px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-600 font-medium',
+            default       => 'px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-400 font-medium',
         };
     }
 

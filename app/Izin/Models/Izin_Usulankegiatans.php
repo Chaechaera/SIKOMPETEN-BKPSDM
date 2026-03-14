@@ -125,13 +125,14 @@ class Izin_Usulankegiatans extends Model
     public function getStatusUiClassAttribute()
     {
         return match ($this->status_ui) {
-            'draft' => 'text-gray-500',
-            'pending' => 'text-yellow-600',
-            'need_review' => 'text-orange-600',
-            'rejected' => 'text-red-600',
-            'accepted' => 'text-green-600',
-            'in_progress' => 'text-blue-600',
-            default => 'text-gray-400',
+            'draft' => 'px-3 py-1 text-xs rounded-full bg-purple-100 text-gray-500 font-medium',
+            'pending' => 'px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 font-medium',
+            'need_review' => 'px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-600 font-medium',
+            'revisi'      => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
+            'rejected' => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
+            'accepted' => 'px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-medium',
+            'in_progress' => 'px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-600 font-medium',
+            default => 'px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-400 font-medium',
         };
     }
 
@@ -182,10 +183,16 @@ class Izin_Usulankegiatans extends Model
         return $this->status_ui === 'accepted' && $this->sudah_cetak && !$this->sudah_kirim;
     }
 
-    public function isLaporan(): bool
+    /*public function isLaporan(): bool
     {
-        return $this->inputlaporankegiatans && $this->inputlaporankegiatans->laporankegiatans;
-    }
+        return $this->inputlaporankegiatans() && $this->inputlaporankegiatans->laporankegiatans;
+    }*/
+
+    public function isLaporan(): bool
+{
+    return $this->inputlaporankegiatans
+        && $this->inputlaporankegiatans->laporankegiatans;
+}
 
     public function isPendingUsulan(): bool
     {

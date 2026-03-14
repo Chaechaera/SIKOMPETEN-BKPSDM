@@ -1,103 +1,135 @@
 <x-app-layout>
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-    <div class="max-w-5xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-6">
-            Form Kirim Balasan Pengajuan Usulan Kegiatan Pengembangan Kompetensi ASN
-        </h1>
+        {{-- Sidebar --}}
+        @include('pages.sidebar.superadmin')
 
-        <div class="bg-white shadow-md rounded-lg p-6">
+        {{-- Main Content --}}
+        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+
+            {{-- Header --}}
+            @include('layouts.navigation')
+
+            {{-- 📝 FORM KIRIM BALASAN USULAN KEGIATAN --}}
             <form method="POST" action="{{ route('superadmin.balasanusulankegiatan.kirim', $usulankegiatan->id) }}" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="usulankegiatan_id" value="{{ $usulankegiatan->id }}">
                 <input type="hidden" name="next_route" value="superadmin.balasanusulankegiatan.kirim">
 
+                <div class="bg-white rounded-xl shadow p-6 mb-4">
+                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR KIRIM BALASAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                    <p class="text-sm text-gray-500 max-w-4xl">
+                        Silahkan lengkapi data kirim balasan usulan kegiatan pada form ini dan pastikan data yang diisikan telah sesuai sebelum dikirim.
+                    </p>
+                </div>
+
                 {{-- ================================================== --}}
                 {{-- ======== BAGIAN 1: UPLOAD IDENTITAS SURAT ======== --}}
                 {{-- ================================================== --}}
-                <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Upload Identitas Surat Usulan Kegiatan</h2>
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
-                    {{-- Nomor Surat --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Nomor Surat</label>
-                        <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                            class="border rounded w-full p-2" placeholder="Masukkan nomor surat">
-                        @error('nomor_surat')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        {{-- Nomor Surat --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Surat</label>
+                            <div class="required">
+                                <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="12/X/BKPSDM/001" required>
+                                @error('nomor_surat')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Tanggal Surat --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
+                            <div class="relative">
+                                <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                @error('tanggal_surat')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Lampiran Surat --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lampiran Surat</label>
+                            <div class="relative">
+                                <input type="text" name="lampiran_surat" value="1 Bendel"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
+                                @error('lampiran_surat')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Sifat Surat --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sifat Surat</label>
+                            <div class="relative">
+                                <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                    <option value="" disabled selected>-- Pilih sifat surat --</option>
+                                    <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
+                                    <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
+                                </select>
+                                @error('sifat_surat')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- Perihal Surat --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perihal Surat</label>
+                            <div class="relative">
+                                <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
+                                @error('perihal_surat')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        {{-- ===================================================== --}}
+                        {{-- === BAGIAN 2: UPLOAD FILE BALASAN USULAN KEGIATAN === --}}
+                        {{-- ===================================================== --}}
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                                Upload File Balasan Usulan Kegiatan Final
+                                <span class="text-gray-400 text-sm">(PDF/DOC/DOCX)</span>
+                            </label>
+                            <p class="text-xs text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
+                            <p class="text-xs text-gray-500">Contoh nama file: file_balasan_usulan_kegiatan.pdf</p>
+                            <div class="relative mb-3 mt-2">
+                                <input type="file" name="filekirim_balasanusulankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" required>
+                                @error('filekirim_balasanusulankegiatan')
+                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- Tanggal Surat --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Tanggal Surat</label>
-                        <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                            class="border rounded w-full p-2">
-                        @error('tanggal_surat')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                    {{-- =========================================== --}}
+                    {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
+                    {{-- =========================================== --}}
+                    <div class="mt-6 flex justify-end gap-3">
+                        <a href="{{ route('superadmin.usulankegiatan.pending') }}"
+                            class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
+                            Batal Kirim
+                        </a>
+                        <button type="submit"
+                            class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
+                            Kirim Balasan
+                        </button>
                     </div>
-
-                    {{-- Perihal Surat --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Perihal Surat</label>
-                        <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                            class="border rounded w-full p-2" placeholder="Masukkan perihal">
-                        @error('perihal_surat')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Lampiran Surat --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Lampiran Surat</label>
-                        <input type="text" name="lampiran_surat" value="1 Bendel"
-                            class="border rounded w-full p-2 bg-gray-100" readonly>
-                        @error('lampiran_surat')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Sifat Surat --}}
-                    <div class="mb-4">
-                        <label class="block font-medium">Sifat Surat</label>
-                        <select name="sifat_surat" class="border rounded w-full p-2">
-                            <option value="" disabled selected>-- Pilih sifat surat --</option>
-                            <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                            <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                        </select>
-                        @error('sifat_surat')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                {{-- ===================================================== --}}
-                {{-- === BAGIAN 2: UPLOAD FILE BALASAN USULAN KEGIATAN === --}}
-                {{-- ===================================================== --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Unggah File Balasan Usulan Kegiatan Final</label>
-                        <p class="text-sm text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
-                        <p class="text-sm text-gray-500">Contoh nama file: file_balasan_usulan_kegiatan.pdf</p>
-                        <input type="file" name="filekirim_balasanusulankegiatan" accept=".pdf,.doc,.docx" class="border p-2 w-full">
-                        @error('filekirim_balasanusulankegiatan')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                {{-- =========================================== --}}
-                {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
-                {{-- =========================================== --}}
-                <div class="mt-6 flex justify-end gap-3">
-                    <button href="{{ route('superadmin.usulankegiatan.pending') }}"
-                        class="bg-gray-500 hover:bg-gray-600 transition text-white font-semibold px-4 py-2 rounded">
-                        Batal Kirim
-                    </button>
-                    <button type="submit"
-                        class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
-                        Kirim Balasan
-                    </button>
                 </div>
             </form>
-        </div>
+        </main>
     </div>
 </x-app-layout>

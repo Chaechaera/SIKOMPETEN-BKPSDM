@@ -12,6 +12,7 @@ use App\Izin\Http\Controllers\Auth\RegisteredUserController;
 use App\Izin\Http\Controllers\Auth\VerifyEmailController;
 use App\Izin\Http\Controllers\Auth\SuperadminController;
 use App\Izin\Http\Controllers\Auth\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -92,6 +93,31 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
     Route::put('password', [PasswordController::class, 'update'])
         ->name('password.update');
+
+    // Switch Panel (Admin <-> Superadmin)
+    Route::post('/switch-panel/{role}', function ($role) {
+        if (!in_array($role, ['admin', 'superadmin'])) {
+            abort(403);
+        }
+
+        // hanya superadmin boleh switch
+        if (Auth::user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        session(['active_role' => $role]);
+
+        // ✅ redirect sesuai panel
+        if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($role === 'superadmin') {
+            return redirect()->route('superadmin.dashboard');
+        }
+
+        abort(403);
+    })->middleware('auth')->name('switch.panel');
 
     // Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

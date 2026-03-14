@@ -1,275 +1,210 @@
 <x-app-layout>
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-    <div class="max-w-5xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-6">
-            Form Lengkapi Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
-        </h1>
+        {{-- Sidebar --}}
+        @include('pages.sidebar.admin')
 
-        <div class="bg-white shadow-md rounded-lg p-6">
+        {{-- Main Content --}}
+        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+
+            {{-- Header --}}
+            @include('layouts.navigation')
+
+            {{-- 📝 FORM LAPORAN KEGIATAN --}}
             <form method="POST" action="{{ route('admin.laporankegiatan.update', $usulankegiatans->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="laporankegiatan_id" value="{{ $laporankegiatans->id }}">
 
+                <div class="bg-white rounded-xl shadow p-6 mb-4">
+                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                    <p class="text-sm text-gray-500 max-w-6xl">
+                        Silahkan lengkapi data untuk laporan hasil kegiatan Pengembangan Kompetensi ASN yang telah terselenggarakan pada form ini dan pastikan datatelah sesuai sebelum dicetak.
+                    </p>
+                </div>
+
+                {{-- Step Progress --}}
+                <x-step-progress :usulan="$usulankegiatans" :is-laporan="true" />
+
                 {{-- =========================================================== --}}
                 {{-- === BAGIAN 1: PREVIEW DATA UTAMA LAPORAN HASIL KEGIATAN === --}}
                 {{-- =========================================================== --}}
-                <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Detail Data Utama Laporan Hasil Kegiatan Pengembangan Kompetensi ASN</h2>
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Preview Data Utama Laporan Hasil Kegiatan</h2>
+
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-gray-200"></div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         {{-- Unit Kerja --}}
                         <div class="md:col-span-2">
-                            <label class="block font-medium">Unit Kerja yang Menyelenggarakan</label>
-                            <input type="text"
-                                value="{{ $unitkerjas ?? '' }}"
-                                class="border p-2 w-full bg-gray-100"
-                                readonly>
-                            <input type="hidden" name="unitkerja_id" value="{{ $unitkerja_id ?? '' }}">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unit Kerja yang Menyelenggarakan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $unitkerjas ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    readonly>
+                                <input type="hidden" name="unitkerja_id" value="{{ $unitkerja_id ?? '' }}">
+                            </div>
                         </div>
 
                         {{-- Sub Unit Kerja --}}
                         <div class="md:col-span-2">
-                            <label class="block font-medium">Sub Unit Kerja yang Menyelenggarakan</label>
-                            <input type="text"
-                                value="{{ $subunitkerjas ?? '' }}"
-                                class="border p-2 w-full bg-gray-100"
-                                readonly>
-                            <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sub Unit Kerja yang Menyelenggarakan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $subunitkerjas ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    readonly>
+                                <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
+                            </div>
                         </div>
 
                         {{-- Nama Kegiatan --}}
                         <div class="md:col-span-2">
-                            <label class="block font-medium">Nama Kegiatan yang Diselenggarakan</label>
-                            <input type="text"
-                                value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}"
-                                class="border p-2 w-full bg-gray-100"
-                                readonly>
-                            <input type="hidden" name="nama_kegiatan" value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nama Kegiatan yang Diselenggarakan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    readonly>
+                                <input type="hidden" name="nama_kegiatan" value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}">
+                            </div>
+                        </div>
+
+                        {{-- Cara Pelatihan --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan yang Digunakan</label>
+                            <div class="relative">
+                                <select name="carapelatihan_id" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" disabled>
+                                    <option value="">-- Pilih Cara Pelatihan --</option>
+                                    @foreach($carapelatihans as $c)
+                                    <option value="{{ $c->id }}" {{ old('carapelatihan_id', $usulankegiatans?->carapelatihan_id) == $c->id ? 'selected' : '' }}>{{ $c->cara_pelatihan }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Diajukan Oleh --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perwakilan yang Mengajukan</label>
+                            <div class="relative">
+                                <input type="text"
+                                    value="{{ auth()->user()->nama }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    readonly>
+                                <input type="hidden" name="dibuat_oleh" value="{{ auth()->id() }}">
+                            </div>
                         </div>
 
                         {{-- Lokasi Kegiatan --}}
                         <div class="md:col-span-2">
-                            <label class="block font-medium">Lokasi Kegiatan Diselenggarakan</label>
-                            <input type="text" name="lokasi_kegiatan"
-                                value="{{ old('lokasi_kegiatan', $usulankegiatans?->lokasi_kegiatan) }}"
-                                class="border p-2 w-full" required>
-                        </div>
-
-                        {{-- Cara Pelatihan --}}
-                        <div class="md:col-span-2">
-                            <label class="block font-medium">Cara Pelatihan yang Digunakan</label>
-                            <select name="carapelatihan_id" class="border p-2 w-full" disabled>
-                                <option value="">-- Pilih Cara Pelatihan --</option>
-                                @foreach($carapelatihans as $c)
-                                <option value="{{ $c->id }}" {{ old('carapelatihan_id', $usulankegiatans?->carapelatihan_id) == $c->id ? 'selected' : '' }}>{{ $c->cara_pelatihan }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lokasi Kegiatan Diselenggarakan</label>
+                            <div class="relative">
+                                <input type="text" name="lokasi_kegiatan"
+                                    value="{{ old('lokasi_kegiatan', $laporankegiatans?->lokasi_kegiatan) }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                            </div>
                         </div>
 
                         {{-- Tanggal Mulai --}}
                         <div>
-                            <label class="block font-medium">Tanggal Kegiatan Mulai Diselenggarakan</label>
-                            <input type="date" name="tanggalmulai_kegiatan" value="{{ old('tanggalmulai_kegiatan', $usulankegiatans?->tanggalmulai_kegiatan) }}"
-                                class="border p-2 w-full" required>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan Mulai Diselenggarakan</label>
+                            <div class="relative">
+                                <input type="date" name="tanggalmulai_kegiatan" value="{{ old('tanggalmulai_kegiatan', $laporankegiatans?->tanggalmulai_kegiatan) }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                            </div>
                         </div>
 
                         {{-- Tanggal Selesai --}}
                         <div>
-                            <label class="block font-medium">Tanggal Kegiatan Selesai Diselenggarakan</label>
-                            <input type="date" name="tanggalselesai_kegiatan" value="{{ old('tanggalselesai_kegiatan', $usulankegiatans?->tanggalselesai_kegiatan) }}"
-                                class="border p-2 w-full" required>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan Selesai Diselenggarakan</label>
+                            <div class="relative">
+                                <input type="date" name="tanggalselesai_kegiatan" value="{{ old('tanggalselesai_kegiatan', $laporankegiatans?->tanggalselesai_kegiatan) }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                            </div>
                         </div>
 
                         {{-- Waktu Mulai --}}
                         <div>
-                            <label class="block font-medium">Waktu Kegiatan Dimulai</label>
-                            <input type="time" name="waktumulai_kegiatan" value="{{ old('waktumulai_kegiatan', $usulankegiatans?->waktumulai_kegiatan) }}"
-                                class="border p-2 w-full" required>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Waktu Kegiatan Dimulai</label>
+                            <div class="relative">
+                                <input type="time" name="waktumulai_kegiatan" value="{{ old('waktumulai_kegiatan', $laporankegiatans?->waktumulai_kegiatan) }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                            </div>
                         </div>
 
                         {{-- Waktu Selesai --}}
                         <div>
-                            <label class="block font-medium">Waktu Kegiatan Berakhir</label>
-                            <input type="time" name="waktuselesai_kegiatan" value="{{ old('waktuselesai_kegiatan', $usulankegiatans?->waktuselesai_kegiatan) }}"
-                                class="border p-2 w-full" required>
-                        </div>
-
-                        {{-- Diajukan Oleh --}}
-                        <div class="md:col-span-2">
-                            <label class="block font-medium">Perwakilan yang Mengajukan</label>
-                            <input type="text"
-                                value="{{ auth()->user()->nama }}"
-                                class="border p-2 w-full bg-gray-100"
-                                readonly>
-                            <input type="hidden" name="dibuat_oleh" value="{{ auth()->id() }}">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Waktu Kegiatan Berakhir</label>
+                            <div class="relative">
+                                <input type="time" name="waktuselesai_kegiatan" value="{{ old('waktuselesai_kegiatan', $laporankegiatans?->waktuselesai_kegiatan) }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- ============================================================== --}}
-                {{-- === BAGIAN 2: PREVIEW DATA TAMBAHAN LAPORAN HASIL KEGIATAN === --}}
-                {{-- ============================================================== --}}
-                <div class="bg-white shadow-md rounded-lg p-6 mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Detail Data Tambahan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN</h2>
+                {{-- =============================================================================== --}}
+                {{-- === BAGIAN 2: DATA KHUSUS LAPORAN HASIL KEGIATAN BERDASARKAN CARA PELATIHAN === --}}
+                {{-- =============================================================================== --}}
+                @php
+                $carapelatihanId = $usulankegiatans->carapelatihans->id ?? null;
+                $config = config('atribut_khusus');
+                $atributKhusus = $carapelatihanId && isset($config[$carapelatihanId]['fields']) ? $config[$carapelatihanId]['fields'] : [];
+                @endphp
 
-                    {{-- Data Detail --}}
-                    @php
-                    $fields = [
-                    'latarbelakang_kegiatan' => [
-                    'label' => 'Latar Belakang Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
-                    'numbering' => false
-                    ],
-                    'dasarhukum_kegiatan' => [
-                    'label' => 'Dasar Hukum Kegiatan',
-                    'placeholder' => '1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => true
-                    ],
-                    'uraian_kegiatan' => [
-                    'label' => 'Uraian Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => false
-                    ],
-                    'maksud_kegiatan' => [
-                    'label' => 'Maksud Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
-                    'numbering' => false
-                    ],
-                    'tujuan_kegiatan' => [
-                    'label' => 'Tujuan Kegiatan',
-                    'placeholder' => '1. Mensejahterakan masyarakat&#10;2. Mendukung visi misi pemerintah&#10;3. dst',
-                    'numbering' => true
-                    ],
-                    'hasillangsung_kegiatan' => [
-                    'label' => 'Hasil Jangka Langsung dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => false
-                    ],
-                    'hasilmenengah_kegiatan' => [
-                    'label' => 'Hasil Jangka Menengah dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => false
-                    ],
-                    'hasilpanjang_kegiatan' => [
-                    'label' => 'Hasil Jangka Panjang dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => false
-                    ],
-                    'narasumber_kegiatan' => [
-                    'label' => 'Narasumber Kegiatan',
-                    'placeholder' => '1. Budi Mulyono - Kepala Staff Ahli IT&#10;2. Anisa Widyanti - Kepala Bidang&#10;3. dst',
-                    'numbering' => true
-                    ],
-                    'sasaranpeserta_kegiatan' => [
-                    'label' => 'Sasaran Peserta Kegiatan',
-                    'placeholder' => '1. PNS di Lingkungan BKPSDM&#10;2. Masyarakat Umum&#10;3. dst',
-                    'numbering' => true
-                    ],
-                    'detailhasil_kegiatan' => [
-                    'label' => 'Detail yang Dihasilkan dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
-                    'numbering' => false
-                    ],
-                    'penyelenggara_kegiatan' => [
-                    'label' => 'Penyelenggara Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
-                    'numbering' => false
-                    ],
-                    ];
-                    @endphp
+                @if($atributKhusus)
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Lengkapi Data Khusus Laporan Hasil Kegiatan</h2>
 
-                    @foreach($fields as $name => $field)
-                    <div class="mt-4">
-                        <div class="flex justify-between items-center">
-                            <label class="font-semibold text-gray-800">
-                                {{ $field['label'] }}
-                            </label>
-                        </div>
-                        @if($field['placeholder'])
-                        <pre id="sample-{{ $name }}"
-                            class="hidden bg-gray-50 border p-3 rounded mt-2 text-sm whitespace-pre-wrap">
-                        {{ $field['placeholder'] }}
-                        </pre>
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-gray-200"></div>
+
+                    @foreach($atributKhusus as $key => $field)
+                    <div class="mt-3">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">{{ $field['label'] }}</label>
+                        <div class="relative">
+                        @if($field['type'] === 'textarea')
+                        <textarea name="{{ $key }}" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="{{ $field['label'] }}">{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}</textarea>
+                        @else
+                        <input type="{{ $field['type'] }}" name="{{ $key }}" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/..." value="{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}">
                         @endif
-                        <textarea
-                            name="{{ $name }}"
-                            placeholder="{!! $field['placeholder'] !!}"
-                            data-numbering="{{ $field['numbering'] ? 'true' : 'false' }}"
-                            class="overflow-hidden smart-textarea mt-2 w-full border border-gray-300 rounded p-3 resize-none focus:ring focus:ring-blue-200" readonly>{{ old($name, $usulankegiatans->detailusulankegiatans?->$name ?? '') }}</textarea>
-                        <input type="hidden" name="{{ $name }}" value="{{ $usulankegiatans->detailusulankegiatans?->$name ?? '' }}">
-                        @error($name)
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                        </div>
                     </div>
                     @endforeach
-
-                    {{-- Metode Pelatihan --}}
-                    <div class="mt-4">
-                        <label class="block font-medium">Metode Pelatihan</label>
-                        <select class="border p-2 w-full bg-gray-100" disabled>
-                            <option value="">-- Pilih Metode Pelatihan --</option>
-                            @foreach($metodepelatihans as $m)
-                            <option value="{{ $m->id }}" {{ old('metodepelatihan_id', $usulankegiatans->detailusulankegiatans?->metodepelatihan_id) == $m->id ? 'selected' : '' }}>{{ $m->metode_pelatihan }}</option>
-                            @endforeach
-                        </select>
-                        <input type="hidden" name="metodepelatihan_id" value="{{ $usulankegiatans->detailusulankegiatans?->metodepelatihan_id }}">
-                    </div>
-
-                    {{-- =============================================================================== --}}
-                    {{-- === BAGIAN 3: DATA KHUSUS LAPORAN HASIL KEGIATAN BERDASARKAN CARA PELATIHAN === --}}
-                    {{-- =============================================================================== --}}
-                    @php
-                    $carapelatihanId = $usulankegiatans->carapelatihans->id ?? null;
-                    $config = config('atribut_khusus');
-                    $atributKhusus = $carapelatihanId && isset($config[$carapelatihanId]['fields']) ? $config[$carapelatihanId]['fields'] : [];
-                    @endphp
-
-                    @if($atributKhusus)
-                    <div class="mt-6 border-t pt-4">
-                        <h3 class="font-semibold text-lg mb-2">
-                            Atribut Khusus untuk {{ $usulankegiatans->carapelatihans->cara_pelatihan }}
-                        </h3>
-
-                        @foreach($atributKhusus as $key => $field)
-                        <div class="mt-3">
-                            <label class="block font-medium">{{ $field['label'] }}</label>
-                            @if($field['type'] === 'textarea')
-                            <textarea name="{{ $key }}" class="border p-2 w-full" placeholder="{{ $field['label'] }}">{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}</textarea>
-                            @else
-                            <input type="{{ $field['type'] }}" name="{{ $key }}" class="border p-2 w-full" placeholder="https://docs.google.com/..." value="{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}">
-                            @endif
-                        </div>
-                        @endforeach
-                    </div>
-                    @endif
-
                 </div>
+                @endif
 
                 {{-- ============================================================= --}}
-                {{-- === BAGIAN 4: LENGKAPI DATA DETAIL LAPORAN HASIL KEGIATAN === --}}
+                {{-- === BAGIAN 3: LENGKAPI DATA DETAIL LAPORAN HASIL KEGIATAN === --}}
                 {{-- ============================================================= --}}
-                <div class="bg-white shadow-md rounded-lg p-6">
-                    <h2 class="text-xl font-semibold mb-4">Lengkapi Data Detail Laporan Hasil Kegiatan Pengembangan Kompetensi ASN</h2>
+                <div class="bg-white shadow-lg rounded-lg p-6">
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Lengkapi Data Tambahan Laporan Hasil Kegiatan</h2>
+
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-gray-200"></div>
 
                     {{-- Kop Surat --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Pilih Jenis Kop yang Digunakan</label>
-                        <label class="flex items-center gap-2">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Pilih Jenis Kop yang Digunakan</label>
+                        <div class="relative">
+                        <label class="cursor-pointer items-center gap-6 block text-sm font-semibold text-[#5A5A5A] mb-2">
                             <input type="radio"
                                 name="jeniskop_laporankegiatan"
                                 value="kop_text"
                                 {{ old('jeniskop_laporankegiatan', $laporankegiatans->detaillaporankegiatans?->jeniskop_laporankegiatan) == 'kop_text' ? 'checked' : '' }}>
                             Kop Text
                         </label>
-                        <label class="flex items-center gap-2">
+                        <label class="cursor-pointer items-center gap-6 block text-sm font-semibold text-[#5A5A5A] mb-2">
                             <input type="radio"
                                 name="jeniskop_laporankegiatan"
                                 value="kop_gambar"
                                 {{ old('jeniskop_laporankegiatan', $laporankegiatans->detaillaporankegiatans?->jeniskop_laporankegiatan) == 'kop_gambar' ? 'checked' : '' }}>
                             Kop Gambar
                         </label>
+                    </div>
                     </div>
 
                     {{-- Data Detail --}}
@@ -291,13 +226,13 @@
                     @foreach($fields as $name => $field)
                     <div class="mt-4">
                         <div class="flex justify-between items-center">
-                            <label class="font-semibold text-gray-800">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 {{ $field['label'] }}
                             </label>
                         </div>
                         @if($field['placeholder'])
                         <pre id="sample-{{ $name }}"
-                            class="hidden bg-gray-50 border p-3 rounded mt-2 text-sm whitespace-pre-wrap">
+                            class="hidden bg-gray-50 border-gray-300 rounded-lg px-3 py-2 mt-2 w-full text-sm whitespace-pre-wrap">
                         {{ $field['placeholder'] }}
                         </pre>
                         @endif
@@ -305,7 +240,7 @@
                             name="{{ $name }}"
                             placeholder="{!! $field['placeholder'] !!}"
                             data-numbering="{{ $field['numbering'] ? 'true' : 'false' }}"
-                            class="overflow-hidden smart-textarea mt-2 w-full border border-gray-300 rounded p-3 resize-none focus:ring focus:ring-blue-200">{{ old($name, $laporankegiatans->detaillaporankegiatans?->$name ?? '') }}</textarea>
+                            class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2 resize-none">{{ old($name, $detail->$name ?? '') }}</textarea>
                         @error($name)
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -314,10 +249,17 @@
 
                     {{-- Rundown Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Rundown Kegiatan (Excel)</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Unggah Rundown Kegiatan
+                            <span class="text-gray-400 text-sm">(Excel)</span>
+                        </label>
                         <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
                         <p class="text-sm text-gray-500">Contoh nama file: rundown_kegiatan.xlsx</p>
-                        <input type="file" name="rundown_laporan" accept=".xls,.xlsx" class="border p-2 w-full">
+                        <div class="relative mb-3 mt-2">
+                            <input type="file" name="rundown_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2">
                         @if(!empty($laporankegiatans->detaillaporankegiatans?->rundown_laporan))
                         <p class="text-sm text-gray-600 mt-2">File Sebelumnya:
                             <a href="{{ asset('storage/'.$laporankegiatans->detaillaporankegiatans?->rundown_laporan) }}" target="_blank" class="text-blue-600">
@@ -328,14 +270,22 @@
                         @error('rundown_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        </div>
                     </div>
 
                     {{-- Peserta Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Peserta Kegiatan (Excel)</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Unggah Peserta Kegiatan
+                            <span class="text-gray-400 text-sm">(Excel)</span>
+                        </label>
                         <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
                         <p class="text-sm text-gray-500">Contoh nama file: peserta_kegiatan.xlsx</p>
-                        <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="border p-2 w-full">
+                        <div class="relative mb-3 mt-2">
+                            <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2">
                         @if(!empty($laporankegiatans->detaillaporankegiatans?->peserta_laporan))
                         <p class="text-sm text-gray-600 mt-2">File Sebelumnya:
                             <a href="{{ asset('storage/'.$laporankegiatans->detaillaporankegiatans?->peserta_laporan) }}" target="_blank" class="text-blue-600">
@@ -346,13 +296,14 @@
                         @error('peserta_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        </div>
                     </div>
 
                     {{-- Link Undangan Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Undangan Kegiatan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unggah Link Undangan Kegiatan</label>
                         <input type="text" name="linkundangan_laporan" value="{{ old('linkundangan_laporan', $laporankegiatans->detaillaporankegiatans?->linkundangan_laporan) }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/...">
                         @error('linkundangan_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -360,9 +311,9 @@
 
                     {{-- Link Materi Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Materi Kegiatan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unggah Link Materi Kegiatan</label>
                         <input type="text" name="linkmateri_laporan" value="{{ old('linkmateri_laporan', $laporankegiatans->detaillaporankegiatans?->linkmateri_laporan) }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/...">
                         @error('linkmateri_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -370,9 +321,9 @@
 
                     {{-- Link Daftar Hadir Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Daftar Hadir Kegiatan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unggah Link Daftar Hadir Kegiatan</label>
                         <input type="text" name="linkdaftarhadir_laporan" value="{{ old('linkdaftarhadir_laporan', $laporankegiatans->detaillaporankegiatans?->linkdaftarhadir_laporan) }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/...">
                         @error('linkdaftarhadir_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -380,9 +331,9 @@
 
                     {{-- Link Dokumentasi Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Link Dokumentasi Kegiatan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unggah Link Dokumentasi Kegiatan</label>
                         <input type="text" name="linkdokumentasi_laporan" value="{{ old('linkdokumentasi_laporan', $laporankegiatans->detaillaporankegiatans?->linkdokumentasi_laporan) }}"
-                            class="border p-2 w-full" placeholder="https://docs.google.com/...">
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/...">
                         @error('linkdokumentasi_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -390,43 +341,59 @@
 
                     {{-- Gambar Dokumentasi Kegiatan --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Unggah Gambar Dokumentasi Kegiatan (JPG, PNG, JPEG)</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Unggah Gambar Dokumentasi Kegiatan
+                            <span class="text-gray-400 text-sm">(JPG, PNG, JPEG)</span>
+                        </label>
                         <p class="text-sm text-gray-500 mt-1">Format: .jpg / .png / .jpeg</p>
                         <p class="text-sm text-gray-500">Contoh nama file: gambar_kegiatan_1.jpg</p>
-                        <input type="file" name="gambardokumentasi_laporan[]" accept=".jpg,.png,.jpeg" class="border p-2 w-full" multiple id="gambardokumentasi_laporanFiles" required>
+                        <div class="relative mb-3 mt-2">
+                            <input type="file" name="gambardokumentasi_laporan[]" accept=".jpg,.png,.jpeg" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2" multiple id="gambardokumentasi_laporanFiles" required>
                         @error('gambardokumentasi_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
                         <ul id="fileList" class="mt-2 list-disc list-inside text-gray-700"></ul>
+                        </div>
                     </div>
 
                     {{-- Template Sertifikat --}}
                     <div class="mt-4">
-                        <label class="block font-medium">Upload File Template Sertifikat (Gambar)</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Unggah File Template Sertifikat Kegiatan
+                            <span class="text-gray-400 text-sm">(JPG, PNG)</span>
+                        </label>
                         <p class="text-sm text-gray-500 mt-1">Format: .jpg / .png</p>
                         <p class="text-sm text-gray-500">Contoh nama file: template_sertifikat.jpg</p>
-                        <input type="file" name="templatesertifikat_kegiatan" accept=".png,.jpg" class="border p-2 w-full">
+                        <div class="relative mb-3 mt-2">
+                            <input type="file" name="templatesertifikat_kegiatan" accept=".png,.jpg" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2">
                         @error('templatesertifikat_kegiatan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
+                        </div>
                     </div>
                 </div>
 
                 {{-- ===================================================== --}}
-                {{-- =============== BAGIAN 3: TOMBOL AKSI =============== --}}
+                {{-- =============== BAGIAN 4: TOMBOL AKSI =============== --}}
                 {{-- ===================================================== --}}
                 <div class="mt-6 flex justify-end gap-3">
-                    <button href="{{ route('admin.usulankegiatan.index') }}"
-                        class="bg-gray-500 hover:bg-gray-600 transition text-white font-semibold px-4 py-2 rounded">
+                    <a href="{{ route('admin.usulankegiatan.index') }}"
+                        class="w-2/12 text-center py-2.5 rounded-lg  bg-gray-300 text-gray-700 font-semibold hover:bg-gray-200 transition">
                         Batal
-                    </button>
-                    <button type="submit" name="statuslaporan_kegiatan" value="completed"
-                        class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
+                    </a>
+                    <button type="submit"
+                        class="w-2/12 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
                         Submit Laporan
                     </button>
                 </div>
             </form>
-        </div>
+        </main>
     </div>
 
     <script>

@@ -6,6 +6,7 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Pelaksanaankegiatans;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PelaksanaanKegiatansController extends Controller
 {
@@ -62,7 +63,7 @@ class PelaksanaanKegiatansController extends Controller
     /**
      * Tampilkan Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         // Temukan usulankegiatan berdasarkan id
         $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans.pelaksanaankegiatans')->findOrFail($id);
@@ -75,6 +76,19 @@ class PelaksanaanKegiatansController extends Controller
 
         // Decode JSON dari kolom buktipelaksanaan_kegiatan
         $buktipelaksanaan_kegiatanFiles = json_decode($pelaksanaankegiatans->buktipelaksanaan_kegiatan, true) ?? [];
+
+        // 🔥 manual pagination dari array
+    $perPage = 8;
+    $currentPage = LengthAwarePaginator::resolveCurrentPage();
+    $collection = collect($buktipelaksanaan_kegiatanFiles);
+
+    $buktipelaksanaan_kegiatanFiles = new LengthAwarePaginator(
+        $collection->slice(($currentPage - 1) * $perPage, $perPage)->values(),
+        $collection->count(),
+        $perPage,
+        $currentPage,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
 
         // Redirect ke halaman lihat preview gambar bukti pelaksanaan kegiatan
         return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', ['usulankegiatans' => $usulankegiatan, 'buktipelaksanaan_kegiatanFiles' => $buktipelaksanaan_kegiatanFiles,]);

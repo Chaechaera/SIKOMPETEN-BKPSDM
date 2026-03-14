@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('nip')->nullable()->unique();
             $table->string('nama');
             $table->string('email')->unique();
-            $table->enum('role', ['superadmin', 'admin', 'user'])->default('admin');
+            $table->enum('role', ['superadmin', 'admin', 'user'])->default('user');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->enum('status', ['aktif', 'nonaktif'])->default('nonaktif');
             $table->timestamps();
         });
 

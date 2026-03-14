@@ -18,10 +18,7 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-white">
-
-        {{-- @include('layouts.navigation') --}}
-
+    <div class="min-h-screen bg-gray-50">
 
         <!-- Page Content -->
         <main class="p-6">
@@ -34,7 +31,9 @@
 </body>
 
 <style>
-[x-cloak] { display: none !important; }
+    [x-cloak] {
+        display: none !important;
+    }
 </style>
 
 </html>

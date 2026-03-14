@@ -22,8 +22,7 @@ return new class extends Migration
             $table->time('waktumulai_kegiatan')->nullable();
             $table->time('waktuselesai_kegiatan')->nullable();
             $table->enum('statususulan_kegiatan', ['draft', 'pending', 'need_review', 'revisi'])->nullable();
-            $table->unsignedInteger('dibuat_oleh')->nullable();
-            $table->foreign('dibuat_oleh')->references('id')->on('users')->onDelete('set null');
+            $table->foreignId('dibuat_oleh')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
         });
     }

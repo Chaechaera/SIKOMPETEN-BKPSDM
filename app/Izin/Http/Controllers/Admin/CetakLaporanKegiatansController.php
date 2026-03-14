@@ -9,13 +9,14 @@ use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class CetakLaporanKegiatansController extends Controller
 {
     /**
      * Simpan Data Cetak Laporan Hasil Kegiatan
      */
-    public function store($id)
+    public function store(Request $request, $id)
     {
         // Eager load model dari relasi dan temukan usulankegiatan berdasarkan id
         $usulan = Izin_Usulankegiatans::with([
@@ -29,6 +30,11 @@ class CetakLaporanKegiatansController extends Controller
         // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
         if ($laporan->statuslaporan_kegiatan !== 'completed') {
             abort(403, 'Laporan Kegiatan Sudah Dicetak');
+        }
+
+        // Kalau GET → tampilkan modal
+        if ($request->isMethod('get')) {
+            return view('pages.laporankegiatan.cetak_laporan_kegiatan', compact('usulan'));
         }
 
         // Transaksi DB berlangsung

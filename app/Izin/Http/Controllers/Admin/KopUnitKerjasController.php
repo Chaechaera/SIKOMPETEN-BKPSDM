@@ -22,6 +22,11 @@ class KopUnitKerjasController extends Controller
         // Ambil user yang login saat ini
         $user = Auth::user();
 
+        // Cek apakah data sudah ada untuk subunit ini
+        $kop = Izin_Kopunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->first();
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->first();
+
         // Redirect ke halaman upload data tambahan OPD
         return view('pages.upload_kop_ttd_surat', [
             'unitkerjas' => $user->subunitkerjas?->unitkerjas?->unitkerja,
@@ -29,9 +34,9 @@ class KopUnitKerjasController extends Controller
             'unitkerja_id' => $user->subunitkerjas?->unitkerja_id,
             'subunitkerja_id' => $user->subunitkerja_id,
             'nama_opd' => $user->subunitkerjas->sub_unitkerja ?? null,
-            'kopunitkerjas' => null,
-            'ttdunitkerjas' => null,
-            'stempelunitkerjas' => null
+            'kopunitkerjas' => $kop,
+            'ttdunitkerjas' => $ttd,
+            'stempelunitkerjas' => $stempel
         ]);
     }
 
@@ -145,7 +150,7 @@ class KopUnitKerjasController extends Controller
         $data = Izin_Kopunitkerjas::findOrFail($id);
 
         // Redirect ke halaman edit data tambahan OPD
-        return view('izin.kopunitkerjas.edit', compact('data'));
+        return view('izin.pages.upload_kop_ttd_surat', compact('data'));
     }
 
     /**

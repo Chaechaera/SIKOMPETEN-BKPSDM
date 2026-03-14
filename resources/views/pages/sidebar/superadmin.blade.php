@@ -1,162 +1,204 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'SIKOMPETEN')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-  </head>
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
 
 <body class="text-gray-800">
 
-    <div x-data="{ sidebarOpen: true }">
-    <!-- Tombol Open Sidebar -->
-   <button
-    @click="sidebarOpen = true"
-    class="fixed top-1/2 -translate-y-1/2 left-4 z-50 bg-white p-2 rounded-lg shadow"
-    x-show="!sidebarOpen"
-    x-transition
->
-    <i class="fa-solid fa-bars text-xl text-gray-700"></i>
-</button>
+    <div x-data="{ sidebarOpen: true }" class="relative">
 
-   <!-- Sidebar -->
-    <aside
-        class="fixed inset-y-0 left-0 w-64 bg-[#F9FAFC] border-r border-gray-200
-               flex flex-col overflow-y-auto transform transition-transform
-               duration-300 ease-in-out z-50"
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-    >
-        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-            <div>
-                <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-28 mb-2">
-                <h1 class="text-lg font-bold text-[#2B3674]">SIKOMPETEN</h1>
+        <!-- 🔘 TOGGLE BUTTON -->
+        <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="fixed top-6 z-[60] transition-all duration-300"
+            :class="sidebarOpen ? 'left-[232px]' : 'left-[56px]'">
+
+            <div class="w-10 h-10 bg-white rounded-xl shadow-lg
+                flex items-center justify-center
+                border border-gray-200">
+                <i class="fa-solid"
+                    :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
+            </div>
+        </button>
+
+        <!-- ✅ SIDEBAR -->
+        <aside
+            class="fixed inset-y-0 left-0 bg-[#F9FAFC] border-r border-gray-200
+               flex flex-col overflow-hidden transition-all duration-300 z-50"
+            :class="sidebarOpen ? 'w-64' : 'w-20'">
+
+            <!-- 🔷 HEADER -->
+            <div class="p-6 border-b border-gray-200">
+
+                <!-- Logo besar -->
+                <div class="flex flex-col items-start" x-show="sidebarOpen">
+                    <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-28">
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
+                            SIKOMPETEN
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- Logo kecil saat collapse -->
+                <div class="flex justify-center" x-show="!sidebarOpen">
+                    <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-10">
+                </div>
             </div>
 
-            <!-- Close Sidebar -->
-            <button @click="sidebarOpen = false" class="text-gray-600">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
+            <!-- 🔷 NAVIGATION -->
+            <nav class="flex-1 p-4 space-y-2 text-sm">
+
+                <!-- Dashboard -->
+                <a href="{{ route('superadmin.dashboard') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Request::is('superadmin/dashboard')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Request::is('superadmin/dashboard')
+                    ? asset('images/grid-white.png')
+                    : asset('images/grid.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Dashboard</span>
+                </a>
+
+                <!-- Daftar Usulan -->
+                <a href="{{ route('superadmin.usulankegiatan.pending') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('superadmin.usulankegiatan*')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('superadmin.usulankegiatan*')
+                    ? asset('images/file-white.png')
+                    : asset('images/file.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Daftar Usulan Kegiatan</span>
+                </a>
+
+                <!-- Daftar Laporan -->
+                <a href="{{ route('superadmin.laporankegiatan.pending') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('superadmin.laporankegiatan*')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('superadmin.laporankegiatan*')
+                    ? asset('images/file-white.png')
+                    : asset('images/file.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Daftar Laporan Kegiatan</span>
+                </a>
+
+                <!-- Manajemen User -->
+                <a href="{{ route('superadmin.manajemenuser') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ request()->routeIs('superadmin.manajemenuser')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ request()->routeIs('superadmin.manajemenuser')
+                    ? asset('images/Settings-white.png')
+                    : asset('images/Settings.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Manajemen User</span>
+                </a>
+
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t border-gray-200"></div>
+
+                <!-- OTHERS LABEL -->
+                <p class="px-3 text-xs font-semibold text-gray-400 tracking-wider"
+                    x-show="sidebarOpen">
+                    OTHERS
+                </p>
+
+                <!-- Rekapitulasi -->
+                <a href="{{ route('superadmin.rekapitulasi') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('superadmin.rekapitulasi')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('superadmin.rekapitulasi')
+                    ? asset('images/briefcase-white.png')
+                    : asset('images/briefcase.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Rekapitulasi</span>
+                </a>
+
+                <!-- Daftar Laporan Peserta Kegiatan -->
+                <a href="{{ route('superadmin.laporanpeserta.index') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('superadmin.laporanpeserta.index')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('superadmin.laporanpeserta.index')
+                    ? asset('images/briefcase-white.png')
+                    : asset('images/briefcase.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Daftar Laporan Peserta</span>
+                </a>
+
+                <!-- Informasi -->
+                <a href="{{ route('superadmin.informasi') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Request::is('superadmin/informasi')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Request::is('superadmin/informasi')
+                    ? asset('images/Info-white.png')
+                    : asset('images/Info.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Informasi</span>
+                </a>
+
+            </nav>
+        </aside>
+
+        <!-- ✅ CONTENT WRAPPER -->
+        <div class="transition-all duration-300"
+            :class="sidebarOpen ? 'ml-64' : 'ml-20'">
+            @yield('content')
         </div>
 
-        <!-- NAV -->
-        <nav class="flex-1 p-4 space-y-2 text-sm">
-        <!-- Dashboard -->
-        <a href="{{ route('superadmin.dashboard') }}"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium 
-            {{ Request::is('superadmin/dashboard') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
-            >
-            <img src="{{ Request::is('superadmin/dashboard') ? asset('images/grid-white.png') : asset('images/grid.png') }}" class="w-5">
-                Dashboard
-            </a>
-
-            <!-- Pengaturan Dasar -->
-<a 
-    href="{{ route('superadmin.pengaturan') }}"
-    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-    {{ request()->routeIs('superadmin.pengaturan', 'superadmin-detail.pengaturan')
-        ? 'bg-[#1C1F4A] text-white'
-        : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
->
-    <img 
-        src="{{ request()->routeIs('superadmin.pengaturan', 'superadmin-detail.pengaturan')
-            ? asset('images/Settings-white.png')
-            : asset('images/Settings.png') }}"
-        class="w-5"
-    >
-    Pengaturan Dasar
-</a>
-
-
-            <!-- Informasi -->
-            <a 
-                href="{{ route('superadmin.informasi') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Request::is('superadmin/informasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
-            >
-                <img src="{{ Request::is('superadmin/informasi') ? asset('images/Info-white.png') : asset('images/Info.png') }}" class="w-5">
-                Informasi
-            </a>
-
-        <!-- Daftar Pengajuan -->
-            <a 
-                href="{{ route('usulankegiatan.daftar-masuk') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Route::is('usulankegiatan.daftar-masuk') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
-            >
-                <img src="{{ Route::is('usulankegiatan.daftar-masuk') ? asset('images/file-white.png') : asset('images/file.png') }}" class="w-5">
-                Daftar Pengajuan
-            </a>
-
-        <!-- Daftar Laporan Yang Masuk -->
-        <a 
-    href="{{ route('laporan-masuk') }}"
-    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-    {{ Route::is('laporan-masuk') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
->
-    <img 
-        src="{{ Route::is('laporan-masuk') 
-            ? asset('images/File text-white.png') 
-            : asset('images/File text.png') 
-        }}" 
-        class="w-5"
-    >
-    Daftar Laporan
-</a>
-        <!-- Rekapitulasi -->
-            <a 
-                href="{{ route('superadmin.rekapitulasi') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Route::is('superadmin.rekapitulasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
-            >
-                <img src="{{ Route::is('superadmin.rekapitulasi') ? asset('images/briefcase-white.png') : asset('images/briefcase.png') }}" class="w-5">
-                Rekapitulasi 
-            </a>
-
-            <!-- Sertifikat -->
-            <a 
-                href="{{ route('superadmin.sertifikat') }}"
-                class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Route::is('superadmin.sertifikat') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}"
-            >
-                <img src="{{ Route::is('superadmin.sertifikat') ? asset('images/Award-white.png') : asset('images/Award.png') }}" class="w-5">
-                Sertifikat 
-            </a>
-    </nav>
-</aside>
-
-<!-- Wrapper konten -->
-    <div
-        class="transition-all duration-300"
-        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
-    >
-        @yield('content')
     </div>
 
-</div>
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const openBtn = document.getElementById("openSidebar");
+        const closeBtn = document.getElementById("closeSidebar");
 
+        // Buka sidebar
+        openBtn.addEventListener("click", () => {
+            sidebar.classList.remove("-translate-x-full");
+            openBtn.classList.add("hidden");
+        });
 
-<script>
-  const sidebar = document.getElementById("sidebar");
-  const openBtn = document.getElementById("openSidebar");
-  const closeBtn = document.getElementById("closeSidebar");
-
-  // Buka sidebar
-  openBtn.addEventListener("click", () => {
-    sidebar.classList.remove("-translate-x-full");
-    openBtn.classList.add("hidden");
-  });
-
-  // Tutup sidebar
-  closeBtn.addEventListener("click", () => {
-    sidebar.classList.add("-translate-x-full");
-    openBtn.classList.remove("hidden");
-  });
-</script>
+        // Tutup sidebar
+        closeBtn.addEventListener("click", () => {
+            sidebar.classList.add("-translate-x-full");
+            openBtn.classList.remove("hidden");
+        });
+    </script>
 
 
 </body>

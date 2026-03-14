@@ -2,56 +2,22 @@
 <x-app-layout>
 <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-        {{-- Sidebar --}} 
-        @include('pages.sidebar.superadmin')
+{{-- Sidebar --}}
+        @php
+    $activeRole = session('active_role', auth()->user()->role);
+@endphp
+
+@if ($activeRole === 'superadmin')
+    @include('pages.sidebar.superadmin')
+@else
+    @include('pages.sidebar.admin')
+@endif
 
         {{-- Main Content --}}
-        <main 
-        class="flex-1 p-6 space-y-6 transition-all duration-300"
-        :class="sidebarOpen ? 'ml-64' : 'ml-0'"
-    >
+        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
 
-            {{-- HEADER --}}
-            <header class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#2B3674]">Hallo, Super Admin!</h1>
-                    <p class="text-sm text-gray-500">Hope you have a good day</p>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <img src="{{ asset('images/notif.png') }}" class="w-6 h-6 cursor-pointer">
-                    <img src="{{ asset('images/pesan.png') }}" class="w-5 h-5 cursor-pointer">
-
-                    <!-- Profil Dropdown -->
-                    <div x-data="{ open: false }" class="relative">
-                    <!-- Trigger -->
-                    <div @click="open = !open" class="flex items-center gap-2 cursor-pointer select-none">
-                        <img src="{{ asset('images/bkpsdm.png') }}" alt="Profile" class="w-8 h-8 rounded-full">
-                        <span class="text-[#2B3674] font-medium text-sm sm:text-base">{{ Auth::user()->name }}</span>
-                        <i class="fa-solid fa-chevron-down text-gray-400 text-sm transition-transform duration-200"
-                            :class="{ 'rotate-180': open }"></i>
-                    </div>
-
-                    <!-- Dropdown Menu -->
-                    <div x-show="open" 
-                        @click.outside="open = false"
-                        x-transition
-                        class="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-lg shadow-lg py-2 z-50">
-                    <a href="{{ route('profile.edit') }}" 
-                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Profile
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" 
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                        Log Out
-                    </button>
-                    </form>
-                    </div>
-                    </div>
-                </div>
-            </header>
+            {{-- Header --}}
+            @include('layouts.navigation')
 
             {{-- STATISTIK CARDS --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

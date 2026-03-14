@@ -22,7 +22,7 @@ class ReviewUsulanKegiatansController extends Controller
             'verifikasiusulankegiatanterakhir',
             'cetakusulankegiatans',
             'balasanusulankegiatans'
-        ])->get();
+        ]);;
 
         // Urutkan usulankegiatan yang perlu direview berdasarkan statusnya
         if ($request->filled('statususulan_kegiatan')) {
@@ -34,6 +34,9 @@ class ReviewUsulanKegiatansController extends Controller
                 $usulankegiatans->where('statususulan_kegiatan', $request->statususulan_kegiatan);
             }
         }
+
+        // paginate TERAKHIR
+    $usulankegiatans = $usulankegiatans->paginate(20);
 
         // Redirect ke halaman daftar usulan kegiatan yang perlu direview
         return view('pages.usulankegiatan.pending_list_usulan_kegiatan', compact('usulankegiatans'));

@@ -13,94 +13,162 @@
 
 <body class="text-gray-800">
 
-    <div x-data="{ sidebarOpen: true }">
-        <!-- Tombol Open Sidebar -->
+    <div x-data="{ sidebarOpen: true }" class="relative">
+
+        <!-- 🔘 TOGGLE BUTTON -->
         <button
-            @click="sidebarOpen = true"
-            class="fixed top-1/2 -translate-y-1/2 left-4 z-50 bg-white p-2 rounded-lg shadow"
-            x-show="!sidebarOpen"
-            x-transition>
-            <i class="fa-solid fa-bars text-xl text-gray-700"></i>
+            @click="sidebarOpen = !sidebarOpen"
+            class="fixed top-6 z-[60] transition-all duration-300"
+            :class="sidebarOpen ? 'left-[232px]' : 'left-[56px]'">
+
+            <div class="w-10 h-10 bg-white rounded-xl shadow-lg
+                flex items-center justify-center
+                border border-gray-200">
+                <i class="fa-solid"
+                    :class="sidebarOpen ? 'fa-xmark' : 'fa-bars'"></i>
+            </div>
         </button>
 
-        <!-- Sidebar -->
+        <!-- ✅ SIDEBAR -->
         <aside
-            class="fixed inset-y-0 left-0 w-64 bg-[#F9FAFC] border-r border-gray-200
-               flex flex-col overflow-y-auto transform transition-transform
-               duration-300 ease-in-out z-50"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
-            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                <div>
-                    <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-28 mb-2">
-                    <h1 class="text-lg font-bold text-[#2B3674]">SIKOMPETEN</h1>
+            class="fixed inset-y-0 left-0 bg-[#F9FAFC] border-r border-gray-200
+               flex flex-col overflow-hidden transition-all duration-300 z-50"
+            :class="sidebarOpen ? 'w-64' : 'w-20'">
+
+            <!-- 🔷 HEADER -->
+            <div class="p-6 border-b border-gray-200">
+
+                <!-- Logo besar -->
+                <div class="flex flex-col items-start" x-show="sidebarOpen">
+                    <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-28">
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
+                            SIKOMPETEN
+                        </h1>
+                    </div>
                 </div>
 
-                <!-- Close Sidebar -->
-                <button @click="sidebarOpen = false" class="text-gray-600">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <!-- Logo kecil saat collapse -->
+                <div class="flex justify-center" x-show="!sidebarOpen">
+                    <img src="{{ asset('images/logo-bkpsdm.png') }}" class="w-10">
+                </div>
             </div>
 
-            <!-- NAV -->
+            <!-- 🔷 NAVIGATION -->
             <nav class="flex-1 p-4 space-y-2 text-sm">
 
                 <!-- Dashboard -->
                 <a href="{{ route('admin.dashboard') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ Request::is('admin/dashboard') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Request::is('admin/dashboard') ? asset('images/grid-white.png') : asset('images/grid.png') }}" class="w-5">
-                    Dashboard
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Request::is('admin/dashboard')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Request::is('admin/dashboard')
+                    ? asset('images/grid-white.png')
+                    : asset('images/grid.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Dashboard</span>
                 </a>
 
-                <!-- Daftar Usulan -->
+                <!-- Daftar Usulan Kegiatan -->
                 <a href="{{ route('admin.usulankegiatan.index') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ Route::is('admin/usulankegiatan') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Route::is('admin/usulankegiatan') ? asset('images/file-white.png') : asset('images/file.png') }}" class="w-5">
-                    Daftar Usulan Kegiatan
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.usulankegiatan.index')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.usulankegiatan.index')
+                    ? asset('images/file-white.png')
+                    : asset('images/file.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Daftar Usulan Kegiatan</span>
+                </a>
+
+                <!-- Daftar Laporan Kegiatan -->
+                <a href="{{ route('admin.laporankegiatan.index') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.laporankegiatan.index')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.laporankegiatan.index')
+                    ? asset('images/file-white.png')
+                    : asset('images/file.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Daftar Laporan Kegiatan</span>
                 </a>
 
                 <!-- Izin Pengembangan -->
                 <a href="{{ route('admin.usulankegiatan.create') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ Route::is('admin/usulankegiatan') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Route::is('admin/usulankegiatan') ? asset('images/file-white.png') : asset('images/file.png') }}" class="w-5">
-                    Ajukan Usulan Kegiatan
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.usulankegiatan.create')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.usulankegiatan.create')
+                    ? asset('images/file-white.png')
+                    : asset('images/file.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Ajukan Usulan Kegiatan</span>
                 </a>
 
-                <!-- Pengaturan Dasar -->
-                <a href="{{ route('admin.pengaturan') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ request()->routeIs('admin.pengaturan', 'admin-detail.pengaturan')
-                    ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ request()->routeIs('admin.pengaturan', 'admin-detail.pengaturan')
-                    ? asset('images/Settings-white.png') : asset('images/Settings.png') }}"
-                    class="w-5">
-                    Pengaturan Dasar
-                </a>
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t border-gray-200"></div>
 
-                <!-- Informasi -->
-                <a href="{{ route('admin.informasi') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ Request::is('admin/informasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Request::is('admin/informasi') ? asset('images/Info-white.png') : asset('images/Info.png') }}" class="w-5">
-                    Informasi
-                </a>
+                <!-- OTHERS LABEL -->
+                <p class="px-3 text-xs font-semibold text-gray-400 tracking-wider"
+                    x-show="sidebarOpen">
+                    OTHERS
+                </p>
 
                 <!-- Rekapitulasi -->
                 <a href="{{ route('admin.rekapitulasi') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    {{ Route::is('admin.rekapitulasi') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Route::is('admin.rekapitulasi') ? asset('images/briefcase-white.png') : asset('images/briefcase.png') }}" class="w-5">
-                    Rekapitulasi
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.rekapitulasi')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.rekapitulasi')
+                    ? asset('images/briefcase-white.png')
+                    : asset('images/briefcase.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Rekapitulasi</span>
                 </a>
 
                 <!-- Sertifikat -->
                 <a href="{{ route('admin.sertifikat') }}"
-                    class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                {{ Route::is('admin.sertifikat') ? 'bg-[#1C1F4A] text-white' : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-                    <img src="{{ Route::is('admin.sertifikat') ? asset('images/Award-white.png') : asset('images/Award.png') }}" class="w-5">
-                    Sertifikat
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.sertifikat')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.sertifikat')
+                    ? asset('images/Award-white.png')
+                    : asset('images/Award.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Sertifikat</span>
+                </a>
+
+                <!-- Informasi -->
+                <a href="{{ route('admin.informasi') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.informasi')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.informasi')
+                    ? asset('images/Info-white.png')
+                    : asset('images/Info.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Informasi</span>
                 </a>
             </nav>
         </aside>

@@ -22,8 +22,11 @@ class KirimLaporanKegiatansController extends Controller
         // Temukan laporankegiatan berdasarkan id laporankegiatan
         $laporankegiatans = Izin_Laporankegiatans::findOrFail($laporankegiatan_id);
 
+        // Temukan usulan kegiatan terkait
+        $usulan = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans;
+
         // Redirect ke halaman kirim laporan hasil kegiatan
-        return view('pages.laporankegiatan.kirim_laporan_kegiatan', ['laporankegiatans' => $laporankegiatans]);
+        return view('pages.laporankegiatan.kirim_laporan_kegiatan', ['usulan' => $usulan, 'laporankegiatans' => $laporankegiatans]);
     }
 
     /**

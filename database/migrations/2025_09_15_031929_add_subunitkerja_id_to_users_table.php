@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->foreign('subunitkerja_id')->references('id')->on('ref_subunitkerjas')->onDelete('set null');
             }
             if (!Schema::hasColumn('users', 'role')) {
-                $table->string('role')->default('admin')->after('email');
+                $table->string('role')->default('user')->after('email');
             }
         });
     }

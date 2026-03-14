@@ -15,6 +15,7 @@ class Izin_Inputusulankegiatans extends Model
 
     protected $fillable = [
         'usulankegiatan_id',
+        'kirimbalasanusulankegiatan_id',
         'pjunitkerja_id',
         'kopunitkerja_id',
         'nama_kegiatan'

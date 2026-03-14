@@ -45,4 +45,9 @@ class Izin_Sertifikats extends Model
     {
         return $this->hasMany(Izin_Pesertakegiatans::class, 'sertifikat_id');
     }
+
+        public function laporanpesertakegiatans()
+{
+    return $this->hasMany(Izin_LaporanPesertakegiatans::class, 'sertifikat_id');
+}
 }

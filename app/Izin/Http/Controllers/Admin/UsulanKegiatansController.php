@@ -8,6 +8,7 @@ use App\Izin\Models\Izin_Inputusulankegiatans;
 use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
+use App\Izin\Models\Izin_RefSubunitkerjas;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
@@ -18,11 +19,75 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UsulanKegiatansController extends Controller
 {
+    public function rekap()
+    {
+        $rekap = Izin_RefSubunitkerjas::withCount([
+            'usulankegiatans as jumlah_kegiatan_bangkom'
+        ])
+            ->with(['usulankegiatans.inputlaporankegiatans.laporankegiatans.sertifikats'])
+            ->get()
+            ->map(function ($subunit) {
+
+                $sertifikats = collect();
+
+                foreach ($subunit->usulankegiatans as $usulan) {
+
+                    if (!$usulan->inputlaporankegiatans) {
+                        continue;
+                    }
+
+                    $input = $usulan->inputlaporankegiatans;
+
+                    if (!$input->laporankegiatans) {
+                        continue;
+                    }
+
+                    $laporan = $input->laporankegiatans;
+
+                    if ($laporan->sertifikats) {
+                        $sertifikats = $sertifikats->merge(
+                            is_iterable($laporan->sertifikats)
+                                ? $laporan->sertifikats
+                                : collect([$laporan->sertifikats])
+                        );
+                    }
+                }
+
+                $jp0_10 = $sertifikats->whereBetween('jp', [0, 10])->count();
+                $jp11_19 = $sertifikats->whereBetween('jp', [11, 19])->count();
+                $jp20 = $sertifikats->where('jp', '>', 20)->count();
+                $total = $sertifikats->count();
+
+                return [
+                    'nama' => $subunit->sub_unitkerja,
+                    'jumlah_kegiatan' => $subunit->jumlah_kegiatan_bangkom,
+                    'jp0_10' => $jp0_10,
+                    'jp11_19' => $jp11_19,
+                    'jp20' => $jp20,
+                    'total' => $total,
+                    'persen_20' => $total > 0 ? round(($jp20 / $total) * 100) . '%' : '0%',
+                ];
+            });
+        $user = Auth::user();
+
+        if ($user->role === 'superadmin') {
+            return view('pages.rekapitulasi.admin_superadmin', compact('rekap'));
+        }
+
+        if ($user->role === 'admin') {
+            return view('pages.rekapitulasi.admin_superadmin', compact('rekap'));
+        }
+
+        return view('pages.rekapitulasi.user', compact('rekap'));
+    }
+
     /**
      * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
     public function index()
     {
+        $user = Auth::user();
+
         // Eager load relasi dari model
         $usulankegiatans = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
@@ -31,7 +96,17 @@ class UsulanKegiatansController extends Controller
             'verifikasiusulankegiatanterakhir',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans'
-        ])->orderBy('created_at', 'desc')->get();
+        ])->orderBy('created_at', 'desc');
+
+        if ($user->role === 'admin') {
+            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        }
+
+        if ($user->role === 'user') {
+            $usulankegiatans->where('dibuat_oleh', $user->id);
+        }
+
+        $usulankegiatans = $usulankegiatans->paginate(20);
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
         return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
@@ -106,7 +181,7 @@ class UsulanKegiatansController extends Controller
         // Ambil kopunitkerja terakhir user yang sedang login saat ini
         $kopunitkerja_user = Izin_Kopunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
         $kopunitkerja_id = $usulan->inputusulankegiatans?->kopunitkerja_id ?? $kopunitkerja_user?->id ?? null;
-        
+
         // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
         if ($usulan->statususulan_kegiatan !== 'draft') {
             abort(403, 'Usulan sudah tidak dapat diubah.');
@@ -214,7 +289,7 @@ class UsulanKegiatansController extends Controller
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user'   => $user,
+            'user' => $user,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF

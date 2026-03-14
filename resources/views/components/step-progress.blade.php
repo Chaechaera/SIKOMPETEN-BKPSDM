@@ -1,79 +1,103 @@
+@props(['usulan' => null])
+
 @php
-    /**
-     * STEP PROGRESS – UI ONLY
-     * Aman tanpa DB
-     */
+$status = $usulan?->status_ui ?? 'null';
 
-    // Step aktif (default 1)
-    $currentStep = $currentStep ?? 1;
+$hasPelaksanaan = $usulan?->inputusulankegiatans?->pelaksanaankegiatans;
 
-    // Daftar step (pastikan TIDAK NULL)
-    $steps = $steps ?? [
-        1 => 'Input Data',
-        2 => 'Cetak Usulan',
-        3 => 'Kirim Usulan',
-        4 => 'Input Laporan',
-        5 => 'Cetak Laporan',
-        6 => 'Kirim Laporan',
-        7 => 'Unggah Peserta',
-        8 => 'Unggah Template',
-        9 => 'Download Sertifikat',
-    ];
+$isLaporan = !empty($hasPelaksanaan);
 
-    // Total step (anti error)
-    $totalSteps = is_countable($steps) && count($steps) > 0 ? count($steps) : 1;
+/* ================= TITLE DINAMIS ================= */
+$title = $isLaporan
+? 'Progress Pelaporan Hasil Kegiatan'
+: 'Progress Pengajuan Usulan Kegiatan';
 
-    // Persentase progress
-    $progress = intval(($currentStep / $totalSteps) * 100);
+/* ================= STEPS ================= */
+$steps = $isLaporan
+? [
+1 => 'Ajukan Laporan',
+2 => 'Lengkapi Laporan',
+3 => 'Cetak Laporan',
+4 => 'Kirim Laporan',
+]
+: [
+1 => 'Ajukan Usulan',
+2 => 'Lengkapi Usulan',
+3 => 'Cetak Usulan',
+4 => 'Kirim Usulan',
+];
+
+/* ================= CURRENT STEP ================= */
+$currentStep = match ($status) {
+'null' => 1,
+'in_progress' => 1,
+'draft', 'completed' => 2,
+'pending' => 3,
+'need_review' => 4,
+'accepted', 'finish' => 4,
+'rejected' => 2,
+default => 1,
+};
+
+$totalSteps = count($steps);
+$progress = intval(($currentStep / $totalSteps) * 100);
 @endphp
 
-<div class="bg-white rounded-xl shadow p-6">
+<div class="bg-white rounded-xl shadow p-6 w-full mb-4">
 
     {{-- Header --}}
-    <div class="mb-4">
-        <p class="text-sm text-gray-500">Processing</p>
-        <p class="text-blue-600 font-semibold">
+    <div class="mb-6">
+        <p class="text-sm text-gray-500">{{ $title }}</p>
+        <p class="text-[#2B3674] font-semibold text-lg">
             {{ $progress }}%
         </p>
     </div>
 
-    {{-- Wrapper scroll horizontal --}}
-    <div class="overflow-x-auto">
-        <div class="flex items-start min-w-max gap-10 px-2">
+    {{-- Step Wrapper --}}
+    <div class="relative w-full">
+
+        {{-- Background Line --}}
+        <div class="absolute top-5 left-0 w-full h-0.5 bg-gray-200"></div>
+
+        {{-- Active Line --}}
+        <div class="absolute top-5 left-0 h-0.5 bg-[#2B3674] transition-all duration-300"
+            style="width: {{ $progress }}%">
+        </div>
+
+        <div class="flex justify-between relative">
 
             @foreach ($steps as $step => $label)
-                <div class="flex flex-col items-center relative min-w-[100px]">
+            <div class="flex flex-col items-center text-center w-full">
 
-                    {{-- Garis --}}
-                    @if (!$loop->first)
-                        <div class="absolute top-5 -left-10 w-10 h-0.5
-                            {{ $currentStep >= $step ? 'bg-blue-600' : 'bg-gray-200' }}">
-                        </div>
+                {{-- Circle --}}
+                <div class="
+                    relative z-10 w-10 h-10 rounded-full
+                    flex items-center justify-center
+                    text-sm font-medium transition-all duration-300
+                    {{ $currentStep > $step
+                        ? 'bg-[#2B3674] text-white'
+                        : ($currentStep == $step
+                            ? 'bg-[#2B3674] text-white ring-4 ring-blue-100'
+                            : 'bg-gray-200 text-gray-400') }}
+                ">
+
+                    @if($currentStep > $step)
+                    ✓
+                    @else
+                    ●
                     @endif
 
-                    {{-- Bulatan --}}
-                    <div class="
-                        relative z-10 w-10 h-10 rounded-full
-                        flex items-center justify-center
-                        text-sm font-medium
-                        {{ $currentStep >= $step
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-400' }}
-                    ">
-                        {{ $step }}
-                    </div>
-
-                    {{-- Label --}}
-                    <span class="mt-2 text-xs text-center leading-tight
-                        {{ $currentStep >= $step
-                            ? 'text-blue-600 font-medium'
-                            : 'text-gray-400' }}">
-                        {{ $label }}
-                    </span>
                 </div>
-            @endforeach
 
+                {{-- Label --}}
+                <span class="mt-3 text-xs
+                    {{ $currentStep >= $step
+                        ? 'text-[#2B3674] font-medium'
+                        : 'text-gray-400' }}">
+                    {{ $label }}
+                </span>
+            </div>
+            @endforeach
         </div>
     </div>
-
 </div>

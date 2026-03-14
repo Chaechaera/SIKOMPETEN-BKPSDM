@@ -5,13 +5,114 @@ namespace App\Izin\Http\Controllers\User;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
+use App\Izin\Models\Izin_Laporanpesertakegiatans;
 use App\Izin\Models\Izin_Pesertakegiatans;
 use App\Izin\Models\Izin_Sertifikats;
+use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Auth;
 
 class SertifikatsController extends Controller
 {
+    // New: list all users
+    public function index()
+    {
+        $usulankegiatans = Izin_Usulankegiatans::with(
+            'inputusulankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans',
+            'inputlaporankegiatans.laporankegiatans.sertifikats',
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+        )->orderBy('created_at', 'desc')
+        ->paginate(10);
+
+        return view('pages.sertifikat.admin', compact('usulankegiatans'));
+    }
+
+    // New: list all users
+    public function listSertif()
+    {
+        $user = Auth::user();
+
+    $usulankegiatans = Izin_Usulankegiatans::with(
+        'inputusulankegiatans',
+        'inputlaporankegiatans',
+        'inputlaporankegiatans.laporankegiatans',
+        'inputlaporankegiatans.laporankegiatans.sertifikats',
+        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans.subunitkerjas'
+    )->orderBy('created_at', 'desc')
+    ->paginate(10);
+
+    // Get all certificates for the user with relationships
+    $sertifikats = Izin_Sertifikats::with([
+        'pesertakegiatans',
+        'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+        'laporanpesertakegiatans'
+    ])->whereHas('pesertakegiatans', function($query) use ($user) {
+        $query->where('nip_nik_peserta', $user->nip_nik ?? $user->email);
+    })->first();
+
+    $peserta = $sertifikats ? $sertifikats->pesertakegiatans->first() : null;
+    
+    $laporanPeserta = $sertifikats && $peserta ? 
+        Izin_LaporanPesertakegiatans::where('sertifikat_id', $sertifikats->id)
+            ->where('pesertakegiatan_id', $peserta->id)
+            ->first() : null;
+
+    return view('pages.sertifikat.user', [
+        'usulankegiatans' => $usulankegiatans,
+        'sertifikat' => $sertifikats,
+        'peserta' => $peserta,
+        'laporanPeserta' => $laporanPeserta
+    ]);
+    }
+
+    public function cek($nip)
+    {
+        $peserta = Izin_Pesertakegiatans::with([
+            'sertifikats',
+            'detaillaporankegiatans',
+            'detaillaporankegiatans.laporankegiatans',
+            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans',
+            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        ])
+        ->where('nip_nik_peserta', $nip)
+        ->first();
+
+        if (!$peserta || !$peserta->sertifikats) {
+        return response()->json([
+            'success' => false
+        ]);
+    }
+
+    $sertifikat = $peserta->sertifikats;
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'nama' => $peserta->nama_peserta,
+            'nip' => $peserta->nip_nik_peserta,
+            'pelatihan' =>
+                optional(
+                    $peserta->detaillaporankegiatans
+                        ->laporankegiatans
+                        ->inputlaporankegiatans
+                        ->inputusulankegiatans
+                )->nama_kegiatan ?? '-',
+
+            'download_url' => route(
+                'user.sertifikat.download',
+                [$peserta->sertifikat_id, $peserta->id]
+            )
+        ]
+    ]);
+    }
+
     /**
      * Generate dan Simpan Data Sertifikat Baru
      */
@@ -86,6 +187,16 @@ class SertifikatsController extends Controller
      */
     public function download($sertifikat_id, $peserta_id)
     {
+        // Check if participant has uploaded the report first
+        /*$laporanpesertakegiatans = Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $peserta_id)
+            ->where('sertifikat_id', $sertifikat_id)
+            ->first();
+
+        if (!$laporanpesertakegiatans || $laporanpesertakegiatans->statuslaporan_pesertakegiatan !== 'pending') {
+            return redirect()->route('user.laporanpeserta.create', $sertifikat_id)
+                ->with('warning', 'Silahkan upload laporan peserta terlebih dahulu sebelum mengunduh sertifikat.');
+        }*/
+
         // Eager load relasi dari model dan temukan sertifikat berdasarkan id
         $sertifikat = Izin_Sertifikats::with([
             'pesertakegiatans'

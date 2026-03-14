@@ -1,132 +1,101 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50">
-        <div x-data="{ sidebarOpen: false }" class="flex min-h-full">
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-            <!-- SIDEBAR -->
-            @include('pages.sidebar.admin')
+        {{-- Sidebar --}}
+        @include('pages.sidebar.admin')
 
-            {{-- Main Content --}}
-            <main
-                class="flex-1 p-6 space-y-6 transition-all duration-300"
-                :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+        {{-- Main Content --}}
+        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
 
-                <!-- JUDUL -->
-                <div class="bg-white rounded-xl shadow p-6 mb-10">
-                    <h1 class="text-2xl font-semibold text-[#2B3674]">
-                        DAFTAR PENGAJUAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN
-                    </h1>
-                    <p class="text-sm text-gray-500 max-w-2xl">
-                        Daftar usulan kegiatan yang saat ini sedang dalam proses pengajuan.
-                    </p>
-                </div>
+            {{-- Header --}}
+            @include('layouts.navigation')
 
-                <!-- PROGRES -->
-                <div class="w-full bg-white rounded-xl shadow p-6 mb-8">
-                    <h2 class="text-lg font-semibold text-[#2B3674] mb-6">PROGRES PENGAJUAN</h2>
+            <!-- JUDUL -->
+            <div class="bg-white rounded-xl shadow p-6 mb-4">
+                <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">DAFTAR PENGAJUAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                <p class="text-sm text-gray-500 max-w-4xl">
+                    Daftar usulan kegiatan yang saat ini sedang dalam proses pengajuan dan verifikasi oleh superadmin.
+                </p>
+            </div>
 
-                    @include('components.proggres-stepper', [
-                    'processStatus' => $usulankegiatans[0]->process_status ?? null
-                    ])
-                </div>
+            <!-- BUTTON TAMBAH -->
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end mb-4">
+                <a href="{{ route('admin.usulankegiatan.create') }}"
+                    class="w-2/12 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white text-center font-semibold hover:opacity-90 transition">
+                    + Buat Usulan Baru
+                </a>
+            </div>
 
-                <!-- BUTTON TAMBAH -->
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end mb-2">
-                    <a href="{{ route('admin.usulankegiatan.create') }}"
-                        class="bg-[#FFA41B] text-white px-4 py-2 rounded-lg hover:bg-[#ff9600] transition">
-                        + Buat Usulan Baru
-                    </a>
-                </div>
+            <!-- TABLE -->
+            <div class="bg-white rounded-xl shadow p-6">
+                <div class="border rounded-lg overflow-hidden">
+                    <table class="w-full text-sm table-fixed">
+                        <thead>
+                            <tr class="bg-gray-50 border-b text-center text-gray-600">
+                                <th class="py-3 px-4 w-14">No</th>
+                                <th class="py-3 px-4 w-72">Nama Kegiatan</th>
+                                <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
+                                <th class="py-3 px-4 w-28">Status Usulan</th>
+                                <th class="py-3 px-4 w-48">Update Progress</th>
+                                <th class="py-3 px-4 w-36">Aksi</th>
+                            </tr>
+                        </thead>
 
-                <!-- TABLE -->
-                <section class="bg-white rounded-xl shadow p-4 sm:p-6">
-                    <div class="overflow-x-auto w-full">
-                        <table class="min-w-full text-sm text-gray-600">
-                            <thead class="border-b text-gray-700 bg-[#FAFAFB]">
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Kegiatan</th>
-                                    <th>Tanggal Pelaksanaan</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
+                        <tbody>
+                            @forelse ($usulankegiatans as $index => $u)
+                            <tr class="border-b hover:bg-gray-50">
 
-                            <tbody>
-                                @forelse ($usulankegiatans as $u)
-                                <tr class="border-b hover:bg-gray-50 transition">
+                                <!-- Nomor Otomatis -->
+                                <td class="py-3 px-4 text-center">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
 
-                                    <!-- Nomor Otomatis -->
-                                    <td class="py-3 px-4 text-center">{{ $loop->iteration }}</td>
+                                <!-- Nama Kegiatan -->
+                                <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
 
-                                    <!-- Nama Kegiatan -->
-                                    <td class="py-3 px-4 font-medium">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
-
-                                    <!-- Tanggal Pelaksanaan Kegiatan -->
-                                    <td class="py-3 px-4">
-                                        {{$u->tanggalmulai_kegiatan && $u->tanggalselesai_kegiatan
+                                <!-- Tanggal Pelaksanaan Kegiatan -->
+                                <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
+                                    {{$u->tanggalmulai_kegiatan && $u->tanggalselesai_kegiatan
                                         ? \Carbon\Carbon::parse($u->tanggalmulai_kegiatan)->format('d/m/Y') . ' - ' .
                                         \Carbon\Carbon::parse($u->tanggalselesai_kegiatan)->format('d/m/Y') : '-'}}
-                                    </td>
+                                </td>
 
-                                    <!-- Status Usulan Kegiatan -->
-                                    <td class="py-3 px-4 capitalize font-semibold">
-                                        <span class="{{ $u->status_ui_class }}">
-                                            {{ str_replace('_', ' ', $u->status_ui) }}
-                                        </span>
-                                    </td>
+                                <!-- Status Usulan Kegiatan -->
+                                <td class="py-3 px-4 text-center">
+                                    <span class="{{ $u->status_ui_class }}">
+                                        {{ str_replace('_', ' ', $u->status_ui) }}
+                                    </span>
+                                </td>
 
-                                    <!-- Tombol Aksi -->
-                                    <td class="p-2 space-x-2 relative flex items-centergap-2" x-data="{ openProgress: false, openDokumen: false }">
-
+                                <!-- Update Progress -->
+                                <td class="py-3 px-4 text-center" x-data="{ openProgress: false }">
+                                    <div class="flex justify-center gap-2">
                                         {{-- ===================== CETAK DOKUMEN ===================== --}}
                                         @if(
                                         in_array($u->status_ui, ['draft', 'rejected']) &&
                                         is_null($u->cetakusulankegiatans))
-                                        <form method="POST"
-                                            action="{{ route('admin.usulankegiatan.cetak', $u->id) }}"
-                                            onsubmit="return confirm('Yakin cetak? Status akan berubah ke pending.')">
-                                            @csrf
-                                            <button type="submit"
-                                                class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
-                                                Cetak
-                                            </button>
-                                        </form>
-                                        @elseif (
-                                        isset($u->inputlaporankegiatans) &&
-                                        isset($u->inputlaporankegiatans->laporankegiatans) &&
-                                        in_array($u->inputlaporankegiatans->laporankegiatans->status_laporan_ui, ['completed', 'rejected']) &&
-                                        is_null($u->inputlaporankegiatans->laporankegiatans->cetakusulankegiatans))
-                                        <form method="POST"
-                                            action="{{ route('admin.laporankegiatan.cetak', $u->id) }}"
-                                            onsubmit="return confirm('Yakin cetak? Status akan berubah ke pending.')">
-                                            @csrf
-                                            <button type="submit"
-                                                class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
-                                                Cetak
-                                            </button>
-                                        </form>
+                                        <button onclick="openCetakModal('{{ $u->id }}', 'usulankegiatans')"
+                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
+                                            Cetak
+                                        </button>
                                         @else
-                                        <button class="bg-[#dcddde] text-gray-600 italic text-xs px-4 py-1.5 rounded-md">Cetak</button>
+                                        <button
+                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                                            Cetak
+                                        </button>
                                         @endif
 
                                         {{-- ===================== KIRIM DOKUMEN ===================== --}}
                                         @if($u->isPendingUsulan())
                                         <a href="{{ route('admin.usulankegiatan.kirim', $u->id) }}"
-                                            class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
-                                            Kirim
-                                        </a>
-                                        @elseif($u->isPendingLaporan())
-                                        <a href="{{ route('admin.laporankegiatan.kirim', $u->id) }}"
-                                            class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
+                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
                                             Kirim
                                         </a>
                                         @else
-                                        <button class="bg-[#dcddde] text-gray-600 italic text-xs px-4 py-1.5 rounded-md">Kirim</button>
+                                        <button class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Kirim</button>
                                         @endif
 
                                         {{-- ===================== UPDATE PROGRESS ===================== --}}
                                         <button type="button" @click="openProgress = true"
-                                            class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
+                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
                                             Update
                                         </button>
 
@@ -164,7 +133,6 @@
 
                                                     {{-- Lihat Pelaksanaan --}}
                                                     <a href="{{ route('admin.pelaksanaankegiatan.show', $u->id) }}"
-                                                        target="_blank"
                                                         class="block px-4 py-2 rounded-lg bg-[#eadffe] text-[#7d5bcd]">
                                                         Lihat Pelaksanaan Kegiatan
                                                     </a>
@@ -180,23 +148,21 @@
                                                         Update Laporan Hasil Kegiatan
                                                     </span>
                                                     @endif
-
-                                                    {{-- Lihat Pelaksanaan --}}
-                                                    <a href="{{ route('admin.sertifikat.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#defff8] text-[#136769]">
-                                                        Download Sertifikat Peserta
-                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </td>
+
+                                <!-- Tombol Aksi -->
+                                <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
+                                    <div class="flex justify-center gap-4">
 
                                         {{-- ===================== LIHAT DOKUMEN ===================== --}}
-                                        <button type="button" @click="openDokumen = true"
-                                            class="bg-[#4361EE] text-white text-xs px-4 py-1.5 rounded-md hover:bg-[#3651d4] transition">
-                                            Lihat
-                                        </button>
-
+                                        <a @click="openDokumen = true"
+                                            class="text-indigo-600 hover:underline">
+                                            <img src="{{ asset('images/File text.png') }}" class="w-6 h-6 inline">
+                                        </a>
 
                                         <!-- MODAL DETAIL -->
                                         <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -248,50 +214,94 @@
                                             </div>
                                         </div>
 
-                                        {{-- ===================== AKSI ADMINISTRATIF ===================== --}}
-                                        <div class="flex flex-wrap gap-2">
+                                        {{-- ===================== TOMBOL EDIT ===================== --}}
+                                        @if(in_array($u->status_ui, ['draft', 'rejected']))
+                                        <a href="{{ route('admin.usulankegiatan.edit', $u->id) }}"
+                                            class="text-indigo-600 hover:underline">
+                                            <img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline">
+                                        </a>
+                                        @elseif($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
+                                        <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
+                                            class="text-indigo-600 hover:underline">
+                                            <img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline">
+                                        </a>
+                                        @else
+                                        <span class="text-gray-400 italic"><img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline"></span>
+                                        @endif
 
-                                            {{-- TOMBOL EDIT --}}
-                                            @if(in_array($u->status_ui, ['draft', 'rejected']))
-                                            <a href="{{ route('admin.usulankegiatan.edit', $u->id) }}"
-                                                class="text-indigo-600 hover:underline">
-                                                <img src="{{ asset('images/edit.png') }}" class="w-5 h-5">
-                                            </a>
-                                            @elseif($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
-                                            <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
-                                                class="text-indigo-600 hover:underline">
-                                                <img src="{{ asset('images/edit.png') }}" class="w-5 h-5">
-                                            </a>
-                                            @else
-                                            <span class="text-gray-400 italic"><img src="{{ asset('images/edit.png') }}" class="w-5 h-5"></span>
-                                            @endif
+                                        {{-- ===================== TOMBOL HAPUS ===================== --}}
+                                        <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Yakin hapus usulan ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="text-red-600 hover:underline">
+                                                <img src="{{ asset('images/delete.png') }}" alt="Hapus" class="w-6 h-6 inline">
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-gray-500 py-4">
+                                    Tidak ada data usulan kegiatan.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
-                                            {{-- TOMBOL HAPUS --}}
-                                            <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Yakin hapus usulan ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 hover:underline">
-                                                    <img src="{{ asset('images/delete.png') }}" alt="Hapus" class="w-5 h-5 inline">
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="7" class="text-center text-gray-500 py-4">
-                                        Tidak ada data usulan kegiatan.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                {{-- Footer Pagination --}}
+                <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">
+                    <span>
+                        {{ $usulankegiatans->firstItem() }}–{{ $usulankegiatans->lastItem() }}
+                        dari {{ $usulankegiatans->total() }} data
+                    </span>
+                    <div>
+                        {{ $usulankegiatans->links() }}
                     </div>
-                </section>
-            </main>
-        </div>
+                </div>
+            </div>
+        </main>
     </div>
+
+    <!-- Modal Container -->
+    <div id="cetakModalContainer"></div>
+
+    <script>
+        async function openCetakModal(id, type) {
+            const container = document.getElementById('cetakModalContainer');
+            container.innerHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
+                    <div class="animate-pulse text-lg">Memuat pop-up cetak...</div>
+                </div>
+            `;
+
+            // Tentukan endpoint berdasarkan tipe
+            let url = '';
+
+            if (type === 'usulankegiatans') {
+                url = `/admin/usulankegiatan/${id}/cetak`;
+            }
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Gagal memuat pop-up cetak.');
+                const html = await response.text();
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
+                        <div class="bg-red-700 p-4 rounded shadow">
+                            ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+
 </x-app-layout>

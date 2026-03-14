@@ -1,30 +1,34 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-<x-app-layout>
-<div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        {{-- Sidebar --}} 
-        @include('pages.sidebar.superadmin')
+    <title>SIKOMPETEN</title>
 
-        {{-- Main Content --}}
-        <main
-            class="flex-1 p-6 space-y-6 transition-all duration-300"
-            :class="sidebarOpen ? 'ml-64' : 'ml-0'"
-        >
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <div class="space-y-6 max-w-6xl mx-auto">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 
-            {{-- Header --}}
-            <div class="flex items-start gap-3">
-                <img src="{{ asset('images/rekap.png') }}" alt="Rekap" class="h-8 w-8 mt-1">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#2B3674]">
-                        REKAPITULASI IZIN PENGEMBANGAN KOMPETENSI ASN TAHUN
-                        <span id="year-title">2025</span>
-                    </h1>
-                    <p class="text-sm text-gray-500 max-w-2xl">
-                        Daftar Rekap Izin Pengembangan Kompetensi ASN
-                    </p>
-                </div>
+<body class="bg-white font-sans antialiased">
+
+    {{-- Navbar --}}
+    @include('components.izin-navbar')
+
+    {{-- Background utama --}}
+    <div class="min-h-screen bg-gray-100 pt-24">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pb-16">
+
+            {{-- Card Formulir --}}
+            <div class="bg-white rounded-xl shadow p-6 mb-4 mt-10">
+                <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">REKAPITULASI KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                <p class="text-sm text-gray-500 max-w-4xl">
+                    Daftar Rekap Kegiatan Pengembangan Kompetensi ASN di lingkungan Pemerintah Kota Surakarta
+                </p>
             </div>
 
             {{-- Filter --}}
@@ -62,7 +66,6 @@
                                     <tr class="border-b text-gray-700 bg-[#FAFAFB]">
                                         <th class="py-3 px-4 text-left font-semibold">NO</th>
                                         <th class="py-3 px-4 text-left font-semibold">Unit Kerja / Sub Unit</th>
-                                        <th class="py-3 px-4 text-left font-semibold">Jumlah Pegawai</th>
                                         <th class="py-3 px-4 text-left font-semibold">Jumlah Kegiatan Bangkom</th>
                                         <th class="py-3 px-4 text-left font-semibold">0 - 10 JP</th>
                                         <th class="py-3 px-4 text-left font-semibold">11 - 19 JP</th>
@@ -72,31 +75,39 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php
-                                        $data = [
-                                            [1,'BKPSDM Surakarta',69,12,0,0,69,69,'100%'],
-                                            [2,'DINKES Surakarta',56,8,1,0,55,55,'90%'],
-                                            [3,'DISDIK Surakarta',40,6,2,3,35,40,'87%'],
-                                            [4,'DISKOMINFO Surakarta',30,5,3,2,25,30,'83%'],
-                                            [5,'SETDA Surakarta',50,9,4,1,45,50,'90%'],
-                                            [6,'SATPOL PP Surakarta',28,4,5,0,23,28,'82%'],
-                                        ];
-                                    @endphp
-
-                                    @foreach ($data as $row)
-                                    <tr class="border-b hover:bg-gray-50 table-row">
-                                        <td class="p-4 border-r">{{ $row[0] }}</td>
-                                        <td class="p-4 border-r unit-kerja font-semibold">{{ $row[1] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[2] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[3] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[4] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[5] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[6] }}</td>
-                                        <td class="p-4 border-r text-center">{{ $row[7] }}</td>
-                                        <td class="p-4 text-center">{{ $row[8] }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
+@forelse ($rekap as $index => $row)
+<tr class="border-b hover:bg-gray-50 table-row">
+    <td class="p-4 border-r">{{ $index + 1 }}</td>
+    <td class="p-4 border-r unit-kerja font-semibold">
+        {{ $row['nama'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jumlah_kegiatan'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp0_10'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp11_19'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['jp20'] }}
+    </td>
+    <td class="p-4 border-r text-center">
+        {{ $row['total'] }}
+    </td>
+    <td class="p-4 text-center">
+        {{ $row['persen_20'] }}
+    </td>
+</tr>
+@empty
+<tr>
+    <td colspan="8" class="text-center py-6 text-gray-500">
+        Tidak ada data
+    </td>
+</tr>
+@endforelse
+</tbody>
                             </table>
                         </div>
                     </div>
@@ -106,8 +117,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
+    </div>
+
 
         {{-- Script --}}
         <script>
@@ -132,6 +144,9 @@
                 emptyState.classList.toggle('hidden', visible !== 0);
             });
         </script>
+        
+    {{-- Navbar --}}
+    @include('components.izin-footer')
+</body>
 
-    </main>
-</x-app-layout>
+</html>

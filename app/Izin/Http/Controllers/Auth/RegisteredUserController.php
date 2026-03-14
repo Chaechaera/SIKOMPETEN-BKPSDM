@@ -61,7 +61,7 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'nip' => $request->nip,
             'nama' => $request->nama,
-            'role' => 'admin',
+            'role' => 'user',
             'subunitkerja_id' => $request->subunitkerja_id,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -69,8 +69,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('admin.dashboard', absolute: false));
+        return redirect()->route('verification.notice');
     }
 }

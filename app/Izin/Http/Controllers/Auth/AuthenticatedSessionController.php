@@ -28,6 +28,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // ✅ SET ROLE AKTIF DEFAULT
+    session(['active_role' => Auth::user()->role]);
+
         return $this->authenticated($request, Auth::user());
     }
 
