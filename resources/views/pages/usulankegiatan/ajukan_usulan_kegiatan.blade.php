@@ -7,9 +7,12 @@
     {{-- Main Content --}}
     <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
 
+<<<<<<< Updated upstream
       {{-- Header --}}
       @include('layouts.navigation')
       
+=======
+>>>>>>> Stashed changes
             {{-- 📝 FORM PENGAJUAN USULAN --}}
             <form method="POST" action="{{ route('admin.usulankegiatan.storeAwal') }}" enctype="multipart/form-data">
                 @csrf
