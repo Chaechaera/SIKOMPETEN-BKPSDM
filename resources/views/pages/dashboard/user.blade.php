@@ -22,7 +22,7 @@
     {{-- Hero Section --}}
     <x-izin-hero />
 
-    <!-- ======================= CEK SERTIFIKAT ASN ======================= -->
+    {{-- ======================= CEK SERTIFIKAT ASN ======================= -->
     <section class="py-10 px-6 bg-gray-50">
         <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg p-10">
 
@@ -122,7 +122,7 @@ async function cekSertifikat() {
     }
 }
 </script>
-    <!-- ======================= END CEK SERTIFIKAT ASN ======================= -->
+    <!-- ======================= END CEK SERTIFIKAT ASN ======================= --}}
 
     {{-- Fitur Section --}}
     <x-izin-fitur-section />

@@ -26,7 +26,7 @@ class SertifikatsController extends Controller
             'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
             'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
         )->orderBy('created_at', 'desc')
-        ->paginate(10);
+            ->paginate(10);
 
         return view('pages.sertifikat.admin', compact('usulankegiatans'));
     }
@@ -35,40 +35,39 @@ class SertifikatsController extends Controller
     public function listSertif()
     {
         $user = Auth::user();
+        $sort = request('sort_tahun'); // asc / desc / null
 
-    $usulankegiatans = Izin_Usulankegiatans::with(
-        'inputusulankegiatans',
-        'inputlaporankegiatans',
-        'inputlaporankegiatans.laporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.sertifikats',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans.subunitkerjas'
-    )->orderBy('created_at', 'desc')
-    ->paginate(10);
+        $usulankegiatans = Izin_Usulankegiatans::with(
+            'inputusulankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans',
+            'inputlaporankegiatans.laporankegiatans.sertifikats',
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans.subunitkerjas'
+        )->orderBy('created_at', 'desc')->paginate(10);
 
-    // Get all certificates for the user with relationships
-    $sertifikats = Izin_Sertifikats::with([
-        'pesertakegiatans',
-        'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
-        'laporanpesertakegiatans'
-    ])->whereHas('pesertakegiatans', function($query) use ($user) {
-        $query->where('nip_nik_peserta', $user->nip_nik ?? $user->email);
-    })->first();
+        $sertifikats = Izin_Sertifikats::with([
+            'pesertakegiatans.subunitkerjas',
+            'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+            'laporanpesertakegiatans'
+        ])
+            ->whereHas('pesertakegiatans', function ($query) use ($user) {
+                $query->where('nip_nik_peserta', $user->nip ?? $user->email);
+            })
+            ->get();
 
-    $peserta = $sertifikats ? $sertifikats->pesertakegiatans->first() : null;
-    
-    $laporanPeserta = $sertifikats && $peserta ? 
-        Izin_LaporanPesertakegiatans::where('sertifikat_id', $sertifikats->id)
-            ->where('pesertakegiatan_id', $peserta->id)
-            ->first() : null;
 
-    return view('pages.sertifikat.user', [
-        'usulankegiatans' => $usulankegiatans,
-        'sertifikat' => $sertifikats,
-        'peserta' => $peserta,
-        'laporanPeserta' => $laporanPeserta
-    ]);
+        $laporanPeserta = Izin_LaporanPesertakegiatans::whereIn(
+            'sertifikat_id',
+            $sertifikats->pluck('id')
+        )->get();
+
+        return view('pages.sertifikat.user', [
+            'usulankegiatans' => $usulankegiatans,
+            'sertifikat' => $sertifikats,
+            'laporanPeserta' => $laporanPeserta
+        ]);
     }
 
     public function cek($nip)
@@ -81,23 +80,23 @@ class SertifikatsController extends Controller
             'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
             'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
         ])
-        ->where('nip_nik_peserta', $nip)
-        ->first();
+            ->where('nip_nik_peserta', $nip)
+            ->first();
 
         if (!$peserta || !$peserta->sertifikats) {
+            return response()->json([
+                'success' => false
+            ]);
+        }
+
+        $sertifikat = $peserta->sertifikats;
+
         return response()->json([
-            'success' => false
-        ]);
-    }
-
-    $sertifikat = $peserta->sertifikats;
-
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'nama' => $peserta->nama_peserta,
-            'nip' => $peserta->nip_nik_peserta,
-            'pelatihan' =>
+            'success' => true,
+            'data' => [
+                'nama' => $peserta->nama_peserta,
+                'nip' => $peserta->nip_nik_peserta,
+                'pelatihan' =>
                 optional(
                     $peserta->detaillaporankegiatans
                         ->laporankegiatans
@@ -105,12 +104,12 @@ class SertifikatsController extends Controller
                         ->inputusulankegiatans
                 )->nama_kegiatan ?? '-',
 
-            'download_url' => route(
-                'user.sertifikat.download',
-                [$peserta->sertifikat_id, $peserta->id]
-            )
-        ]
-    ]);
+                'download_url' => route(
+                    'user.sertifikat.download',
+                    [$peserta->sertifikat_id, $peserta->id]
+                )
+            ]
+        ]);
     }
 
     /**
