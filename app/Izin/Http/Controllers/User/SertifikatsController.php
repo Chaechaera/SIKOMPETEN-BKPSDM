@@ -11,6 +11,7 @@ use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class SertifikatsController extends Controller
@@ -35,9 +36,99 @@ class SertifikatsController extends Controller
     public function listSertif()
     {
         $user = Auth::user();
+        $search = request('search');
         $sort = request('sort_tahun'); // asc / desc / null
 
-        $usulankegiatans = Izin_Usulankegiatans::with(
+        $sertifikats = Izin_Sertifikats::with([
+    'pesertakegiatans.subunitkerjas',
+    'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+    'laporanpesertakegiatans'
+])
+->whereHas('pesertakegiatans', function ($q) use ($user) {
+    $q->where('nip_nik_peserta', $user->nip ?? $user->email);
+})
+->get(); // ambil dulu
+
+// ✅ FILTER SEARCH (PAKAI COLLECTION, BUKAN WHERE)
+if ($search) {
+    $search = strtolower($search);
+
+    $sertifikats = $sertifikats->filter(function ($s) use ($search) {
+
+        // ✅ NOMOR SERTIFIKAT
+        $p = $s->pesertakegiatans->first();
+$nomor = strtolower($p->nomorsertifikatpeserta_kegiatan ?? '');
+
+        // ✅ TAHUN
+        $tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
+
+        // ✅ NAMA KEGIATAN
+        $namaKegiatan = strtolower(
+            optional($s->laporankegiatans)
+                ?->inputlaporankegiatans
+                ?->inputusulankegiatans
+                ?->nama_kegiatan ?? ''
+        );
+
+        // ✅ OPD (SUBUNIT KERJA)
+        $opd = strtolower(
+    optional($p->sertifikats)
+        ?->inputusulankegiatans
+        ?->subunitkerjas
+        ?->singkatan ?? ''
+);
+
+        return 
+            str_contains($nomor, $search) ||
+            str_contains((string)$tahun, $search) ||
+            str_contains($namaKegiatan, $search) ||
+            str_contains($opd, $search);
+    });
+}
+
+// ✅ filter Status
+$status = request('statuslaporan_pesertakegiatan');
+
+if ($status) {
+    $sertifikats = $sertifikats->filter(function ($s) use ($status) {
+
+        $laporan = $s->laporanpesertakegiatans->first();
+        
+        if ($status === 'belum_upload') {
+            return $laporan === null;
+        }
+
+        return optional($laporan)->statuslaporan_pesertakegiatan === $status;
+    });
+}
+
+// ✅ SORT TAHUN (DARI REQUEST)
+if ($sort === 'asc') {
+    $sertifikats = $sertifikats->sortBy('tanggalkeluarsertifikat_kegiatan');
+} else {
+    // default & desc
+    $sertifikats = $sertifikats->sortByDesc('tanggalkeluarsertifikat_kegiatan');
+}
+
+// ✅ RESET INDEX (WAJIB)
+$sertifikats = $sertifikats->values();
+
+// ✅ PAGINATOR GENERATOR
+$page = request()->get('page', 1);
+$perPage = 20;
+
+$sertifikats = new LengthAwarePaginator(
+    $sertifikats->forPage($page, $perPage),
+    $sertifikats->count(),
+    $perPage,
+    $page,
+    [
+        'path' => request()->url(),
+        'query' => request()->query(),
+    ]
+);
+
+        /*$usulankegiatans = Izin_Usulankegiatans::with(
             'inputusulankegiatans',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans',
@@ -61,13 +152,9 @@ class SertifikatsController extends Controller
         $laporanPeserta = Izin_LaporanPesertakegiatans::whereIn(
             'sertifikat_id',
             $sertifikats->pluck('id')
-        )->get();
+        )->get();*/
 
-        return view('pages.sertifikat.user', [
-            'usulankegiatans' => $usulankegiatans,
-            'sertifikat' => $sertifikats,
-            'laporanPeserta' => $laporanPeserta
-        ]);
+        return view('pages.sertifikat.user', compact('sertifikats'));
     }
 
     public function cek($nip)

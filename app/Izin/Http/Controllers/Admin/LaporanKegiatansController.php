@@ -5,6 +5,7 @@ namespace App\Izin\Http\Controllers\Admin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Detaillaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
@@ -196,9 +197,17 @@ class LaporanKegiatansController extends Controller
         ])->findOrFail($id);
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        // ✅ BENAR (ambil dari user login)
+$unitkerjaId = $user->subunitkerjas->unitkerja_id;
+
+$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+
+$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+
+        // $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        // $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        // $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file

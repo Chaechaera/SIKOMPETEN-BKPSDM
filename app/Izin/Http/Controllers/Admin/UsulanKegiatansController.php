@@ -9,11 +9,13 @@ use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_RefSubunitkerjas;
+use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Barryvdh\DomPDF\Facade\PDF;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -21,14 +23,21 @@ class UsulanKegiatansController extends Controller
 {
     public function rekap()
     {
+        $search = request('search');
+        $tahun = request('tahun');
+
         $rekap = Izin_RefSubunitkerjas::withCount([
             'usulankegiatans as jumlah_kegiatan_bangkom'
         ])
             ->with(['usulankegiatans.inputlaporankegiatans.laporankegiatans.sertifikats'])
             ->get()
-            ->map(function ($subunit) {
+            ->map(function ($subunit) use ($search, $tahun) {
 
-                $sertifikats = collect();
+                $total_jp = 0;
+                $jp0_10 = 0;
+                $jp11_19 = 0;
+                $jp20 = 0;
+                $jumlah_kegiatan_valid = 0;
 
                 foreach ($subunit->usulankegiatans as $usulan) {
 
@@ -42,32 +51,105 @@ class UsulanKegiatansController extends Controller
                         continue;
                     }
 
-                    $laporan = $input->laporankegiatans;
+                    // 🔥 AMBIL BALASAN LANGSUNG DARI DB (INI KUNCI)
+                    $balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
+                        'inputlaporankegiatan_id',
+                        $input->id
+                    )->first();
 
-                    if ($laporan->sertifikats) {
-                        $sertifikats = $sertifikats->merge(
-                            is_iterable($laporan->sertifikats)
-                                ? $laporan->sertifikats
-                                : collect([$laporan->sertifikats])
-                        );
+                    if (!$balasan) continue;
+
+                    // ✅ filter tahun
+                    if ($tahun) {
+                        $sertifikat = $input->laporankegiatans->sertifikats;
+
+                        if (
+                            !$sertifikat ||
+                            !$sertifikat->tanggalkeluarsertifikat_kegiatan ||
+                            \Carbon\Carbon::parse($sertifikat->tanggalkeluarsertifikat_kegiatan)->year != $tahun
+                        ) {
+                            continue;
+                        }
+                    }
+
+                    $jp = $balasan->totalcapaianjp_kegiatan;
+
+                    // ✅ total JP
+                    $total_jp += $jp;
+
+                    // ✅ jumlah kegiatan valid
+                    $jumlah_kegiatan_valid++;
+
+                    // ✅ kategori JP
+                    if ($jp <= 10) {
+                        $jp0_10++;
+                    } elseif ($jp <= 19) {
+                        $jp11_19++;
+                    } else {
+                        $jp20++;
                     }
                 }
 
-                $jp0_10 = $sertifikats->whereBetween('jp', [0, 10])->count();
-                $jp11_19 = $sertifikats->whereBetween('jp', [11, 19])->count();
-                $jp20 = $sertifikats->where('jp', '>', 20)->count();
-                $total = $sertifikats->count();
-
                 return [
                     'nama' => $subunit->sub_unitkerja,
-                    'jumlah_kegiatan' => $subunit->jumlah_kegiatan_bangkom,
+
+                    // ✅ pakai jumlah valid (bukan semua usulan)
+                    'jumlah_kegiatan' => $jumlah_kegiatan_valid,
+
                     'jp0_10' => $jp0_10,
                     'jp11_19' => $jp11_19,
                     'jp20' => $jp20,
-                    'total' => $total,
-                    'persen_20' => $total > 0 ? round(($jp20 / $total) * 100) . '%' : '0%',
+
+                    'total' => $total_jp,
+
+                    // ✅ persen dari jumlah kegiatan
+                    'persen_20' => $jumlah_kegiatan_valid > 0
+                        ? round(($jp20 / $jumlah_kegiatan_valid) * 100) . '%'
+                        : '0%',
                 ];
+            })
+
+            // ✅ FILTER SEARCH (setelah mapping)
+            ->filter(function ($row) use ($search, $tahun) {
+
+                $matchSearch = true;
+                $matchTahun  = true;
+
+                if ($search) {
+                    $matchSearch = str_contains(strtolower($row['nama']), strtolower($search));
+                }
+
+                if ($tahun) {
+                    // kalau kamu belum punya field tahun di array, skip dulu
+                    $matchTahun = true; // nanti kita bisa upgrade
+                }
+
+                return $matchSearch && $matchTahun;
             });
+
+        // 🔥 PAGINATION
+        $rekap = $rekap->values(); // reset index
+
+        $page = request()->get('page', 1);
+        $perPage = 20;
+
+        $rekap = new LengthAwarePaginator(
+            $rekap->forPage($page, $perPage),
+            $rekap->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        // ✅ AMBIL LIST TAHUN UNTUK DROPDOWN
+        $tahuns = Izin_Sertifikats::selectRaw('YEAR(tanggalkeluarsertifikat_kegiatan) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+
         $user = Auth::user();
 
         if ($user->role === 'superadmin') {
@@ -78,7 +160,7 @@ class UsulanKegiatansController extends Controller
             return view('pages.rekapitulasi.admin_superadmin', compact('rekap'));
         }
 
-        return view('pages.rekapitulasi.user', compact('rekap'));
+        return view('pages.rekapitulasi.user', compact('rekap', 'tahuns'));
     }
 
     /**
@@ -251,9 +333,17 @@ class UsulanKegiatansController extends Controller
         ])->findOrFail($id);
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        // ✅ BENAR (ambil dari user login)
+        $unitkerjaId = $user->subunitkerjas->unitkerja_id;
+
+        $kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+
+        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+
+        // $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        // $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        // $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
