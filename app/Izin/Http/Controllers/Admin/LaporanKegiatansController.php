@@ -16,35 +16,134 @@ use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
 
+
 class LaporanKegiatansController extends Controller
 {
     /**
      * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
-    public function index()
-    {
-        $user = Auth::user();
+    public function index(Request $request)
+{
+    $user = Auth::user();
 
-        // Eager load relasi dari model
-        $usulankegiatans = Izin_Usulankegiatans::with([
+    $query = Izin_Usulankegiatans::with([
         'inputusulankegiatans',
         'inputusulankegiatans.pelaksanaankegiatans',
         'inputlaporankegiatans.laporankegiatans',
-        ])->whereHas('inputusulankegiatans.pelaksanaankegiatans')->orderByDesc('created_at');
+        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
+        'inputlaporankegiatans.laporankegiatans.sertifikats',
+        'inputlaporankegiatans.laporankegiatans.balasanlaporankegiatans',
+    ])
+    ->whereHas('inputusulankegiatans.pelaksanaankegiatans')
+    ->whereHas('inputlaporankegiatans.laporankegiatans')
 
-        if ($user->role == 'admin') {
-            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
-        }
+    // JOIN untuk sorting
+    ->leftJoin('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
+    ->leftJoin('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
 
-        if ($user->role == 'user') {
-            $usulankegiatans->where('dibuat_oleh', $user->id);
-        }
+    ->select('izin_usulankegiatans.*');
 
-        $usulankegiatans = $usulankegiatans->paginate(20);
+    // 🔥 SORTING (default terbaru)
+    $sort = $request->get('sort', 'desc');
 
-        // Redirect ke halaman daftar pengajuan usulan kegiatan
-        return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
+    $query->orderByRaw("
+        izin_laporankegiatans.tanggalmulai_kegiatan IS NULL,
+        izin_laporankegiatans.tanggalmulai_kegiatan {$sort}
+    ");
+
+    // 🔍 SEARCH
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+
+            // Nama kegiatan
+            $q->whereHas('inputusulankegiatans', function ($q1) use ($search) {
+                $q1->where('nama_kegiatan', 'like', "%{$search}%");
+            })
+
+            // Tanggal kegiatan
+            ->orWhereHas('inputlaporankegiatans.laporankegiatans', function ($q2) use ($search) {
+                $q2->where('tanggalmulai_kegiatan', 'like', "%{$search}%")
+                   ->orWhere('tanggalselesai_kegiatan', 'like', "%{$search}%");
+            });
+
+        });
     }
+
+    // 🔐 FILTER ROLE
+    if ($user->role == 'admin') {
+        $query->where('izin_usulankegiatans.subunitkerja_id', $user->subunitkerja_id);
+    }
+
+    if ($user->role == 'user') {
+        $query->where('izin_usulankegiatans.dibuat_oleh', $user->id);
+    }
+
+    // 🔥 FILTER TAHUN
+    if ($request->filled('tahun')) {
+        $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
+            $q->whereYear('tanggalmulai_kegiatan', $request->tahun);
+        });
+    }
+
+    // 🔥 AMBIL DATA
+    $data = $query->get();
+
+    // 🔥 FILTER STATUS (collection)
+    if ($request->filled('status')) {
+        $status = $request->status;
+
+        $data = $data->filter(function ($item) use ($status) {
+            return optional($item->inputlaporankegiatans?->laporankegiatans)->status_laporan_ui === $status;
+        });
+    }
+
+    // 🔥 PAGINATION MANUAL
+    $perPage = 20;
+    $currentPage = request()->get('page', 1);
+
+    $usulankegiatans = new \Illuminate\Pagination\LengthAwarePaginator(
+        $data->forPage($currentPage, $perPage),
+        $data->count(),
+        $perPage,
+        $currentPage,
+        [
+            'path' => request()->url(),
+            'query' => request()->query()
+        ]
+    );
+
+    $all = Izin_Laporankegiatans::with([
+    'verifikasilaporankegiatanterakhir',
+    'sertifikats',
+    'balasanlaporankegiatans'
+])->get();
+
+/* ================= CARD FIX ================= */
+
+   $total = $all->count();
+
+$disetujui = $all->filter(fn($item) =>
+    $item->status_laporan_ui === 'accepted' ||
+    $item->status_laporan_ui === 'finish'
+)->count();
+
+$menunggu = $all->filter(fn($item) =>
+    in_array($item->status_laporan_ui, ['need_review'])
+)->count();
+
+    /* ================= VIEW ================= */
+
+    return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
+        'usulankegiatans',
+        'total',
+        'disetujui',
+        'menunggu'
+    ));
+
+    return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
+}
 
     /**
      * Tampilkan Form Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
@@ -125,9 +224,9 @@ class LaporanKegiatansController extends Controller
         $laporankegiatans = $inputlaporankegiatans->laporankegiatans;
 
         // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
-        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
-            abort(403, 'Usulan sudah tidak dapat diubah.');
-        }
+        if (!in_array($laporankegiatans->status_laporan_ui, ['completed', 'rejected'])) {
+    abort(403, 'Usulan sudah tidak dapat diubah.');
+}
 
         // Pastikan detaillaporankegiatan selalu ada
         $detaillaporankegiatans = $laporankegiatans->detaillaporankegiatans ?? new Izin_Detaillaporankegiatans();
@@ -159,9 +258,9 @@ class LaporanKegiatansController extends Controller
         $laporankegiatans = $inputlaporan->laporankegiatans;
 
         // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
-        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
-            abort(403);
-        }
+        if (!in_array($laporankegiatans->status_laporan_ui, ['completed', 'rejected'])) {
+    abort(403, 'Laporan tidak bisa diedit.');
+}
 
         // Update data laporankegiatan
         $laporankegiatans->update([
@@ -171,7 +270,9 @@ class LaporanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            'statuslaporan_kegiatan' => 'completed'
         ]);
+        $laporankegiatans->verifikasilaporankegiatans()->delete();
 
         // Lanjutkan proses store ke controller detaillaporankegiatan
         return app(DetailLaporanKegiatansController::class)->store($request);
@@ -186,17 +287,23 @@ class LaporanKegiatansController extends Controller
         $user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
-        $laporankegiatans = Izin_Laporankegiatans::with([
-            'detaillaporankegiatans',
-            'inputlaporankegiatans',
-            'inputlaporankegiatans.inputusulankegiatans',
-            'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
-            'detaillaporankegiatans.pesertakegiatans',
-            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
-        ])->findOrFail($id);
+        // Ambil dari USULAN, bukan langsung laporan
+$usulan = Izin_Usulankegiatans::with([
+    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+    'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
+    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+    'inputlaporankegiatans.laporankegiatans.sertifikats'
+])->findOrFail($id);
+
+// Ambil laporan dari relasi
+$laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
+
+if (!$laporankegiatans) {
+    abort(404, 'Laporan tidak ditemukan');
+}
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans?->kopunitkerjas ?? null;
         $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
         $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
@@ -346,4 +453,56 @@ class LaporanKegiatansController extends Controller
 
         return $formatRupiah . ' (' . $hasil . ')';
     }
+
+    public function destroy($id)
+{
+    $input = Izin_Inputlaporankegiatans::with([
+        'laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+        'laporankegiatans.verifikasilaporankegiatans',
+        'laporankegiatans.sertifikats',
+        'laporankegiatans.balasanlaporankegiatans',
+        'cetaklaporankegiatans'
+    ])->findOrFail($id);
+
+    $laporan = $input->laporankegiatans;
+
+    if ($laporan) {
+
+        // 1. hapus peserta
+        $detail = $laporan->detaillaporankegiatans;
+        if ($detail) {
+            $detail->pesertakegiatans()->delete();
+            $detail->delete();
+        }
+
+        // 2. hapus verifikasi
+        $laporan->verifikasilaporankegiatans()->delete();
+
+        // 3. hapus sertifikat
+        if ($laporan->sertifikats) {
+            $laporan->sertifikats->delete();
+        }
+
+        // 4. hapus balasan
+        if ($laporan->balasanlaporankegiatans) {
+            $laporan->balasanlaporankegiatans->delete();
+        }
+
+        // 5. hapus cetak
+        if ($input->cetaklaporankegiatans) {
+            $input->cetaklaporankegiatans->delete();
+        }
+    }
+
+    // 6. HAPUS INPUT  
+    $input->delete();
+
+    // 7. HAPUS LAPORAN
+    if ($laporan) {
+        $laporan->delete();
+    }
+
+    return redirect()->route('admin.laporankegiatan.index')
+        ->with('success', 'Laporan berhasil dihapus');
+}
 }

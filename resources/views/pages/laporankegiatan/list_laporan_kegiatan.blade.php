@@ -18,16 +18,127 @@
                 </p>
             </div>
 
-            <!-- BUTTON TAMBAH 
-            <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end mb-4">
-                <a href="{{ route('admin.usulankegiatan.create') }}"
-                    class="w-2/12 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white text-center font-semibold hover:opacity-90 transition">
-                    + Buat Usulan Baru
-                </a>
-            </div>-->
+            <!-- Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+
+  <div class="p-5 sm:p-6 rounded-xl bg-[#FFE6EB] shadow-sm">
+    <h2 class="text-gray-700 text-sm font-medium">Total Laporan</h2>
+    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
+      {{ $total }}
+    </p>
+  </div>
+
+  <div class="p-5 sm:p-6 rounded-xl bg-[#E3EEFF] shadow-sm">
+    <h2 class="text-gray-700 text-sm font-medium">Disetujui</h2>
+    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
+      {{ $disetujui }}
+    </p>
+  </div>
+
+  <div class="p-5 sm:p-6 rounded-xl bg-[#F2E9FF] shadow-sm">
+    <h2 class="text-gray-700 text-sm font-medium">Menunggu Verifikasi</h2>
+    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
+      {{ $menunggu }}
+    </p>
+  </div>
+
+</section>
 
             <!-- TABLE -->
             <div class="bg-white rounded-xl shadow p-6">
+                 <!-- FILTER ATAS -->
+    <div class="flex flex-col md:flex-row gap-4 mb-4">
+               {{-- Search --}}
+<form method="GET" class="flex-1 relative">
+    <input type="text" name="search" value="{{ request('search') }}"
+        placeholder="Cari nama kegiatan, tanggal pelaksanaan..."
+        onkeyup="this.form.submit()"
+        class="w-full pl-10 pr-4 py-2 border rounded-lg" />
+
+    <svg xmlns="http://www.w3.org/2000/svg"
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
+        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+    </svg>
+</form>
+        <form method="GET" class="flex gap-3 justify-end flex-wrap">
+
+    <!-- FILTER TAHUN -->
+    <select name="tahun" onchange="this.form.submit()"
+        class="border rounded-lg px-4 py-2 text-sm min-w-[140px] whitespace-nowrap">
+        <option value="">Semua Tahun</option>
+        @for ($year = 2021; $year <= 2026; $year++)
+            <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                {{ $year }}
+            </option>
+        @endfor
+    </select>
+
+    <!-- FILTER STATUS -->
+    <select name="status" onchange="this.form.submit()"
+        class="border rounded-lg px-4 py-2 text-sm min-w-[140px] whitespace-nowrap">
+
+        <option value="">Semua Status</option>
+
+        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+            pending
+        </option>
+
+        <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>
+            need review
+        </option>
+
+        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+            completed
+        </option>
+
+        <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>
+            accepted
+        </option>
+
+        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+            rejected
+        </option>
+
+        <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>
+            finish
+        </option>
+
+    </select>
+
+</form>
+
+<div x-data="{ openSort: false }" class="relative">
+    
+    <!-- ICON SORT -->
+    <button @click="openSort = !openSort"
+        class="border rounded-lg px-3 py-2 text-sm bg-white hover:bg-gray-100 flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8"
+    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M3 4h13M3 8h9m-9 4h6m-6 4h3" />
+</svg>
+    </button>
+
+    <!-- DROPDOWN -->
+    <div x-show="openSort" @click.outside="openSort = false"
+        x-transition
+        class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow z-50">
+
+        <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}"
+            class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort', 'desc') == 'desc' ? 'bg-gray-100 font-semibold' : '' }}">
+            Terbaru
+        </a>
+
+        <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}"
+            class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort') == 'asc' ? 'bg-gray-100 font-semibold' : '' }}">
+            Terlama
+        </a>
+
+    </div>
+</div>
+    </div>
                 <div class="border rounded-lg overflow-hidden">
                     <table class="w-full text-sm table-fixed">
                         <thead>
@@ -58,12 +169,13 @@
                                         \Carbon\Carbon::parse(optional($u->inputlaporankegiatans?->laporankegiatans)->tanggalselesai_kegiatan)->format('d/m/Y') : '-'}}
                                 </td>
 
-                                <!-- Status Usulan Kegiatan -->
+                                <!-- Status Laporan Kegiatan -->
                                 <td class="py-3 px-4 text-center">
                                     <span class="{{ $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui_class }}">
                                         {{ str_replace('_', ' ', $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui) }}
                                     </span>
                                 </td>
+
 
                                 <!-- Update Progress -->
                                 <td class="py-3 px-4 text-center" x-data="{ openProgress: false }">
@@ -133,12 +245,22 @@
                                                     </span>
                                                     @endif
 
-                                                    {{-- Lihat Pelaksanaan --}}
-                                                    <a href="{{ route('admin.sertifikat.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#defff8] text-[#136769]">
-                                                        Download Sertifikat Peserta
-                                                    </a>
+                                                    {{-- Sertifikat --}}
+@php
+    $sertifikat = $u->inputlaporankegiatans?->laporankegiatans?->sertifikats;
+@endphp
+
+@if($sertifikat)
+    <a href="{{ route('admin.sertifikat.download', $u->id) }}"
+       target="_blank"
+       class="block px-4 py-2 rounded-lg bg-[#defff8] text-[#136769]">
+        Download Sertifikat Peserta
+    </a>
+@else
+    <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+        Download Sertifikat Peserta
+    </span>
+@endif
                                                 </div>
                                             </div>
                                         </div>
@@ -149,10 +271,11 @@
                                 <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
                                     <div class="flex justify-center gap-4">
 
+                                        <div class="flex items-center space-x-2">
                                         {{-- ===================== LIHAT DOKUMEN ===================== --}}
                                         <a @click="openDokumen = true"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/File text.png') }}" class="w-6 h-6 inline">
+                                            class="text-blue-600 hover:underline cursor-pointer">
+                                            Detail
                                         </a>
 
                                         <!-- MODAL DETAIL -->
@@ -166,7 +289,7 @@
                                                 </button>
 
                                                 <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    📄 Daftar Dokumen
+                                                    Detail Dokumen
                                                 </h2>
 
                                                 <p class="text-sm text-gray-500 mb-6">
@@ -174,51 +297,72 @@
                                                 </p>
 
                                                 <div class="flex flex-col space-y-3 font-bold">
-                                                    {{-- Lihat Surat dan Laporan Hasil --}}
-                                                    <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6]">
-                                                        Lihat Surat dan Laporan Hasil
-                                                    </a>
 
-                                                    {{-- Lihat Surat Balasan Laporan --}}
-                                                    <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000]">
-                                                        Lihat Surat Balasan Laporan
-                                                    </a>
-                                                </div>
+    {{-- Lihat Surat dan Laporan Hasil --}}
+    @if($u->inputlaporankegiatans?->laporankegiatans)
+        <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
+           target="_blank"
+           class="block px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6]">
+            Lihat Surat dan Laporan Hasil
+        </a>
+    @else
+        <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+            Lihat Surat dan Laporan Hasil
+        </span>
+    @endif
+
+
+    {{-- Lihat Surat Balasan Laporan --}}
+    @if($u->inputlaporankegiatans?->laporankegiatans?->balasanlaporankegiatans ?? false)
+        <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
+           target="_blank"
+           class="block px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000]">
+            Lihat Surat Balasan Laporan
+        </a>
+    @else
+        <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
+            Lihat Surat Balasan Laporan
+        </span>
+    @endif
+
+    </div>
                                             </div>
                                         </div>
 
                                         {{-- ===================== TOMBOL EDIT ===================== --}}
                                         @if($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
+                                        <span class="text-gray-400">|</span>
                                         <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline">
+                                            class="text-blue-600 hover:underline">
+                                            Edit
                                         </a>
                                         @else
-                                        <span class="text-gray-400 italic"><img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline"></span>
+                                        <span class="text-gray-400 ">| Edit</span>
                                         @endif
 
                                         {{-- ===================== TOMBOL HAPUS ===================== --}}
-                                        <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Yakin hapus usulan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:underline">
-                                                <img src="{{ asset('images/delete.png') }}" alt="Hapus" class="w-6 h-6 inline">
-                                            </button>
-                                        </form>
+@if($u->inputlaporankegiatans)
+    <span class="text-gray-400">|</span>
+    <form action="{{ route('admin.laporankegiatan.destroy', $u->inputlaporankegiatans->id) }}"
+        method="POST"
+        class="inline"
+        onsubmit="return confirm('Yakin hapus laporan ini?')">
+        @csrf
+        @method('DELETE')
+
+        <button type="submit" class="text-red-600 hover:underline">
+            Hapus
+        </button>
+    </form>
+@endif
+                                    </div>
                                     </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-gray-500 py-4">
-                                    Tidak ada data usulan kegiatan.
+                                    Tidak ada data laporan kegiatan.
                                 </td>
                             </tr>
                             @endforelse

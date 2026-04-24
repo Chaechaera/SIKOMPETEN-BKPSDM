@@ -4,6 +4,7 @@ namespace App\Izin\Models;
 
 use App\Izin\Models\Izin_Pelaksanaankegiatans;
 use App\Izin\Models\Izin_Usulankegiatans;
+use App\Izin\Models\Izin_Cetakusulankegiatans;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -52,4 +53,9 @@ class Izin_Inputusulankegiatans extends Model
     {
         return $this->hasOne(Izin_Pelaksanaankegiatans::class, 'inputusulankegiatan_id');
     }
+
+    public function cetakusulankegiatans()
+{
+    return $this->hasMany(Izin_Cetakusulankegiatans::class, 'inputusulankegiatan_id', 'id');
+}
 }

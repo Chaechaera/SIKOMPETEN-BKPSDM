@@ -18,33 +18,101 @@
                 </p>
             </div>
 
-            <!-- Tabel Daftar Usulan -->
-            <div class="bg-white rounded-xl shadow p-6">
-                {{-- Filters --}}
-                <div class="flex flex-col md:flex-row gap-4 mb-4">
-                    {{-- Search --}}
-                    <div class="flex-1 relative">
-                        <input type="text" placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg" />
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
-                        </svg>
-                    </div>
+            <!-- TABLE -->
+<div class="bg-white rounded-xl shadow p-6">
 
-                    {{-- Status Filter --}}
-                    <form method="GET">
-                        <select name="statuslaporan_kegiatan" onchange="this.form.submit()"
-                            class="w-full md:w-52 border rounded-lg px-3 py-2">
-                            <option value="">Semua Status Laporan</option>
-                            <option value="pending" {{ request('statuslaporan_kegiatan') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="accepted" {{ request('statuslaporan_kegiatan') == 'accepted' ? 'selected' : '' }}>Disetujui</option>
-                            <option value="rejected" {{ request('statuslaporan_kegiatan') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
-                    </form>
+    <!-- FILTER ATAS -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+
+        {{-- Search --}}
+<form method="GET" class="flex-1 relative">
+    <input 
+        type="text" 
+        name="search" 
+        value="{{ request('search') }}" 
+        placeholder="Cari nama kegiatan, nomor surat, atau OPD..." 
+        onkeyup="this.form.submit()" 
+        class="w-full pl-10 pr-4 py-2 border rounded-lg"
+    />
+
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+    >
+        <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" 
+        />
+    </svg>
+</form>
+        <!-- FILTER + SORT -->
+        <div class="flex items-center gap-3 flex-wrap">
+
+            <form method="GET" class="flex items-center gap-3 flex-wrap">
+
+                <!-- TAHUN -->
+                <select name="tahun" onchange="this.form.submit()"
+                    class="border rounded-lg px-4 py-2 text-sm min-w-[140px]">
+                    <option value="">Semua Tahun</option>
+                    @for ($year = 2021; $year <= 2026; $year++)
+                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                            {{ $year }}
+                        </option>
+                    @endfor
+                </select>
+
+                <!-- STATUS -->
+                <select name="status" onchange="this.form.submit()"
+                    class="border rounded-lg px-4 py-2 text-sm min-w-[140px]">
+
+                    <option value="">Semua Status</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>pending</option>
+                    <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>need review</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>completed</option>
+                    <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>accepted</option>
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
+                    <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>finish</option>
+
+                </select>
+
+            </form>
+
+            <!-- SORT -->
+            <div x-data="{ openSort: false }" class="relative">
+
+                <button @click="openSort = !openSort"
+                    class="border rounded-lg px-3 py-2 bg-white hover:bg-gray-100 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h13M3 8h9m-9 4h6m-6 4h3" />
+                    </svg>
+                </button>
+
+                <div x-show="openSort" @click.outside="openSort = false"
+                    x-transition
+                    class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow z-50">
+
+                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}"
+                        class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort', 'desc') == 'desc' ? 'bg-gray-100 font-semibold' : '' }}">
+                        Terbaru
+                    </a>
+
+                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}"
+                        class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort') == 'asc' ? 'bg-gray-100 font-semibold' : '' }}">
+                        Terlama
+                    </a>
+
                 </div>
+            </div>
+
+        </div>
+    </div>
                 <div class="border rounded-lg overflow-hidden">
                     <table class="w-full text-sm table-fixed">
                         <thead>
@@ -94,7 +162,7 @@
                                         {{-- ===================== CETAK DOKUMEN ===================== --}}
                                         @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
                                         <form method="POST"
-                                            action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->id) }}"
+                                            action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->inputlaporankegiatans->laporankegiatans->id) }}"
                                             onsubmit="return confirm('Yakin cetak?')">
                                             @csrf
                                             <button type="submit"
@@ -110,8 +178,12 @@
                                         @endif
 
                                         {{-- ===================== KIRIM DOKUMEN ===================== --}}
-                                        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_laporan)
-                                        <a href="{{ route('superadmin.balasanlaporankegiatan.kirim', $u->id) }}"
+                                        
+                                        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
+                                        <a href="{{ route(
+    'superadmin.balasanlaporankegiatan.kirim',
+    $u->inputlaporankegiatans->laporankegiatans->id
+)}}"
                                             class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
                                             Kirim
                                         </a>
@@ -119,6 +191,7 @@
                                         <button
                                             class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Kirim</button>
                                         @endif
+
 
                                         {{-- ===================== REVIEW DOKUMEN ===================== --}}
                                         @if($u->isReviewLaporan())
@@ -137,11 +210,12 @@
                                 <!-- Tombol Aksi -->
                                 <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
                                     <div class="flex justify-center gap-2">
+                                        <div class="flex justify-center items-center gap-2 text-sm">
 
                                         {{-- TOMBOL LIHAT DOKUMEN --}}
                                         <a @click="openDokumen = true"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/File text.png') }}" class="w-6 h-6 inline">
+                                        class="text-blue-600 hover:underline cursor-pointer">
+                                        Detail
                                         </a>
 
                                         <!-- MODAL DETAIL -->
@@ -155,7 +229,7 @@
                                                 </button>
 
                                                 <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    📄 Daftar Dokumen
+                                                    Detail Dokumen
                                                 </h2>
 
                                                 <p class="text-sm text-gray-500 mb-6">
@@ -179,23 +253,26 @@
                                         </div>
 
                                         {{-- TOMBOL HAPUS --}}
+                                        <span class="text-gray-400">|</span>
                                         <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Yakin hapus usulan ini?')">
+                                                method="POST"
+                                                class="inline"
+                                                onsubmit="return confirm('Yakin hapus usulan ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
+                                        <button type="submit"
                                                 class="text-red-600 hover:underline">
-                                                <img src="{{ asset('images/delete.png') }}" alt="Hapus" class="w-6 h-6 inline">
-                                            </button>
+                                                Hapus
+                                        </button>
                                         </form>
+                                    </div>
                                     </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-gray-500 p-4">
-                                    Tidak ada data usulan kegiatan.
+                                    Tidak ada data laporan kegiatan.
                                 </td>
                             </tr>
                             @endforelse

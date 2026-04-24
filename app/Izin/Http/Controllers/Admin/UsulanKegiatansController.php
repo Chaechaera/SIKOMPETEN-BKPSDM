@@ -295,4 +295,43 @@ class UsulanKegiatansController extends Controller
         // Redirect dan simpan file PDF
         return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
+
+    public function destroy($id)
+{
+    $usulan = Izin_Usulankegiatans::with([
+        'inputusulankegiatans.inputlaporankegiatans.laporankegiatans'
+    ])->findOrFail($id);
+
+    if ($usulan->inputusulankegiatans) {
+
+        $inputUsulan = $usulan->inputusulankegiatans;
+
+        // 🔥 Hapus laporan dulu (child paling bawah)
+        if ($inputUsulan->inputlaporankegiatans) {
+
+            $inputLaporan = $inputUsulan->inputlaporankegiatans;
+
+            if ($inputLaporan->laporankegiatans) {
+                $inputLaporan->laporankegiatans->detaillaporankegiatans()?->delete();
+                $inputLaporan->laporankegiatans->delete();
+            }
+
+            $inputLaporan->delete();
+        }
+
+        // hapus cetak
+        if ($inputUsulan->cetakusulankegiatans) {
+            $inputUsulan->cetakusulankegiatans()->delete();
+        }
+
+        // hapus input usulan
+        $inputUsulan->delete();
+    }
+
+    // terakhir hapus usulan
+    $usulan->delete();
+
+    return redirect()->route('admin.usulankegiatan.index')
+        ->with('success', 'Usulan kegiatan berhasil dihapus');
+}
 }

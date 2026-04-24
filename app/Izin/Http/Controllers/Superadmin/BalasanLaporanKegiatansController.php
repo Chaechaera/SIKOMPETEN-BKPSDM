@@ -131,81 +131,155 @@ class BalasanLaporanKegiatansController extends Controller
      * Tampilkan Form Kirim Balasan Laporan Hasil Kegiatan Final
      */
     public function kirim($id)
-    {
-        // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
-        $laporankegiatans = Izin_Laporankegiatans::with([
-            'sertifikats',
-            'inputlaporankegiatans',
-            'inputlaporankegiatans.inputusulankegiatans',
-        ])->findOrFail($id);
+{
+    $laporankegiatans = Izin_Laporankegiatans::with([
+        'sertifikats',
+        'inputlaporankegiatans',
+        'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans',
+    ])->findOrFail($id);
 
-        // Redirect ke halaman kirim balasan laporan kegiatan
-        return view('pages.balasanlaporankegiatan.kirim_balasan_laporan_kegiatan', compact('laporankegiatans'));
-    }
+    // 🔹 URUTAN
+    $urutan = optional($laporankegiatans->inputlaporankegiatans)->id ?? 0;
+    $urutan = str_pad($urutan, 3, '0', STR_PAD_LEFT);
+
+    // 🔹 BULAN (sementara pakai sekarang)
+    $bulan = date('n');
+    $bulanRomawi = $this->bulanRomawi($bulan);
+
+    // 🔹 CARA PELATIHAN
+
+$cara = optional(
+    $laporankegiatans->inputlaporankegiatans
+        ?->inputusulankegiatans
+        ?->usulankegiatans
+)->carapelatihan_id ?? 0;
+// 🔹 TAHUN
+    $tahun = date('Y');
+
+// 🔹 FINAL
+$nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
+
+    // 🔹 SERTIFIKAT (biar tetap ada di view)
+    $sertifikats = $laporankegiatans->sertifikats;
+
+    return view('pages.balasanlaporankegiatan.kirim_balasan_laporan_kegiatan', 
+        compact('laporankegiatans', 'nomorSurat', 'sertifikats')
+    );
+}
 
     /**
      * Simpan File Balasan Laporan Hasil Kegiatan Final
      */
-    public function storeFinal(Request $request, IdentitasSuratsService $identitassuratservice)
-    {
-        // Ambil user yang sedang login saat ini
-        $user = Auth::user();
 
-        // Transaksi DB berlangsung
-        DB::transaction(function () use ($request, $identitassuratservice, $user) {
+        public function storeFinal(Request $request, IdentitasSuratsService $identitassuratservice)
+{
+    $user = Auth::user();
 
-            // Simpan identitassurat
-            $identitassurats = $identitassuratservice->create(
-                $request->only([
-                    'nomor_surat',
-                    'tanggal_surat',
-                    'perihal_surat',
-                    'sifat_surat',
-                    'lampiran_surat',
-                ])
-            );
+    // ✅ VALIDASI DULU
+    $request->validate([
+        'tanggal_surat' => 'required|date',
+        'filekirim_balasanlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
+        'laporankegiatan_id' => 'required',
+    ]);
 
-            // Validasi request
-            $request->validate([
-                'filekirim_balasanlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
-                'laporankegiatan_id' => 'required',
+    DB::transaction(function () use ($request, $identitassuratservice, $user) {
+
+        // ✅ Ambil data SEKALI SAJA
+        $laporankegiatan = Izin_Laporankegiatans::with([
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans'
+        ])->findOrFail($request->route('id'));
+
+        // =============================
+        // 🔥 GENERATE NOMOR SURAT
+        // =============================
+
+        // 🔹 URUTAN
+        $urutan = optional($laporankegiatan->inputlaporankegiatans)->id ?? 0;
+        $urutan = str_pad($urutan, 3, '0', STR_PAD_LEFT);
+
+        // 🔹 BULAN ROMAWI
+        $bulan = date('n', strtotime($request->tanggal_surat));
+        $bulanRomawi = $this->bulanRomawi($bulan);
+
+        // 🔹 CARA PELATIHAN
+        $cara = optional(
+            $laporankegiatan->inputlaporankegiatans
+                ?->inputusulankegiatans
+                ?->usulankegiatans
+                ?->carapelatihans
+        )->cara_pelatihan ?? 'UMUM';
+
+        // 🔹 FINAL FORMAT
+        $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}";
+
+        // Inject ke request
+        $request->merge([
+            'nomor_surat' => $nomorSurat
+        ]);
+
+        // =============================
+        // 🔥 SIMPAN IDENTITAS SURAT
+        // =============================
+        $identitassurats = $identitassuratservice->create(
+            $request->only([
+                'nomor_surat',
+                'tanggal_surat',
+                'perihal_surat',
+                'sifat_surat',
+                'lampiran_surat',
+            ])
+        );
+
+        // =============================
+        // 🔥 FILE UPLOAD
+        // =============================
+        $filePath = null;
+
+        if ($request->hasFile('filekirim_balasanlaporankegiatan')) {
+            $filePath = $request->file('filekirim_balasanlaporankegiatan')
+                ->storeAs(
+                    'izin/filekirim_balasanlaporankegiatan',
+                    time() . '_' . $request->file('filekirim_balasanlaporankegiatan')->getClientOriginalName(),
+                    'public'
+                );
+        }
+
+        $inputlaporankegiatan_id = optional($laporankegiatan->inputlaporankegiatans)->id;
+
+        // =============================
+        // 🔥 SIMPAN DATA
+        // =============================
+        $kirimbalasanlaporan = Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
+            [
+                'inputlaporankegiatan_id' => $inputlaporankegiatan_id
+            ],
+            [
+                'identitassurat_id' => $identitassurats->id,
+                'filekirim_balasanlaporankegiatan' => $filePath,
+                'tanggalkirim_balasanlaporankegiatan' => now(),
+                'nipadmin_kirimbalasanlaporankegiatan' => $user->nip,
+            ]
+        );
+
+        // Update FK
+        Izin_Inputlaporankegiatans::where('id', $inputlaporankegiatan_id)
+            ->update([
+                'kirimbalasanlaporankegiatan_id' => $kirimbalasanlaporan->id
             ]);
+    });
 
-            // Ambil laporankegiatan dari id route
-            $laporankegiatan = Izin_Laporankegiatans::with('inputlaporankegiatans')->findOrFail($request->route('id'));
-            $inputlaporankegiatan_id = $laporankegiatan->inputlaporankegiatans->id;
+    return redirect()->route('superadmin.usulankegiatan.pending')
+        ->with('success', 'Usulan kegiatan berhasil dikirim!');
+}
+    private function bulanRomawi($bulan)
+{
+    $romawi = [
+        1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV',
+        5 => 'V', 6 => 'VI', 7 => 'VII', 8 => 'VIII',
+        9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+    ];
 
-            // Upload file kirim balasan laporan kegiatan final
-            if ($request->hasFile('filekirim_balasanlaporankegiatan')) {
-                $kirimbalasanlaporankegiatans = $request->file('filekirim_balasanlaporankegiatan')
-                    ->storeAs(
-                        'izin/filekirim_balasanlaporankegiatan',
-                        time() . '_' . $request->file('filekirim_balasanlaporankegiatan')->getClientOriginalName(),
-                        'public'
-                    );
-            }
-
-            // Simpan dan update data kirim balasan laporan kegiatan final
-            $kirimbalasanlaporan = Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
-                [
-                    'inputlaporankegiatan_id' => $inputlaporankegiatan_id
-                ],
-                [
-                    'identitassurat_id' => $identitassurats->id,
-                    'filekirim_balasanlaporankegiatan' => $kirimbalasanlaporankegiatans,
-                    'tanggalkirim_balasanlaporankegiatan' => now(),
-                    'nipadmin_kirimbalasanlaporankegiatan' => $user->nip,
-                ]
-            );
-
-            // Update FK pada inputlaporankegiatan
-            Izin_Inputlaporankegiatans::where('id', $inputlaporankegiatan_id)
-                ->update([
-                    'kirimbalasanlaporankegiatan_id' => $kirimbalasanlaporan->id
-                ]);
-        });
-
-        // Redirect ke halaman daftar usulan kegiatan superadmin
-        return redirect()->route('superadmin.usulankegiatan.pending')->with('success', 'Usulan kegiatan berhasil dikirim!');
-    }
+    return $romawi[(int)$bulan] ?? '-';
+}
 }

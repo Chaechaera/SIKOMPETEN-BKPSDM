@@ -25,7 +25,9 @@
             <div>
                 <h1 class="text-2xl font-medium text-[#2B3674]">
                     <span x-text="greeting"></span>,
-                    <span class="font-bold">{{ Auth::user()->nama }}🪄</span>
+                    <span class="font-bold">
+    {{ Auth::user()->nama }} - {{ Auth::user()->subunitkerjas?->sub_unitkerja ?? '-' }} 🪄
+</span>
                 </h1>
                 <p class="text-sm text-gray-500">
                     Hope you have a good day and good mood for work today!

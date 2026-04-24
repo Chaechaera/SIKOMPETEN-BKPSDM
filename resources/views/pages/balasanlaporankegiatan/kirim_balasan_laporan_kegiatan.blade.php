@@ -18,7 +18,7 @@
 
                 <div class="bg-white rounded-xl shadow p-6 mb-4">
                     <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR KIRIM BALASAN LAPORAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                    <p class="text-sm text-gray-500 max-w-4xl">
+                    <p class="text-sm text-blue-600">
                         Silahkan lengkapi data kirim balasan laporan kegiatan pada form ini dan pastikan data yang diisikan telah sesuai sebelum dikirim.
                     </p>
                 </div>
@@ -34,11 +34,9 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Surat</label>
                             <div class="required">
-                                <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="12/X/BKPSDM/001" required>
-                                @error('nomor_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <input type="text" name="nomor_surat"
+                                    value="{{ $nomorSurat }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
 
@@ -47,7 +45,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
                             <div class="relative">
                                 <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                                 @error('tanggal_surat')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -59,7 +57,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lampiran Surat</label>
                             <div class="relative">
                                 <input type="text" name="lampiran_surat" value="1 Bendel"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                                 @error('lampiran_surat')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -70,7 +68,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sifat Surat</label>
                             <div class="relative">
-                                <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                                     <option value="" disabled selected>-- Pilih sifat surat --</option>
                                     <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
                                     <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
@@ -86,7 +84,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perihal Surat</label>
                             <div class="relative">
                                 <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
                                 @error('perihal_surat')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -98,7 +96,7 @@
                         {{-- ====================================================== --}}
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                                Upload File Balasan Usulan Kegiatan Final
+                                Upload File Balasan Laporan Kegiatan Final
                                 <span class="text-gray-400 text-sm">(PDF/DOC/DOCX)</span>
                             </label>
                             <p class="text-xs text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
@@ -106,7 +104,7 @@
                             <div class="relative mb-3 mt-2">
                                 <input type="file" name="filekirim_balasanlaporankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
                                   focus:outline-none p-2" required>
                                 @error('filekirim_balasanlaporankegiatan')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>

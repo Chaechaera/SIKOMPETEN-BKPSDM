@@ -34,9 +34,9 @@ class Izin_Laporankegiatans extends Model
     }
 
     public function detaillaporankegiatans()
-    {
-        return $this->hasOne(Izin_Detaillaporankegiatans::class, 'laporankegiatan_id')->withDefault();
-    }
+{
+    return $this->hasOne(Izin_Detaillaporankegiatans::class, 'laporankegiatan_id');
+}
 
     public function sertifikats()
     {
@@ -59,22 +59,31 @@ class Izin_Laporankegiatans extends Model
     }
 
     public function verifikasilaporankegiatanterakhir()
-    {
-        return $this->hasOne(Izin_Verifikasilaporankegiatans::class, 'laporankegiatan_id')->latestOfMany('tanggalverifikasi_inputlaporankegiatan');
-    }
+{
+    return $this->hasOne(Izin_Verifikasilaporankegiatans::class, 'laporankegiatan_id')
+        ->orderByDesc('id');
+}
 
     /* ======================= ASSESSOR STATUS UI LAPORAN KEGIATAN ======================= */
 
     public function getStatusLaporanUiAttribute()
     {
-        // Jika verifikasi laporan kegiatan "Rejected"
-        if ($this->verifikasilaporankegiatanterakhir && $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'rejected') {
-            return 'rejected';
-        }
+        $verif = $this->verifikasilaporankegiatanterakhir;
+
+    // 🔥 kalau tidak ada verifikasi
+    if (!$verif) {
+        return $this->statuslaporan_kegiatan; 
+        // jadi 'completed' tetap 'completed'
+    }
 
         // Jika telah sampai tahap sertifikat dan balasan laporan kegiatan telah dibuat 
         if ($this->sertifikats && $this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan) {
             return 'finish';
+        }
+
+         // Jika verifikasi laporan kegiatan "Rejected"
+        if ($this->verifikasilaporankegiatanterakhir && $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'rejected') {
+            return 'rejected';
         }
 
         // Jika verifikasi laporan kegiatan "Accepted"
@@ -82,9 +91,9 @@ class Izin_Laporankegiatans extends Model
             return 'accepted';
         }
 
-        // Jika status laporan kegiatan "Completed" dan belum cetak laporan kegiatan
-        if ($this->statuslaporan_kegiatan === 'completed' && !$this->cetaklaporankegiatans) {
-            return 'completed';
+        // Jika sudah mengirim laporan kegiatan
+        if ($this->statuslaporan_kegiatan === 'need_review') {
+            return 'need_review';
         }
 
         // Jika sudah cetak tapi belum kirim laporan kegiatan
@@ -92,9 +101,9 @@ class Izin_Laporankegiatans extends Model
             return 'pending';
         }
 
-        // Jika sudah mengirim laporan kegiatan
-        if ($this->statuslaporan_kegiatan === 'need_review') {
-            return 'need_review';
+        // Jika status laporan kegiatan "Completed" dan belum cetak laporan kegiatan
+        if ($this->statuslaporan_kegiatan === 'completed' && !$this->cetaklaporankegiatans) {
+            return 'completed';
         }
 
         // Jika tidak memenuhi semua ketentuan
@@ -150,10 +159,18 @@ class Izin_Laporankegiatans extends Model
     }
 
     public function getBolehKirimLaporanAttribute()
-    {
-        return $this->status_laporan_ui === 'accepted' && $this->sudah_cetakLaporan && !$this->sudah_kirimLaporan;
-    }
+{
+    return $this->status_laporan_ui === 'completed'
+        && $this->sudah_cetakLaporan
+        && !$this->sudah_kirimLaporan;
+}
 
+public function getBolehKirimBalasanAttribute()
+{
+    return $this->balasanlaporankegiatans
+        && $this->balasanlaporankegiatans->tanggalcetak_balasanlaporankegiatan
+        && !$this->balasanlaporankegiatans->tanggalkirim_balasanlaporankegiatan;
+}
     /* ======================= ASSESSOR ATRIBUT UNTUK KOP SURAT ======================= */
 
     public function getKopViewAttribute()
@@ -175,4 +192,8 @@ class Izin_Laporankegiatans extends Model
             'value' => $kopsurat->kop_text
         ];
     }
+    public function getInputUsulanAttribute()
+{
+    return $this->inputlaporankegiatans?->inputusulankegiatans;
+}
 }

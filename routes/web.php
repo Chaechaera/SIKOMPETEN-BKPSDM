@@ -115,8 +115,11 @@ Route::middleware('auth')->group(function () {
         // Lihat Bukti Pelaksanaan Kegiatan
         Route::get('/admin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('admin.pelaksanaankegiatan.show');
 
-        // List Pengajuan Usulan Kegiatan yang Dibuat
+        // List Pengajuan laporan Kegiatan yang Dibuat
         Route::get('/admin/laporankegiatan/listlaporankegiatan', [LaporanKegiatansController::class, 'index'])->name('admin.laporankegiatan.index');
+
+        //Daftar Laporan Kegiatan
+        Route::get('/admin/laporankegiatan/daftar_laporankegiatan', [LaporanKegiatansController::class, 'index'])->name('admin.laporankegiatan.index');
 
         // Buat Laporan Hasil Kegiatan
         Route::get('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.create');
@@ -136,6 +139,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.kirim');
         Route::post('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.kirim');
 
+        // Delete Laporan Kegiatan
+        Route::delete('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'destroy'])
+    ->name('admin.laporankegiatan.destroy');
+    
         // Download Surat Balasan Pengajuan Usulan Kegiatan dari Superadmin
         Route::get('/admin/usulankegiatan/{id}/downloadBalasan', [BalasanUsulanKegiatansController::class, 'downloadBalasan'])->name('admin.usulankegiatan.downloadBalasan');
 

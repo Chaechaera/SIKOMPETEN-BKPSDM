@@ -5,6 +5,7 @@ namespace App\Izin\Http\Controllers\Superadmin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Kirimbalasanlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
+use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -37,7 +38,15 @@ class CetakBalasanLaporanKegiatansController extends Controller
             ]);
         });
 
-        // Redirect ke halaman download surat balasan laporan kegiatan
-        return redirect()->route('superadmin.balasanlaporankegiatan.download', $laporan->id)->with('success', 'Usulan berhasil dicetak.');
-    }
+        $balasan = Izin_Balasanlaporankegiatans::where(
+    'inputlaporankegiatan_id',
+    $laporan->inputlaporankegiatans->id
+)->first();
+
+if (!$balasan) {
+    abort(404, 'Balasan tidak ditemukan');
+}
+
+return redirect()->route('superadmin.balasanlaporankegiatan.download', $balasan->id);
+}
 }

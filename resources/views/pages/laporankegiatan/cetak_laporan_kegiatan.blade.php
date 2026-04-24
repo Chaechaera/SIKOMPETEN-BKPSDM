@@ -72,19 +72,35 @@
             </div>
 
             {{-- Form Review Usulan --}}
-            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                <a href="{{ route('admin.laporankegiatan.download', $usulan->id) }}"
-                    class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
-                    Tinjau Laporan
-                </a>
-                <form method="POST" action="{{ route('admin.laporankegiatan.cetak', $usulan->id) }}">
-                    @csrf
-                    <button type="submit"
-                        class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#5b78f8] to-[#3651d4] text-white font-semibold hover:opacity-90 transition">
-                        Cetak Laporan
-                    </button>
-                </form>
-            </div>
+<div class="mt-6 relative flex items-center justify-between">
+
+    {{-- Tombol Kiri --}}
+    <a href="{{ route('admin.laporankegiatan.download', $usulan->id) }}"
+        class="inline-flex items-center justify-center px-6 py-2.5 
+        rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] 
+        text-white font-semibold hover:opacity-90 transition">
+        Tinjau Laporan
+    </a>
+
+    {{-- Step Tengah --}}
+    <div class="absolute left-1/2 transform -translate-x-1/2">
+        <span class="text-sm font-semibold text-gray-500">
+            Step <span class="text-[#FFA41B] font-bold">3</span> dari 4
+        </span>
+    </div>
+
+    {{-- Tombol Kanan --}}
+    <form method="POST" action="{{ route('admin.laporankegiatan.cetak', $usulan->id) }}">
+        @csrf
+        <button type="submit"
+            class="inline-flex items-center justify-center px-6 py-2.5 
+            rounded-lg bg-gradient-to-r from-[#5b78f8] to-[#3651d4] 
+            text-white font-semibold hover:opacity-90 transition">
+            Cetak Laporan
+        </button>
+    </form>
+
+</div>
         </div>
     </div>
 </div>

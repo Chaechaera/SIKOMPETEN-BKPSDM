@@ -68,6 +68,6 @@ class CetakLaporanKegiatansController extends Controller
         });
 
         // Redirect ke halaman download Laporan Hasil Kegiatan
-        return redirect()->route('admin.laporankegiatan.download', $usulan->id)->with('success', 'Usulan berhasil dicetak.');
+        return redirect()->route('admin.laporankegiatan.download', $usulan->id)->with('success', 'Laporan berhasil dicetak.');
     }
 }

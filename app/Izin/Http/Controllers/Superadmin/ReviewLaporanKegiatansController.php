@@ -18,33 +18,93 @@ class ReviewLaporanKegiatansController extends Controller
      * Tampilkan Daftar Usulan Kegiatan yang Perlu Direview
      */
     public function pendingList(Request $request)
-    {
-        // Eager load relasi dari model
-        $usulankegiatans = Izin_Usulankegiatans::with([
-            'inputusulankegiatans',
-            'inputlaporankegiatans',
-            'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
-            'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
-            'inputlaporankegiatans.laporankegiatans'
-        ])->whereHas('inputlaporankegiatans.laporankegiatans');
+{
+    $query = Izin_Usulankegiatans::with([
+        'inputusulankegiatans',
+        'inputlaporankegiatans',
+        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
+        'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
+        'subunitkerjas'
+    ])
+    ->whereHas('inputlaporankegiatans.laporankegiatans')
 
-        // Urutkan usulankegiatan yang perlu direview berdasarkan statusnya
-        if ($request->filled('statuslaporan_kegiatan')) {
-            if (in_array($request->statuslaporan_kegiatan, ['accepted', 'rejected'])) {
-                $usulankegiatans->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
-                    $q->where('status_verifikasilaporankegiatan', $request->statuslaporan_kegiatan);
-                });
-            } else {
-                $usulankegiatans->where('statuslaporan_kegiatan', $request->statuslaporan_kegiatan);
-            }
-        }
+    ->leftJoin('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
+    ->leftJoin('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
 
-        // paginate TERAKHIR
-    $usulankegiatans = $usulankegiatans->paginate(20);
+    ->select('izin_usulankegiatans.*');
 
-        // Redirect ke halaman daftar usulan kegiatan yang perlu direview
-        return view('pages.laporankegiatan.pending_list_laporan_kegiatan', compact('usulankegiatans'));
+    // 🔥 SORTING (default terbaru)
+    $sort = $request->get('sort', 'desc');
+
+    $query->orderByRaw("
+        izin_laporankegiatans.tanggalmulai_kegiatan IS NULL,
+        izin_laporankegiatans.tanggalmulai_kegiatan {$sort}
+    ");
+
+    // 🔥 FILTER SEARCH (PINDAH KE ATAS)
+    if ($request->filled('search')) {
+    $search = $request->search;
+
+    $query->where(function ($q) use ($search) {
+
+        // 🔍 Nama kegiatan (BENAR)
+        $q->whereHas('inputusulankegiatans', function ($q1) use ($search) {
+            $q1->where('nama_kegiatan', 'like', "%{$search}%");
+        })
+
+        // 🔍 OPD
+        ->orWhereHas('subunitkerjas', function ($q2) use ($search) {
+            $q2->where('sub_unitkerja', 'like', "%{$search}%")
+               ->orWhere('singkatan', 'like', "%{$search}%");
+        })
+
+        // 🔍 Nomor surat (PINDAH KE RELASI YANG BENAR)
+        ->orWhereHas('inputlaporankegiatans.kirimlaporankegiatans.identitassurats', function ($q3) use ($search) {
+            $q3->where('nomor_surat', 'like', "%{$search}%");
+        })
+
+        //  🔍 TANGGAL PELAKSANAAN 
+        ->orWhereHas('inputlaporankegiatans.laporankegiatans', function ($q4) use ($search) {
+            $q4->where('tanggalmulai_kegiatan', 'like', "%{$search}%")
+               ->orWhere('tanggalselesai_kegiatan', 'like', "%{$search}%");
+        });
+
+    });
+}
+
+    // 🔥 FILTER TAHUN
+    if ($request->filled('tahun')) {
+        $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
+            $q->whereYear('tanggalmulai_kegiatan', $request->tahun);
+        });
     }
+
+    // 🔥 BARU AMBIL DATA
+    $data = $query->get();
+
+    // 🔥 FILTER STATUS (UI ACCESSOR)
+    if ($request->filled('status')) {
+        $status = $request->status;
+
+        $data = $data->filter(function ($item) use ($status) {
+            return optional($item->inputlaporankegiatans?->laporankegiatans)->status_laporan_ui === $status;
+        });
+    }
+
+    // 🔥 PAGINATION
+    $perPage = 20;
+    $currentPage = request()->get('page', 1);
+
+    $usulankegiatans = new \Illuminate\Pagination\LengthAwarePaginator(
+        $data->forPage($currentPage, $perPage),
+        $data->count(),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+
+    return view('pages.laporankegiatan.pending_list_laporan_kegiatan', compact('usulankegiatans'));
+}
 
     /**
      * Tampilkan Form Review Laporan Hasil Kegiatan

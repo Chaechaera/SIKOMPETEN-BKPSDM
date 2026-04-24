@@ -78,16 +78,20 @@
                             <textarea
                                 name="catatan_verifikasilaporankegiatan"
                                 id="catatan_verifikasilaporankegiatan"
-                                class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
                                 placeholder="Tuliskan catatan review untuk OPD"></textarea>
                         </div>
 
                         {{-- Tombol Aksi --}}
                         <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                            <a href="{{ route('superadmin.laporankegiatan.download', $laporankegiatans->id) }}"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
-                                Tinjau Laporan
-                            </a>
+                            @php
+    $usulanId = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->id;
+@endphp
+
+<a href="{{ route('superadmin.laporankegiatan.download', $usulanId) }}"
+    class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
+    Tinjau Laporan
+</a>
                             <button
                                 type="submit"
                                 name="actionlaporan_kegiatan"

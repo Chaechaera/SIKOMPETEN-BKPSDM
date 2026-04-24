@@ -34,4 +34,9 @@ class Izin_Balasanlaporankegiatans extends Model
     {
         return $this->belongsTo(Izin_Sertifikats::class, 'sertifikat_id');
     }
+
+    public function balasanlaporankegiatans()
+{
+    return $this->hasOne(Izin_Balasanlaporankegiatans::class, 'inputlaporankegiatan_id');
+}
 }

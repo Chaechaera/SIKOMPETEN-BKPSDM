@@ -17,17 +17,26 @@ class KirimLaporanKegiatansController extends Controller
     /**
      * Tampilkan Form Kirim Laporan Hasil Kegiatan Final
      */
-    public function create($laporankegiatan_id)
-    {
-        // Temukan laporankegiatan berdasarkan id laporankegiatan
-        $laporankegiatans = Izin_Laporankegiatans::findOrFail($laporankegiatan_id);
+    public function create($id)
+{
+    // Ambil dari USULAN (bukan langsung laporan)
+    $usulan = Izin_Usulankegiatans::with([
+        'inputlaporankegiatans.laporankegiatans'
+    ])->findOrFail($id);
 
-        // Temukan usulan kegiatan terkait
-        $usulan = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans;
+    // Ambil laporan dari relasi
+    $laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
 
-        // Redirect ke halaman kirim laporan hasil kegiatan
-        return view('pages.laporankegiatan.kirim_laporan_kegiatan', ['usulan' => $usulan, 'laporankegiatans' => $laporankegiatans]);
+    // Kalau belum ada laporan → error
+    if (!$laporankegiatans) {
+        abort(404, 'Laporan tidak ditemukan');
     }
+
+    return view('pages.laporankegiatan.kirim_laporan_kegiatan', [
+        'usulan' => $usulan,
+        'laporankegiatans' => $laporankegiatans
+    ]);
+}
 
     /**
      * Simpan File Kirim Laporan Hasil Kegiatan Final
