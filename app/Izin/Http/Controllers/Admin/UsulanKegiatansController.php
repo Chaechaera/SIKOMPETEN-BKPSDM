@@ -84,7 +84,7 @@ class UsulanKegiatansController extends Controller
     /**
      * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -96,8 +96,9 @@ class UsulanKegiatansController extends Controller
             'verifikasiusulankegiatanterakhir',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans'
-        ])->orderBy('created_at', 'desc');
+        ]);
 
+        // Filter berdasarkan role
         if ($user->role === 'admin') {
             $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
         }
@@ -106,7 +107,24 @@ class UsulanKegiatansController extends Controller
             $usulankegiatans->where('dibuat_oleh', $user->id);
         }
 
-        $usulankegiatans = $usulankegiatans->paginate(20);
+        // Filter berdasarkan nama kegiatan (abjad)
+        if ($request->filled('search')) {
+            $usulankegiatans->whereHas('inputusulankegiatans', function ($query) use ($request) {
+                $query->where('nama_kegiatan', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filter berdasarkan tanggal pengajuan
+        if ($request->filled('tanggal_pengajuan')) {
+            $usulankegiatans->whereDate('created_at', $request->tanggal_pengajuan);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $usulankegiatans->where('statususulan_kegiatan', $request->status);
+        }
+
+        $usulankegiatans = $usulankegiatans->orderBy('created_at', 'desc')->paginate(20)->appends($request->query());
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
         return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));

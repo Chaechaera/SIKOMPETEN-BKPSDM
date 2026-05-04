@@ -26,6 +26,54 @@
                 </a>
             </div>
 
+            <!-- FILTER FORM -->
+            <div class="bg-white rounded-xl shadow p-6 mb-4">
+                <form method="GET" action="{{ route('admin.usulankegiatan.index') }}" class="flex flex-wrap gap-4 items-end">
+                    <!-- Search by Nama Kegiatan -->
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cari Nama Kegiatan</label>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama kegiatan..."
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2">
+                    </div>
+
+                    <!-- Filter by Tanggal Pengajuan -->
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Pengajuan</label>
+                        <input type="date" name="tanggal_pengajuan" value="{{ request('tanggal_pengajuan') }}"
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2">
+                    </div>
+
+                    <!-- Filter by Status -->
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Status Usulan</label>
+                        <select name="status" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2">
+                            <option value="">-- Semua Status --</option>
+                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                            <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>Need Review</option>
+                            <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>Finish</option>
+                        </select>
+                    </div>
+
+                    <!-- BUTTON GROUP -->
+                    <div class="flex items-end gap-2 h-full">
+                        <button type="submit"
+                            class="px-4 h-[42px] bg-[#4361EE] text-white text-sm font-semibold rounded-lg hover:bg-[#3651d4] transition flex items-center">
+                            Filter
+                        </button>
+
+                        <a href="{{ route('admin.usulankegiatan.index') }}"
+                            class="px-4 h-[42px] bg-gray-300 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-400 transition flex items-center">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+
             <!-- TABLE -->
             <div class="bg-white rounded-xl shadow p-6">
                 <div class="border rounded-lg overflow-hidden">
