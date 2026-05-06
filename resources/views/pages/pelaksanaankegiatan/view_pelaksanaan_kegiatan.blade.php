@@ -54,6 +54,27 @@
                     \Carbon\Carbon::parse($usulankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}
                         </p>
                     </div>
+
+                    <div class="md:col-span-2">
+                        <h3 class="text-base font-semibold text-[#5A5A5A] mb-2">Catatan Pelaksanaan</h3>
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 w-full break-words">
+                            {{ $usulankegiatans->inputusulankegiatans?->pelaksanaankegiatans?->catatan_pelaksanaan ?? '-' }}
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <h3 class="text-base font-semibold text-[#5A5A5A] mb-2">Hambatan Pelaksanaan</h3>
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 w-full break-words">
+                            {{ $usulankegiatans->inputusulankegiatans?->pelaksanaankegiatans?->hambatan_pelaksanaan ?? '-' }}
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <h3 class="text-base font-semibold text-[#5A5A5A] mb-2">Solusi Hambatan</h3>
+                        <div class="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 w-full break-words">
+                            {{ $usulankegiatans->inputusulankegiatans?->pelaksanaankegiatans?->solusi_hambatan_pelaksanaan ?? '-' }}
+                        </div>
+                    </div>
                 </div>
             </div>
 

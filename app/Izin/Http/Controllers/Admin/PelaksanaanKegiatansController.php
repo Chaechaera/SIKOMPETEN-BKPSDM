@@ -29,6 +29,9 @@ class PelaksanaanKegiatansController extends Controller
         $request->validate([
             'buktipelaksanaan_kegiatan' => 'required|array|max:5',
             'buktipelaksanaan_kegiatan.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'catatan_pelaksanaan' => 'nullable|string|max:2000',
+            'hambatan_pelaksanaan' => 'nullable|string|max:2000',
+            'solusi_hambatan_pelaksanaan' => 'nullable|string|max:2000',
         ]);
 
         // Ambil ID dari route
@@ -59,6 +62,9 @@ class PelaksanaanKegiatansController extends Controller
             Izin_Pelaksanaankegiatans::create([
                 'inputusulankegiatan_id' => $inputusulankegiatan_id,
                 'buktipelaksanaan_kegiatan' => json_encode($path_buktipelaksanaan),
+                'catatan_pelaksanaan' => $request->catatan_pelaksanaan,
+                'hambatan_pelaksanaan' => $request->hambatan_pelaksanaan,
+                'solusi_hambatan_pelaksanaan' => $request->solusi_hambatan_pelaksanaan,
             ]);
 
             return redirect()

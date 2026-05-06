@@ -14,6 +14,9 @@ class Izin_Pelaksanaankegiatans extends Model
     protected $fillable = [
         'inputusulankegiatan_id',
         'buktipelaksanaan_kegiatan',
+        'catatan_pelaksanaan',
+        'hambatan_pelaksanaan',
+        'solusi_hambatan_pelaksanaan',
     ];
 
     protected $casts = [

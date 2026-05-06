@@ -171,19 +171,25 @@
                                                     @if($u->status_ui === 'accepted')
                                                     <a href="{{ route('admin.pelaksanaankegiatan.create', $u->id) }}"
                                                         class="block px-4 py-2 rounded-lg bg-[#ffedd5] text-[#9a3412]">
-                                                        Update Pelaksanaan Kegiatan
+                                                        Upload Pelaksanaan Kegiatan
                                                     </a>
                                                     @else
                                                     <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
-                                                        Update Pelaksanaan Kegiatan
+                                                        Upload Pelaksanaan Kegiatan
                                                     </span>
                                                     @endif
 
                                                     {{-- Lihat Pelaksanaan --}}
+                                                    @if($u->inputusulankegiatans?->pelaksanaankegiatans)
                                                     <a href="{{ route('admin.pelaksanaankegiatan.show', $u->id) }}"
                                                         class="block px-4 py-2 rounded-lg bg-[#eadffe] text-[#7d5bcd]">
                                                         Lihat Pelaksanaan Kegiatan
                                                     </a>
+                                                    @else
+                                                    <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
+                                                        Lihat Pelaksanaan Kegiatan
+                                                    </span>
+                                                    @endif
 
                                                     {{-- Update Laporan --}}
                                                     @if($u->status_ui === 'in_progress')

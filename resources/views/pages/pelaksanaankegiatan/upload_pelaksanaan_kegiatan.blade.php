@@ -110,6 +110,28 @@
                             </div>
 
                         </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Catatan Pelaksanaan</label>
+                            <textarea name="catatan_pelaksanaan" rows="4"
+                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
+                                placeholder="Tuliskan catatan penting selama pelaksanaan kegiatan...">{{ old('catatan_pelaksanaan') }}</textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Hambatan Pelaksanaan</label>
+                            <textarea name="hambatan_pelaksanaan" rows="4"
+                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
+                                placeholder="Tuliskan hambatan yang ditemukan selama pelaksanaan kegiatan...">{{ old('hambatan_pelaksanaan') }}</textarea>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Solusi untuk Hambatan</label>
+                            <textarea name="solusi_hambatan_pelaksanaan" rows="4"
+                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
+                                placeholder="Tuliskan solusi yang dilakukan untuk mengatasi hambatan tersebut...">{{ old('solusi_hambatan_pelaksanaan') }}</textarea>
+                        </div>
+
                     </div>
 
                     {{-- BUTTON --}}
