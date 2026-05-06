@@ -124,7 +124,7 @@ class UsulanKegiatansController extends Controller
             $usulankegiatans->where('statususulan_kegiatan', $request->status);
         }
 
-        $usulankegiatans = $usulankegiatans->orderBy('created_at', 'desc')->paginate(20)->appends($request->query());
+        $usulankegiatans = $usulankegiatans->orderBy('updated_at', 'desc')->paginate(20)->appends($request->query());
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
         return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
@@ -200,8 +200,8 @@ class UsulanKegiatansController extends Controller
         $kopunitkerja_user = Izin_Kopunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
         $kopunitkerja_id = $usulan->inputusulankegiatans?->kopunitkerja_id ?? $kopunitkerja_user?->id ?? null;
 
-        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
-        if ($usulan->statususulan_kegiatan !== 'draft') {
+        // Verifikasi bahwa usulan dapat diedit
+        if (!$usulan->canEdit()) {
             abort(403, 'Usulan sudah tidak dapat diubah.');
         }
 
@@ -229,8 +229,8 @@ class UsulanKegiatansController extends Controller
         // Temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
 
-        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
-        if ($usulankegiatans->statususulan_kegiatan !== 'draft') {
+        // Verifikasi bahwa usulan dapat diedit
+        if (!$usulankegiatans->canEdit()) {
             abort(403);
         }
 
@@ -242,7 +242,12 @@ class UsulanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            'statususulan_kegiatan' => 'draft', // Reset status ke draft untuk edit ulang
         ]);
+
+        // Reset related records to make it like a new submission
+        $usulankegiatans->cetakusulankegiatans()->delete();
+        $usulankegiatans->verifikasiusulankegiatans()->delete();
 
         // Merge request berdasarkan id usulankegiatan
         $request->merge([

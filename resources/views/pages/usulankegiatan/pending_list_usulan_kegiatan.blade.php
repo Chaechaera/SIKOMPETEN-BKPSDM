@@ -21,10 +21,11 @@
             <!-- Tabel Daftar Usulan -->
             <div class="bg-white rounded-xl shadow p-6">
                 {{-- Filters --}}
-                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <form method="GET" class="flex flex-col md:flex-row gap-4 mb-4 items-end">
                     {{-- Search --}}
                     <div class="flex-1 relative">
-                        <input type="text" placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
+                        <input type="text" name="q" value="{{ request('q') }}"
+                            placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
                             class="w-full pl-10 pr-4 py-2 border rounded-lg" />
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
@@ -34,17 +35,37 @@
                         </svg>
                     </div>
 
+                    {{-- Tanggal Pengajuan --}}
+                    <div class="w-full md:w-52">
+                        <label class="block text-sm text-gray-500 mb-1" for="tanggal_pengajuan">Tanggal Pengajuan</label>
+                        <input type="date" id="tanggal_pengajuan" name="tanggal_pengajuan"
+                            value="{{ request('tanggal_pengajuan') }}"
+                            class="w-full border rounded-lg px-3 py-2" />
+                    </div>
+
                     {{-- Status Filter --}}
-                    <form method="GET">
-                        <select name="statususulan_kegiatan" onchange="this.form.submit()"
-                            class="w-full md:w-52 border rounded-lg px-3 py-2">
+                    <div class="w-full md:w-52">
+                        <label class="block text-sm text-gray-500 mb-1" for="statususulan_kegiatan">Status Usulan</label>
+                        <select id="statususulan_kegiatan" name="statususulan_kegiatan" onchange="this.form.submit()"
+                            class="w-full border rounded-lg px-3 py-2">
                             <option value="">Semua Status Usulan</option>
                             <option value="pending" {{ request('statususulan_kegiatan') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="accepted" {{ request('statususulan_kegiatan') == 'accepted' ? 'selected' : '' }}>Disetujui</option>
                             <option value="rejected" {{ request('statususulan_kegiatan') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                         </select>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="flex gap-3 md:items-center">
+                        <button type="submit"
+                            class="w-full md:w-auto px-4 py-2 rounded-lg bg-[#5B2C89] text-white font-medium hover:bg-[#9868c7] transition">
+                            Terapkan
+                        </button>
+                        <a href="{{ route('superadmin.usulankegiatan.pending') }}"
+                            class="w-full md:w-auto px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition text-center">
+                            Reset
+                        </a>
+                    </div>
+                </form>
                 <div class="border rounded-lg overflow-hidden">
                     <table class="w-full text-sm table-fixed">
                         <thead>
