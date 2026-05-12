@@ -95,7 +95,7 @@ class KirimLaporanKegiatansController extends Controller
             ]);
         });
 
-        // Redirect ke halaman daftar pengajuan usulan kegiatan
-        return redirect()->route('admin.usulankegiatan.index')->with('success', 'Usulan kegiatan berhasil dikirim!');
+        // Redirect ke halaman daftar pengajuan laporan kegiatan
+        return redirect()->route('admin.laporankegiatan.index')->with('success', 'Laporan kegiatan berhasil dikirim!');
     }
 }

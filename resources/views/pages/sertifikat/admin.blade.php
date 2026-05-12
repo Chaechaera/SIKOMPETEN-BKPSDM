@@ -72,11 +72,21 @@
 
                                         <!-- Sertifikat -->
                                         <td class="py-3 px-4 text-center">
-                                            <a href="{{ route('admin.sertifikat.download', $u->id) }}"
-                                                target="_blank"
-                                                class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
-                                                Download Sertifikat
-                                            </a>
+                                            @php
+    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
+@endphp
+
+@if($laporanId)
+    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
+        target="_blank"
+        class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
+        Download Sertifikat
+    </a>
+@else
+    <span class="block px-3 py-2 text-xs rounded-lg bg-gray-200 text-gray-400">
+        Tidak tersedia
+    </span>
+@endif
                                         </td>
                                     </tr>
                                     @endforeach

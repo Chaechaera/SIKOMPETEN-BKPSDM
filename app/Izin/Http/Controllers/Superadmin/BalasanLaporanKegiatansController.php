@@ -82,8 +82,8 @@ class BalasanLaporanKegiatansController extends Controller
             'totalcapaianjp_kegiatan' => $request->totalcapaianjp_kegiatan,
         ]);
 
-        // Redirect ke halaman list usulan kegiatan yang perlu direview
-        return redirect()->route('superadmin.usulankegiatan.pending')->with('success', 'Usulan Kegiatan Berhasil Disimpan Secara Lengkap!');
+        // Redirect ke halaman list laporan kegiatan yang perlu direview
+        return redirect()->route('superadmin.laporankegiatan.pending')->with('success', 'Laporan Kegiatan Berhasil Disimpan Secara Lengkap!');
     }
 
     /**
@@ -269,8 +269,8 @@ $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
             ]);
     });
 
-    return redirect()->route('superadmin.usulankegiatan.pending')
-        ->with('success', 'Usulan kegiatan berhasil dikirim!');
+    return redirect()->route('superadmin.laporankegiatan.pending')
+        ->with('success', 'Laporan kegiatan berhasil dikirim!');
 }
     private function bulanRomawi($bulan)
 {

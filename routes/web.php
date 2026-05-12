@@ -201,11 +201,13 @@ Route::patch('/superadmin/laporanpeserta/{id}/reject',
         // Lihat Bukti Pelaksanaan Kegiatan
         Route::get('/superadmin/pelaksanaankegiatan/{id}', [PelaksanaanKegiatansController::class, 'show'])->name('superadmin.pelaksanaankegiatan.show');
 
-        // List Pengajuan Usulan Kegiatan yang Perlu Direview
+        // List Pengajuan Laporan Kegiatan yang Perlu Direview
         Route::get('/superadmin/laporankegiatan/listlaporankegiatanpending', [ReviewLaporanKegiatansController::class, 'pendingList'])->name('superadmin.laporankegiatan.pending');
 
         // Download Surat Permohonan dan Laporan Hasil Kegiatan
         Route::get('/superadmin/laporankegiatan/{id}/download', [LaporanKegiatansController::class, 'download'])->name('superadmin.laporankegiatan.download');
+
+        Route::get('/superadmin/dashboard', [ReviewLaporanKegiatansController::class, 'dashboard']);
 
         // Buat Review untuk Laporan Hasil Kegiatan yang Diajukan Admin
         Route::get('/superadmin/laporankegiatan/{id}/review', [ReviewLaporanKegiatansController::class, 'reviewForm'])->name('superadmin.laporankegiatan.review');

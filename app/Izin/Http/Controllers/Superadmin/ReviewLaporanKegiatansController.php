@@ -185,4 +185,5 @@ class ReviewLaporanKegiatansController extends Controller
             ->route('superadmin.usulankegiatan.pending')
             ->with('success', "Usulan kegiatan telah berhasil di{$request->actionlaporan_kegiatan}.");
     }
+
 }

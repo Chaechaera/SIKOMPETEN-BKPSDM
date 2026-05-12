@@ -32,6 +32,11 @@ class Izin_Inputlaporankegiatans extends Model
         return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
     }
 
+    public function usulankegiatans()
+    {
+    return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
+    }
+
     public function kirimlaporankegiatans()
     {
         return $this->hasOne(Izin_Kirimlaporankegiatans::class, 'inputlaporankegiatan_id');

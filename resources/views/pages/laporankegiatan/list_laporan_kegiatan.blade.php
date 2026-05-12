@@ -251,7 +251,7 @@
 @endphp
 
 @if($sertifikat)
-    <a href="{{ route('admin.sertifikat.download', $u->id) }}"
+    <a href="{{ route('admin.sertifikat.download', $sertifikat->id) }}"
        target="_blank"
        class="block px-4 py-2 rounded-lg bg-[#defff8] text-[#136769]">
         Download Sertifikat Peserta

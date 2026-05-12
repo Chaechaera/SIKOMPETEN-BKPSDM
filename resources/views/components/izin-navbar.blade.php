@@ -21,7 +21,7 @@ $realRole = Auth::user()->role ?? null;
         @if ($realRole === 'user')
         <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
             <a href="{{ route('user.aboutus') }}" class="hover:text-[#fea73d] transition">
-                About Us
+                Informasi
             </a>
             <a href="{{ route('user.sertifikat') }}" class="hover:text-[#fea73d] transition">
                 Sertifikat

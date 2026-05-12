@@ -42,10 +42,16 @@
                 </div>
 
                 <div class="p-5 sm:p-6 rounded-xl bg-[#E3EEFF] shadow-sm">
-                    <h2 class="text-gray-700 text-sm font-medium">Laporan Masuk</h2>
-                    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">12</p>
-                    <p class="text-xs text-blue-600">3 menunggu verifikasi</p>
-                </div>
+    <h2 class="text-gray-700 text-sm font-medium">Laporan Masuk</h2>
+
+    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
+        {{ $total }}
+    </p>
+
+    <p class="text-xs text-blue-600">
+        {{ $menunggu }} menunggu verifikasi
+    </p>
+</div>
             </div>
 
             {{-- Content Box --}}
@@ -141,47 +147,64 @@
 
         {{-- Content --}}
         <div class="px-6 py-4 space-y-3">
-            @php
-                $laporans = [
-                    ['id'=>1,'title'=>'Laporan Pelatihan Leadership','opd'=>'Dinas Pendidikan','status'=>'pending','date'=>'10 Nov 2025'],
-                    ['id'=>2,'title'=>'Laporan Workshop Digital Marketing','opd'=>'Dinas Pariwisata','status'=>'approved','date'=>'9 Nov 2025'],
-                    ['id'=>3,'title'=>'Laporan Bimtek Pengadaan','opd'=>'BPKAD','status'=>'approved','date'=>'8 Nov 2025'],
-                    ['id'=>4,'title'=>'Laporan Pelatihan IT','opd'=>'Diskominfo','status'=>'pending','date'=>'7 Nov 2025'],
-                    ['id'=>5,'title'=>'Laporan Sosialisasi E-Gov','opd'=>'Sekretariat Daerah','status'=>'approved','date'=>'6 Nov 2025'],
-                ];
-            @endphp
+           @foreach ($laporans as $item)
+@php
+    $input = $item->inputlaporankegiatans?->inputusulankegiatans;
 
-            @foreach ($laporans as $item)
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-900">{{ $item['title'] }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ $item['opd'] }} • {{ $item['date'] }}</p>
-                    </div>
-                    <span class="px-2 py-1 rounded text-xs 
-                        @if($item['status'] === 'approved') bg-green-100 text-green-800 @else bg-yellow-100 text-yellow-800 border border-yellow-300 @endif">
-                        {{ $item['status'] === 'approved' ? 'Disetujui' : 'Pending' }}
-                    </span>
-                </div>
-            @endforeach
+    $title = $input->nama_kegiatan ?? '-';
 
-            <a href="/laporan-masuk" class="w-full mt-4 text-blue-600 text-left hover:underline" onclick="handleViewReports()">
-                Lihat Semua Laporan →
-            </a>
+    $opd = $input?->usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-';
+
+    $date = \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y');
+
+    $status = $item->status_laporan_ui;
+@endphp
+
+    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+        <div>
+            <p class="text-sm text-gray-900">{{ $title }}</p>
+            <p class="text-xs text-gray-500">{{ $opd }} • {{ $date }}</p>
+        </div>
+
+        <span class="px-2 py-1 rounded text-xs
+            @if(in_array($status, ['accepted','finish']))
+                bg-green-100 text-green-800
+            @elseif($status === 'need_review')
+                bg-yellow-100 text-yellow-800
+            @elseif($status === 'rejected')
+                bg-red-100 text-red-800
+            @else
+                bg-gray-100 text-gray-600
+            @endif
+        ">
+            {{ ucfirst($status) }}
+        </span>
+    </div>
+@endforeach
+
+            <a href="{{ route('superadmin.laporankegiatan.pending') }}" 
+   class="w-full mt-4 text-blue-600 text-left hover:underline">
+    Lihat Semua Laporan →
+</a>
         </div>
     </div>
 
 </div>
             {{-- INFO ALERT --}}
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-                <img src="{{ asset('images/Info.png') }}" class="h-5 w-5">
-                <div class="text-medium text-blue-800">
-                    <p class="font-bold">Informasi</p>
-                    <p class="mt-1">
-                        Terdapat 8 usulan dan 3 laporan yang menunggu verifikasi.
-                        Mohon segera ditindaklanjuti.
-                    </p>
-                </div>
-            </div>
+<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
+    <img src="{{ asset('images/Info.png') }}" class="h-5 w-5">
+    <div class="text-medium text-blue-800">
+        <p class="font-bold">Informasi</p>
+        <p class="mt-1">
+    Terdapat 8 usulan dan {{ $menunggu }} laporan yang menunggu verifikasi.
+    @if($menunggu > 0)
+        Mohon segera ditindaklanjuti.
+    @else
+        Semua laporan sudah diverifikasi 🎉
+    @endif
+</p>
+    </div>
+</div>
 
         </div>
     </main>
