@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('laporankegiatan_id')->nullable()->constrained('izin_laporankegiatans')->nullOnDelete();
             $table->foreignId('inputusulankegiatan_id')->nullable()->constrained('izin_inputusulankegiatans')->nullOnDelete();
+            $table->enum('jenissertifikat_kegiatan', ['template_bkpsdm', 'template_opd'])->nullable();
             $table->string('templatesertifikat_kegiatan')->nullable();
             $table->json('fieldstemplatesertifikat_kegiatan')->nullable();
             $table->string('nomorsertifikat_kegiatan')->nullable();

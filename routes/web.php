@@ -26,10 +26,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// User Management
 Route::middleware(['superadmin'])->group(function () {
     Route::resource('/users', UserManagementController::class);
     Route::patch('/users/{user}/verify-email', [UserManagementController::class, 'verifyEmail'])->name('dashboard.users.verify-email');
@@ -52,37 +54,30 @@ Route::middleware('auth')->group(function () {
 
         // Informasi Mengenai Pengembangan Kompetensi ASN
         Route::get('/user/aboutus', function () {return view('pages.about_us');})->name('user.aboutus');
-
         Route::get('/user/ceksertifikat/{nip}', [SertifikatsController::class, 'cek'])->name('user.cek.sertifikat');
-
         Route::get('/user/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('user.rekapitulasi');
 
-        Route::get('/user/laporanpeserta/{sertifikat_id}', [LaporanPesertaKegiatansController::class, 'create'])
-            ->name('user.laporanpeserta.create');
-
-        Route::post('/user/laporanpeserta/{sertifikat_id}', [LaporanPesertaKegiatansController::class, 'store'])
-            ->name('user.laporanpeserta.store');
+        // Pelaporan Peserta Kegiatan
+        Route::get('/user/laporanpeserta/{sertifikat_id}', [LaporanPesertaKegiatansController::class, 'create'])->name('user.laporanpeserta.create');
+        Route::post('/user/laporanpeserta/{sertifikat_id}', [LaporanPesertaKegiatansController::class, 'store'])->name('user.laporanpeserta.store');
     });
 
     // Bagian Admin
     Route::middleware(['role:admin'])->group(function () {
 
+        // Informasi Mengenai Pengembangan Kompetensi ASN
+        Route::get('/admin/informasi', function () {return view('pages.informasi_pk_asn');})->name('admin.informasi');
         Route::get('/admin/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('admin.rekapitulasi');
 
-        // Informasi Mengenai Pengembangan Kompetensi ASN
-        Route::get('/admin/informasi', function () {
-            return view('pages.informasi_pk_asn');
-        })->name('admin.informasi');
-
-        // Sertifikat Admin - Front End
+        // Sertifikat Admin
         Route::get('/admin/sertifikat', [SertifikatsController::class, 'index'])->name('admin.sertifikat');
 
         // Upload Kop, Stempel, dan TTD OPD
         Route::get('/admin/kopunitkerja/upload-kop-ttd', [KopUnitKerjasController::class, 'create'])->name('admin.kopunitkerja.create');
         Route::post('/admin/kopunitkerja/upload-kop-ttd', [KopUnitKerjasController::class, 'store'])->name('admin.kopunitkerja.store');
-        Route::get('/admin/kopunitkerja/upload-kop-ttd/edit', [KopUnitKerjasController::class, 'edit'])->name('admin.kopunitkerja.edit');
-        Route::put('/admin/kopunitkerja/upload-kop-ttd/update', [KopUnitKerjasController::class, 'update'])->name('admin.kopunitkerja.update');
-        Route::delete('/admin/kopunitkerja/upload-kop-ttd/delete', [KopUnitKerjasController::class, 'destroy'])->name('admin.kopunitkerja.destroy');
+        Route::get('/admin/kopunitkerja/upload-kop-ttd/edit/{id}', [KopUnitKerjasController::class, 'edit'])->name('admin.kopunitkerja.edit');
+        Route::put('/admin/kopunitkerja/upload-kop-ttd/update/{id}', [KopUnitKerjasController::class, 'update'])->name('admin.kopunitkerja.update');
+        Route::delete('/admin/kopunitkerja/upload-kop-ttd/delete/{id}', [KopUnitKerjasController::class, 'destroy'])->name('admin.kopunitkerja.destroy');
 
         // List Pengajuan Usulan Kegiatan yang Dibuat
         Route::get('/admin/usulankegiatan/listusulankegiatan', [UsulanKegiatansController::class, 'index'])->name('admin.usulankegiatan.index');
@@ -149,27 +144,17 @@ Route::middleware('auth')->group(function () {
     // Bagian Superadmin
     Route::middleware(['role:superadmin'])->group(function () {
 
-        Route::get('/superadmin/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('superadmin.rekapitulasi');
-
         // Manajemen User
         Route::get('/superadmin/manajemenuser', [UserManagementController::class, 'index'])->name('superadmin.manajemenuser');
 
-        Route::get('/superadmin/laporanpeserta', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'index'])
-    ->name('superadmin.laporanpeserta.index');
-
-Route::patch('/superadmin/laporanpeserta/{id}/approve', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'approve'])
-    ->name('superadmin.laporan.approve');
-
-Route::patch('/superadmin/laporanpeserta/{id}/reject', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'reject'])
-    ->name('superadmin.laporan.reject');
+        // Validasi Laporan Peserta Kegiatan
+        Route::get('/superadmin/laporanpeserta', [ValidasiLaporanPesertaKegiatansController::class, 'index'])->name('superadmin.laporanpeserta.index');
+        Route::patch('/superadmin/laporanpeserta/{id}/approve', [ValidasiLaporanPesertaKegiatansController::class, 'approve'])->name('superadmin.laporan.approve');
+        Route::patch('/superadmin/laporanpeserta/{id}/reject', [ValidasiLaporanPesertaKegiatansController::class, 'reject'])->name('superadmin.laporan.reject');
 
         // Informasi Mengenai Pengembangan Kompetensi ASN
-        Route::get('/superadmin/informasi', function () {
-            return view('pages.informasi_pk_asn');
-        })->name('superadmin.informasi');
+        Route::get('/superadmin/informasi', function () {return view('pages.informasi_pk_asn');})->name('superadmin.informasi');
+        Route::get('/superadmin/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('superadmin.rekapitulasi');
 
         // List Pengajuan Usulan Kegiatan yang Perlu Direview
         Route::get('/superadmin/usulankegiatan/listusulankegiatanpending', [ReviewUsulanKegiatansController::class, 'pendingList'])->name('superadmin.usulankegiatan.pending');

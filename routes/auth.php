@@ -96,27 +96,32 @@ Route::middleware('auth')->group(function () {
 
     // Switch Panel (Admin <-> Superadmin)
     Route::post('/switch-panel/{role}', function ($role) {
-        if (!in_array($role, ['admin', 'superadmin'])) {
+
+        $allowedRoles = ['admin', 'superadmin', 'user'];
+
+        if (!in_array($role, $allowedRoles)) {
             abort(403);
         }
 
-        // hanya superadmin boleh switch
-        if (Auth::user()->role !== 'superadmin') {
+        $realRole = Auth::user()->role;
+
+        if ($realRole === 'superadmin') {
+        } elseif ($realRole === 'admin') {
+            if (!in_array($role, ['user', 'admin'])) {
+                abort(403);
+            }
+        } else {
             abort(403);
         }
 
         session(['active_role' => $role]);
 
-        // ✅ redirect sesuai panel
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
-        if ($role === 'superadmin') {
-            return redirect()->route('superadmin.dashboard');
-        }
-
-        abort(403);
+        // redirect sesuai role aktif
+        return match ($role) {
+            'superadmin' => redirect()->route('superadmin.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'user' => redirect()->route('user.dashboard'),
+        };
     })->middleware('auth')->name('switch.panel');
 
     // Logout

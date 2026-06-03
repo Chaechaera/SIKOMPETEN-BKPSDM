@@ -18,17 +18,33 @@
     <script src="//unpkg.com/alpinejs" defer></script>
 </head>
 
+@php
+$activeRole = session('active_role', Auth::user()->role);
+$realRole = Auth::user()->role;
+@endphp
+
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-50">
+    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen">
+
+        {{-- Sidebar --}}
+        @if($activeRole === 'superadmin')
+        @include('pages.sidebar.superadmin')
+        @elseif($activeRole === 'admin')
+        @include('pages.sidebar.admin')
+        @endif
 
         <!-- Page Content -->
-        <main class="p-6">
+        <main
+            class="flex-1 transition-all duration-300"
+            :class="sidebarOpen ? 'ml-0' : 'ml-20'"> 
+            
+            {{-- Header --}}
+            @include('layouts.navigation')
+
+            {{-- Main Content --}}
             {{ $slot }}
         </main>
     </div>
-</body>
-
-</div>
 </body>
 
 <style>

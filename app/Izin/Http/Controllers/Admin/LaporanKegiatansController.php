@@ -14,6 +14,7 @@ use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
 
@@ -26,24 +27,43 @@ class LaporanKegiatansController extends Controller
     {
         $user = Auth::user();
 
-        // Eager load relasi dari model
         $usulankegiatans = Izin_Usulankegiatans::with([
-        'inputusulankegiatans',
-        'inputusulankegiatans.pelaksanaankegiatans',
-        'inputlaporankegiatans.laporankegiatans',
-        ])->whereHas('inputusulankegiatans.pelaksanaankegiatans')->orderByDesc('created_at');
+            'inputusulankegiatans',
+            'inputusulankegiatans.pelaksanaankegiatans',
+            'inputlaporankegiatans.laporankegiatans',
+        ])
+            ->whereHas('inputusulankegiatans.pelaksanaankegiatans')
+            ->get();
 
-        if ($user->role == 'admin') {
-            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        // =========================
+        // 🔥 FILTER DULU (collection)
+        // =========================
+        if ($user->role === 'admin') {
+            $usulankegiatans = $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
         }
 
-        if ($user->role == 'user') {
-            $usulankegiatans->where('dibuat_oleh', $user->id);
+        if ($user->role === 'user') {
+            $usulankegiatans = $usulankegiatans->where('dibuat_oleh', $user->id);
         }
 
-        $usulankegiatans = $usulankegiatans->paginate(20);
+        // 🔥 baru reset index
+        $usulankegiatans = $usulankegiatans->values();
 
-        // Redirect ke halaman daftar pengajuan usulan kegiatan
+        // 🔥 PAGINATION
+        $page = request()->get('page', 1);
+        $perPage = 20;
+
+        $usulankegiatans = new LengthAwarePaginator(
+            $usulankegiatans->forPage($page, $perPage),
+            $usulankegiatans->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
         return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
     }
 
@@ -197,17 +217,10 @@ class LaporanKegiatansController extends Controller
         ])->findOrFail($id);
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        // ✅ BENAR (ambil dari user login)
-$unitkerjaId = $user->subunitkerjas->unitkerja_id;
-
-$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-
-$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-
-        // $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        // $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        // $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        $unitkerjaId = $user->subunitkerjas->unitkerja_id;
+        $kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file

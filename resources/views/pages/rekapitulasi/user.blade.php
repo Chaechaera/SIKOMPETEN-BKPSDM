@@ -59,9 +59,9 @@
 
             {{-- Tabel Rekapitulasi --}}
             <div class="bg-white rounded-xl overflow-hidden shadow">
-                <table class="w-full text-sm font-semibold table-auto">
+                <table class="w-full text-sm table-auto">
                     <thead>
-                        <tr class="bg-abuabuMuda border-b text-center">
+                        <tr class="bg-abuabuMuda font-semibold border-b text-center">
                             <th class="p-4">No</th>
                             <th class="p-4">Sub Unit Kerja OPD</th>
                             <th class="p-4">Jumlah Kegiatan PK</th>
@@ -76,10 +76,10 @@
                         @forelse ($rekap as $index => $row)
                         <tr class="border-b text-center hover:bg-abuabuCerah/30 table-row">
                             <td class="p-4 border-r">{{ $index + 1 }}</td>
-                            <td class="p-4 border-r text-left">
+                            <td class="p-4 border-r font-semibold text-left">
                                 {{ $row['nama'] }}
                             </td>
-                            <td class="p-4 border-r">
+                            <td class="p-4 font-semibold border-r">
                                 {{ $row['jumlah_kegiatan'] }}
                             </td>
                             <td class="p-4 border-r">
@@ -91,16 +91,16 @@
                             <td class="p-4 border-r">
                                 {{ $row['jp20'] }}
                             </td>
-                            <td class="p-4 border-r">
+                            <td class="p-4 font-semibold border-r">
                                 {{ $row['total'] }}
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 font-semibold">
                                 {{ $row['persen_20'] }}
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-6 text-gray-500">
+                            <td colspan="8" class="text-center py-6 text-abuabuMuda">
                                 Tidak ada data
                             </td>
                         </tr>
@@ -112,7 +112,7 @@
                 {{ $rekap->appends(request()->query())->links() }}
             </div>
 
-            <div id="emptyState" class="hidden text-center py-12 text-gray-500">
+            <div id="emptyState" class="hidden text-center py-12 text-abuabuSedang">
                 Tidak ada data yang sesuai dengan pencarian
             </div>
         </div>

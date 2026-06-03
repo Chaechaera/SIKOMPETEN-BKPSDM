@@ -21,15 +21,18 @@ class RoleCheckMiddleware
             return redirect()->route('login');
         }
 
-        // ambil role aktif dari session
-    $activeRole = session('active_role', Auth::user()->role);
+        // ambil atau set active role
+        $activeRole = session('active_role');
 
-        // Jika middleware untuk role dipanggil maka ubah string jadi array
+        if (!$activeRole) {
+            $activeRole = Auth::user()->role;
+            session(['active_role' => $activeRole]);
+        }
+
         $roles = is_array($roles) ? $roles : explode('|', $roles);
 
-        // Jika menggunakan kolom role pada database user
         if (!in_array($activeRole, $roles)) {
-            abort(403, 'Unauthorized Access');
+            abort(403);
         }
 
         return $next($request); // Tampilkan hasil request
