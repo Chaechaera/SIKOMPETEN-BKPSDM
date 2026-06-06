@@ -126,24 +126,38 @@
 
                         {{-- Waktu Mulai --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Waktu Kegiatan akan Dimulai</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                                Waktu Kegiatan akan Dimulai
+                            </label>
                             <div class="relative">
-                                <input type="time" name="waktumulai_kegiatan" value="{{ old('waktumulai_kegiatan', $usulan->waktumulai_kegiatan) }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                <input
+                                    type="text"
+                                    name="waktumulai_kegiatan"
+                                    value="{{ old('waktumulai_kegiatan', \Carbon\Carbon::parse($usulan->waktumulai_kegiatan)->format('H:i')) }}"
+                                    class="timepicker block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    required
+                                >
                                 @error('waktumulai_kegiatan')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
                         {{-- Waktu Selesai --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Waktu Kegiatan akan Selesai</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                                Waktu Kegiatan akan Selesai
+                            </label>
                             <div class="relative">
-                                <input type="time" name="waktuselesai_kegiatan" value="{{ old('waktuselesai_kegiatan', $usulan->waktuselesai_kegiatan) }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                <input
+                                    type="text"
+                                    name="waktuselesai_kegiatan"
+                                    value="{{ old('waktuselesai_kegiatan', \Carbon\Carbon::parse($usulan->waktuselesai_kegiatan)->format('H:i')) }}"
+                                    class="timepicker block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    required
+                                >
                                 @error('waktuselesai_kegiatan')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
@@ -363,6 +377,9 @@
     </div>
     </div>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         /* Untuk Eksekusi Ukuran Textarea */
         // Event untuk textarea 
@@ -388,6 +405,14 @@
                         resizeTextarea(this);
                     }
                 });
+            });
+            // Flatpickr Time Picker
+            flatpickr(".timepicker", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 1
             });
         });
 

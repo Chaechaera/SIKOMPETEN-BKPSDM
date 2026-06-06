@@ -34,11 +34,13 @@ class CetakUsulanKegiatansController extends Controller
 
         // Validasi request untuk surat fields
         $request->validate([
-            'nomor_surat' => 'required|string',
+            'nomor_surat' => 'required|string|max:30|unique:izin_identitassurats,nomor_surat',
             'tanggal_surat' => 'required|date',
             'lampiran_surat' => 'nullable|string',
             'sifat_surat' => 'required|string',
             'perihal_surat' => 'required|string',
+        ], [
+            'nomor_surat.unique' => 'Nomor surat sudah digunakan pada usulan kegiatan lain.',
         ]);
 
         // Transaksi DB berlangsung
