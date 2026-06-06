@@ -120,10 +120,10 @@
                                         @if(
                                         in_array($u->status_ui, ['draft', 'rejected']) &&
                                         is_null($u->cetakusulankegiatans))
-                                        <button onclick="openCetakModal('{{ $u->id }}', 'usulankegiatans')"
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
+                                        <a href="{{ route('admin.usulankegiatan.cetak', $u->id) }}"
+                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition text-center block">
                                             Cetak
-                                        </button>
+                                        </a>
                                         @else
                                         <button
                                             class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">

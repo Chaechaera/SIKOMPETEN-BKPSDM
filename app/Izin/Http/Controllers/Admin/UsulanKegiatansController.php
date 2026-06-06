@@ -181,6 +181,32 @@ class UsulanKegiatansController extends Controller
         return redirect()->route('admin.usulankegiatan.edit', $usulan->id)->with('success', 'Silakan lengkapi data usulan kegiatan.');
     }
 
+    public function destroy($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        // Hapus data terkait
+        $usulan->verifikasiusulankegiatans()->delete();
+
+        if ($usulan->cetakusulankegiatans) {
+            $usulan->cetakusulankegiatans()->delete();
+        }
+
+        if ($usulan->detailusulankegiatans) {
+            $usulan->detailusulankegiatans()->delete();
+        }
+
+        if ($usulan->inputusulankegiatans) {
+            $usulan->inputusulankegiatans()->delete();
+        }
+
+        $usulan->delete();
+
+        return redirect()
+            ->route('admin.usulankegiatan.index')
+            ->with('success', 'Usulan kegiatan berhasil dihapus.');
+    }
+
     /**
      * Tampilkan Form Edit Ajukan Usulan Kegiatan Pengembangan Kompetensi ASN
      */

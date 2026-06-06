@@ -13,6 +13,7 @@ class Izin_Cetakusulankegiatans extends Model
 
     protected $fillable = [
         'inputusulankegiatan_id',
+        'identitassurat_id',
         'nipadmin_cetakusulankegiatan',
         'pjunitkerja_id',
         'ttdunitkerja_id',
@@ -25,5 +26,13 @@ class Izin_Cetakusulankegiatans extends Model
     public function inputusulankegiatans()
     {
         return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
+    }
+    
+    public function identitassurats()
+    {
+        return $this->belongsTo(
+            Izin_Identitassurats::class,
+            'identitassurat_id'
+        );
     }
 }

@@ -27,72 +27,56 @@
                 <x-step-progress :usulan="$usulankegiatan" :is-laporan="false" />
 
                 {{-- ================================================== --}}
-                {{-- ======== BAGIAN 1: UPLOAD IDENTITAS SURAT ======== --}}
+                {{-- ======= BAGIAN 1: RINGKASAN DATA SURAT KIRIM ======= --}}
                 {{-- ================================================== --}}
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
+                    <h3 class="text-lg font-bold text-[#5A5A5A] mb-4">Ringkasan Data Identitas Surat</h3>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                        {{-- Nomor Surat --}}
+                        {{-- Nomor Surat (Read Only) --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Surat</label>
-                            <div class="required">
-                                <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="12/X/BKPSDM/001" required>
-                                @error('nomor_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                            <div class="relative">
+                                <input type="text" value="{{ $usulankegiatan->cetakusulankegiatans?->identitassurats?->nomor_surat ?? '-' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
 
-                        {{-- Tanggal Surat --}}
+                        {{-- Tanggal Surat (Read Only) --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
                             <div class="relative">
-                                <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
-                                @error('tanggal_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <input type="text" value="{{ $usulankegiatan->cetakusulankegiatans?->identitassurats?->tanggal_surat? \Carbon\Carbon::parse($usulankegiatan->cetakusulankegiatans->identitassurats->tanggal_surat)->format('d-m-Y'): '-'}}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
 
-                        {{-- Lampiran Surat --}}
+                        {{-- Lampiran Surat (Read Only) --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lampiran Surat</label>
                             <div class="relative">
-                                <input type="text" name="lampiran_surat" value="1 Bendel"
+                                <input type="text" value="{{ $usulankegiatan->cetakusulankegiatans?->identitassurats?->lampiran_surat ?? '-' }}"
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
-                                @error('lampiran_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
                             </div>
                         </div>
 
-                        {{-- Sifat Surat --}}
+                        {{-- Sifat Surat (Read Only) --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sifat Surat</label>
                             <div class="relative">
-                                <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
-                                    <option value="" disabled selected>-- Pilih sifat surat --</option>
-                                    <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                                    <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                                </select>
-                                @error('sifat_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <input type="text" value="{{ $usulankegiatan->cetakusulankegiatans?->identitassurats?->sifat_surat ?? '-' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
 
-                        {{-- Perihal Surat --}}
+                        {{-- Perihal Surat (Read Only) --}}
                         <div class="md:col-span-2">
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perihal Surat</label>
                             <div class="relative">
-                                <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
-                                @error('perihal_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
+                                <input type="text" value="{{ $usulankegiatan->cetakusulankegiatans?->identitassurats?->perihal_surat ?? '-' }}"
+                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
 
@@ -110,12 +94,12 @@
                                 <input type="file" name="filekirim_inputusulankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
                                   bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
-                                  focus:outline-none p-2" {{ $usulankegiatan && $usulankegiatan?->kirimusulankegiatans?->filekirim_inputusulankegiatan ? '' : 'required' }}>
-                                @if($usulankegiatan?->kirimusulankegiatans?->filekirim_inputusulankegiatan)
+                                  focus:outline-none p-2" {{ $usulankegiatan && $usulankegiatan?->inputusulankegiatans?->kirimusulankegiatans?->filekirim_inputusulankegiatan ? '' : 'required' }}>
+                                @if($usulankegiatan?->inputusulankegiatans?->kirimusulankegiatans?->filekirim_inputusulankegiatan)
                                 <div class="mt-2">
                                     <p class="text-xs text-gray-500">File saat ini:
-                                        <a href="{{ asset('storage/'.$usulankegiatan?->kirimusulankegiatans?->filekirim_inputusulankegiatan) }}" target="_blank" class="text-blue-600">
-                                            {{ basename($usulankegiatan?->kirimusulankegiatans?->filekirim_inputusulankegiatan) }}
+                                        <a href="{{ asset('storage/'.$usulankegiatan?->inputusulankegiatans?->kirimusulankegiatans?->filekirim_inputusulankegiatan) }}" target="_blank" class="text-blue-600">
+                                            {{ basename($usulankegiatan?->inputusulankegiatans?->kirimusulankegiatans?->filekirim_inputusulankegiatan) }}
                                         </a>
                                     </p>
                                 </div>

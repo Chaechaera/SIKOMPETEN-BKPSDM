@@ -195,7 +195,7 @@
                     $fields = [
                     'latarbelakang_kegiatan' => [
                     'label' => 'Latar Belakang Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                    'placeholder' => 'Tulisakan Latar Belakang Kegiatan',
                     'numbering' => false
                     ],
                     'dasarhukum_kegiatan' => [
@@ -205,12 +205,12 @@
                     ],
                     'uraian_kegiatan' => [
                     'label' => 'Uraian Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
+                    'placeholder' => 'Tuliskan Uraian Kegiatan',
                     'numbering' => false
                     ],
                     'maksud_kegiatan' => [
                     'label' => 'Maksud Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                    'placeholder' => 'Tuliskan Maksud Kegiatan',
                     'numbering' => false
                     ],
                     'tujuan_kegiatan' => [
@@ -220,17 +220,17 @@
                     ],
                     'hasillangsung_kegiatan' => [
                     'label' => 'Hasil Jangka Langsung dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
+                    'placeholder' => 'Tuliskan Hasil Jangka Langsung dari Kegiatan',
                     'numbering' => false
                     ],
                     'hasilmenengah_kegiatan' => [
                     'label' => 'Hasil Jangka Menengah dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
+                    'placeholder' => 'Tuliskan Hasil Jangka Menengah dari Kegiatan',
                     'numbering' => false
                     ],
                     'hasilpanjang_kegiatan' => [
                     'label' => 'Hasil Jangka Panjang dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
+                    'placeholder' => 'Tuliskan Hasil Jangka Panjang dari Kegiatan',
                     'numbering' => false
                     ],
                     'narasumber_kegiatan' => [
@@ -245,17 +245,17 @@
                     ],
                     'detailhasil_kegiatan' => [
                     'label' => 'Detail yang Dihasilkan dari Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst&#10;1. UUD 1945&#10;2. Perpu No.3 Tahun 2014&#10;3. dst',
+                    'placeholder' => 'Tuliskan Detail yang Dihasilkan dari Kegiatan',
                     'numbering' => false
                     ],
                     'penyelenggara_kegiatan' => [
                     'label' => 'Penyelenggara Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                    'placeholder' => 'Tuliskan Penyelenggara Kegiatan',
                     'numbering' => false
                     ],
                     'penutup_kegiatan' => [
                     'label' => 'Penutup Kegiatan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                    'placeholder' => 'Tuliskan Penutup Kegiatan',
                     'numbering' => false
                     ],
                     ];
