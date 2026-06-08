@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
 
         // Download Surat Pengajuan dan KAK Usulan Kegiatan
         Route::get('/admin/usulankegiatan/{id}/download', [UsulanKegiatansController::class, 'download'])->name('admin.usulankegiatan.download');
+        Route::post('/admin/usulankegiatan/{id}/preview', [UsulanKegiatansController::class, 'preview'])->name('admin.usulankegiatan.preview');
 
         // Cetak Surat Pengajuan dan KAK Usulan Kegiatan
         Route::match(['get', 'post'], '/admin/usulankegiatan/{id}/cetak', [CetakUsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.cetak');

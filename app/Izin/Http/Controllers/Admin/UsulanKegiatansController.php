@@ -344,4 +344,87 @@ class UsulanKegiatansController extends Controller
         // Redirect dan simpan file PDF
         return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
+
+    public function preview(Request $request, $id)
+    {
+        $user = Auth::user();
+
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'inputusulankegiatans.kopunitkerjas',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+
+        $ttd = Izin_Ttdunitkerjas::where(
+            'unitkerja_id',
+            $user->subunitkerjas->unitkerja_id
+        )->first();
+
+        $stempel = Izin_Stempelunitkerjas::where(
+            'unitkerja_id',
+            $user->subunitkerjas->unitkerja_id
+        )->first();
+
+        $kop_path = public_path('build/assets/kop_surat.png');
+
+        if (!file_exists($kop_path)) {
+            $kop_path = null;
+        }
+
+        // Baca file excel jadwal kegiatan kalau ada
+        $jadwalpelaksanaan_kegiatan = [];
+
+        if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
+
+            $path = storage_path(
+                'app/public/' .
+                $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan
+            );
+
+            if (file_exists($path)) {
+
+                try {
+
+                    $spreadsheet = IOFactory::load($path);
+
+                    $sheet = $spreadsheet->getActiveSheet();
+
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+                        $jadwalpelaksanaan_kegiatan[] = array_values($row);
+                    }
+
+                } catch (\Exception $e) {
+                    $jadwalpelaksanaan_kegiatan = [];
+                }
+            }
+        }
+
+        $pdf = PDF::loadView(
+            'pages.generatepdf.surat_usulan_kegiatan',
+            [
+                'usulankegiatans' => $usulankegiatans,
+                'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
+                'kop_path' => $kop_path,
+                'kop' => $kop,
+                'ttd' => $ttd,
+                'stempel' => $stempel,
+                'user' => $user,
+
+                'preview_identitas' => [
+                    'nomor_surat' => $request->nomor_surat,
+                    'tanggal_surat' => $request->tanggal_surat,
+                    'lampiran_surat' => $request->lampiran_surat,
+                    'sifat_surat' => $request->sifat_surat,
+                    'perihal_surat' => $request->perihal_surat,
+                ]
+            ]
+        );
+
+        return response(
+            $pdf->output(),
+            200
+        )->header('Content-Type', 'application/pdf');
+    }
 }
