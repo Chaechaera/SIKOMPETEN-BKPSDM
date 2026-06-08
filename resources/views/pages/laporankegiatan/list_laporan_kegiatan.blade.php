@@ -19,28 +19,23 @@
             </div>
 
             <!-- Cards -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
 
-  <div class="p-5 sm:p-6 rounded-xl bg-[#FFE6EB] shadow-sm">
-    <h2 class="text-gray-700 text-sm font-medium">Total Laporan</h2>
-    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
-      {{ $total }}
-    </p>
-  </div>
+@foreach($counts as $status => $value)
+@php
+    $bg = $colors[$status] ?? 'bg-gray-100';
+@endphp
 
-  <div class="p-5 sm:p-6 rounded-xl bg-[#E3EEFF] shadow-sm">
-    <h2 class="text-gray-700 text-sm font-medium">Disetujui</h2>
-    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
-      {{ $disetujui }}
+<div class="p-5 sm:p-6 rounded-xl {{ $bg }} shadow-sm">
+    <h2 class="text-gray-700 text-sm font-medium">
+        {{ str_replace('_', ' ', ucfirst($status)) }}
+    </h2>
+    <p class="text-2xl font-bold text-[#2B3674] mt-2">
+        {{ $value }}
     </p>
-  </div>
+</div>
 
-  <div class="p-5 sm:p-6 rounded-xl bg-[#F2E9FF] shadow-sm">
-    <h2 class="text-gray-700 text-sm font-medium">Menunggu Verifikasi</h2>
-    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
-      {{ $menunggu }}
-    </p>
-  </div>
+@endforeach
 
 </section>
 
@@ -140,7 +135,7 @@
 </div>
     </div>
                 <div class="border rounded-lg overflow-hidden">
-                    <table class="w-full text-sm table-fixed">
+                    <table class="w-full text-sm">
                         <thead>
                             <tr class="bg-gray-50 border-b text-center text-gray-600">
                                 <th class="py-3 px-4 w-14">No</th>
@@ -148,7 +143,7 @@
                                 <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
                                 <th class="py-3 px-4 w-28">Status Laporan</th>
                                 <th class="py-3 px-4 w-48">Update Progress</th>
-                                <th class="py-3 px-4 w-36">Aksi</th>
+
                             </tr>
                         </thead>
 
@@ -178,7 +173,8 @@
 
 
                                 <!-- Update Progress -->
-                                <td class="py-3 px-4 text-center" x-data="{ openProgress: false }">
+                                <td class="py-3 px-4 text-center"
+    x-data="{ openModal: false }">
                                     <div class="flex justify-center gap-2">
                                         {{-- ===================== CETAK DOKUMEN ===================== --}}
                                         @if (
@@ -206,165 +202,185 @@
                                         @else
                                         <button class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Kirim</button>
                                         @endif
+                                        
+{{-- BUTTON UPDATE --}}
+<button type="button"
+    @click="openModal = true"
+    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
+    Update
+</button>
 
-                                        {{-- ===================== UPDATE PROGRESS ===================== --}}
-                                        <button type="button" @click="openProgress = true"
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
-                                            Update
-                                        </button>
+{{-- MODAL --}}
+<div x-show="openModal"
+     x-cloak
+     x-transition.opacity
+     class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
 
+    <div @click.outside="openModal = false"
+         x-transition.scale
+         class="relative bg-white w-[440px] max-w-full rounded-2xl shadow-2xl p-6">
 
-                                        <!-- MODAL DETAIL -->
-                                        <div x-show="openProgress" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-                                            <div @click.outside="openProgress = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
+        {{-- CLOSE --}}
+        <button type="button"
+            @click="openModal = false"
+            class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl">
+            ✖
+        </button>
 
-                                                {{-- Button Close --}}
-                                                <button type="button" @click="openProgress = false"
-                                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg font-bold">
-                                                    ✖
-                                                </button>
+        {{-- TITLE --}}
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">
+            📌 Update & Aksi
+        </h2>
 
-                                                <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    📌 Progress Kegiatan
-                                                </h2>
+        <p class="text-sm text-gray-500 mb-5">
+            Pilih menu yang ingin dilakukan
+        </p>
 
-                                                <p class="text-sm text-gray-500 mb-6">
-                                                    Lakukan update progress secara berkala:
-                                                </p>
+        {{-- CONTENT --}}
+        <div class="space-y-3 text-sm">
 
-                                                <div class="flex flex-col space-y-3 font-bold">
-                                                    {{-- Update Laporan --}}
-                                                    @if($u->status_ui === 'in_progress')
-                                                    <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
-                                                        class="block px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1]">
-                                                        Update Laporan Hasil Kegiatan
-                                                    </a>
-                                                    @else
-                                                    <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
-                                                        Update Laporan Hasil Kegiatan
-                                                    </span>
-                                                    @endif
+            {{-- UPDATE --}}
+            @if($u->status_ui === 'in_progress')
+                <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
+                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1] font-medium hover:brightness-95 transition">
+                    Update Laporan
+                </a>
+            @else
+                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+                    Update Laporan
+                </div>
+            @endif
 
-                                                    {{-- Sertifikat --}}
-@php
-    $sertifikat = $u->inputlaporankegiatans?->laporankegiatans?->sertifikats;
+            {{-- SURAT & LAPORAN --}}
+            @if($u->inputlaporankegiatans?->laporankegiatans)
+                <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
+                   target="_blank"
+                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6] font-medium hover:brightness-95 transition">
+                    Lihat Surat & Laporan Hasil
+                </a>
+            @else
+                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+                    Lihat Surat & Laporan Hasil
+                </div>
+            @endif
+
+            {{-- BALASAN --}}
+            @if($u->inputlaporankegiatans?->laporankegiatans?->balasanlaporankegiatans ?? false)
+                <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
+                   target="_blank"
+                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
+                    Lihat Surat Balasan
+                </a>
+            @else
+                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+                    Lihat Surat Balasan
+                </div>
+            @endif
+
+            {{-- SERTIFIKAT --}}
+                                            @php
+    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
 @endphp
 
-@if($sertifikat)
-    <a href="{{ route('admin.sertifikat.download', $sertifikat->id) }}"
-       target="_blank"
-       class="block px-4 py-2 rounded-lg bg-[#defff8] text-[#136769]">
-        Download Sertifikat Peserta
+@if($laporanId)
+    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
+        target="_blank"
+       class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#defff8] text-[#136769] font-medium hover:brightness-95 transition">
+                    Download Sertifikat
+
     </a>
 @else
-    <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
-        Download Sertifikat Peserta
+    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+                    Sertifikat belum tersedia
+
     </span>
 @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
 
-                                <!-- Tombol Aksi -->
-                                <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
-                                    <div class="flex justify-center gap-4">
+{{-- ================= AKSI EDIT & HAPUS ================= --}}
+    @if($u->inputlaporankegiatans)
+        <div class="pt-2 border-t">
+            <p class="text-sm text-gray-500 mb-5">
+            Pilih aksi yang ingin dilakukan
+        </p>
+            <div class="flex items-center justify-center gap-4">
 
-                                        <div class="flex items-center space-x-2">
-                                        {{-- ===================== LIHAT DOKUMEN ===================== --}}
-                                        <a @click="openDokumen = true"
-                                            class="text-blue-600 hover:underline cursor-pointer">
-                                            Detail
-                                        </a>
+                {{-- EDIT --}}
+                @if($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
+                    <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
+                       class="flex items-center justify-center px-4 py-2 rounded-lg bg-yellow-200 text-yellow-800 font-medium hover:brightness-95 transition">
+                        Edit
+                    </a>
+                @else
+                    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">Edit</span>
+                @endif
 
-                                        <!-- MODAL DETAIL -->
-                                        <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-                                            <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
+                <span class="text-gray-300">|</span>
 
-                                                {{-- Button Close --}}
-                                                <button type="button" @click="openDokumen = false"
-                                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg font-bold">
-                                                    ✖
-                                                </button>
+                {{-- HAPUS --}}
+                <form action="{{ route('admin.laporankegiatan.destroy', $u->inputlaporankegiatans->id) }}"
+                      method="POST"
+                      onsubmit="return confirm('Yakin hapus laporan ini?')">
+                    @csrf
+                    @method('DELETE')
 
-                                                <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    Detail Dokumen
-                                                </h2>
+                    <button type="submit"
+                            class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
+                        Hapus
+                    </button>
+                </form>
 
-                                                <p class="text-sm text-gray-500 mb-6">
-                                                    Pilih dokumen yang ingin dilihat:
-                                                </p>
-
-                                                <div class="flex flex-col space-y-3 font-bold">
-
-    {{-- Lihat Surat dan Laporan Hasil --}}
-    @if($u->inputlaporankegiatans?->laporankegiatans)
-        <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
-           target="_blank"
-           class="block px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6]">
-            Lihat Surat dan Laporan Hasil
-        </a>
-    @else
-        <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
-            Lihat Surat dan Laporan Hasil
-        </span>
+            </div>
+        </div>
     @endif
-
-
-    {{-- Lihat Surat Balasan Laporan --}}
-    @if($u->inputlaporankegiatans?->laporankegiatans?->balasanlaporankegiatans ?? false)
-        <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
-           target="_blank"
-           class="block px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000]">
-            Lihat Surat Balasan Laporan
-        </a>
-    @else
-        <span class="block px-4 py-2 rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
-            Lihat Surat Balasan Laporan
-        </span>
-    @endif
-
+        </div>
     </div>
-                                            </div>
-                                        </div>
-
-                                        {{-- ===================== TOMBOL EDIT ===================== --}}
-                                        @if($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
-                                        <span class="text-gray-400">|</span>
-                                        <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
-                                            class="text-blue-600 hover:underline">
-                                            Edit
-                                        </a>
-                                        @else
-                                        <span class="text-gray-400 ">| Edit</span>
-                                        @endif
-
-                                        {{-- ===================== TOMBOL HAPUS ===================== --}}
-@if($u->inputlaporankegiatans)
-    <span class="text-gray-400">|</span>
-    <form action="{{ route('admin.laporankegiatan.destroy', $u->inputlaporankegiatans->id) }}"
-        method="POST"
-        class="inline"
-        onsubmit="return confirm('Yakin hapus laporan ini?')">
-        @csrf
-        @method('DELETE')
-
-        <button type="submit" class="text-red-600 hover:underline">
-            Hapus
-        </button>
-    </form>
-@endif
-                                    </div>
-                                    </div>
+</div>
                                 </td>
                             </tr>
+
+{{-- ================= CATATAN REVIEW ================= --}}
+@php
+    $verif = $u->inputlaporankegiatans?->laporankegiatans?->verifikasilaporankegiatanterakhir;
+@endphp
+
+@if($verif && $verif->catatan_verifikasilaporankegiatan)
+<tr>
+    <td colspan="6" class="bg-blue-50 px-6 py-3 border-b">
+
+        <div x-data="{ show: true }" x-show="show"
+            class="flex justify-between items-start bg-blue-100 border-l-4 border-blue-500 rounded-lg p-4">
+
+            <div>
+                <div class="font-semibold text-blue-800">
+                    📢 Catatan Review Laporan Kegiatan
+                </div>
+
+                <div class="mt-1 text-gray-700 text-sm">
+                    {{ $verif->catatan_verifikasilaporankegiatan }}
+                </div>
+
+                <div class="mt-2 text-xs text-gray-500">
+                    {{ \Carbon\Carbon::parse($verif->tanggalverifikasi_inputlaporankegiatan)->format('d/m/Y') }}
+                </div>
+            </div>
+
+            <button @click="show = false"
+                class="ml-4 text-gray-500 hover:text-red-600 font-bold text-lg">
+                ✕
+            </button>
+
+        </div>
+
+    </td>
+</tr>
+@endif
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-gray-500 py-4">
                                     Tidak ada data laporan kegiatan.
                                 </td>
                             </tr>
+                            
                             @endforelse
                         </tbody>
                     </table>
@@ -423,3 +439,4 @@
     </script>
 
 </x-app-layout>
+

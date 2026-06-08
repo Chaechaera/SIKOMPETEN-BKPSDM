@@ -49,36 +49,6 @@
       @endforeach
       @endif
 
-      {{-- Notifikasi Pengumuman Laporan Kegiatan Dari Superadmin --}}
-      @if ($catatan_verifikasi_laporan->count())
-      @foreach ($catatan_verifikasi_laporan as $catatan)
-      <div class="p-4 mb-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded">
-        <h3 class="font-semibold">📢 Catatan Review Laporan Kegiatan</h3>
-
-        <p>
-          <strong>
-            {{ optional($catatan->laporankegiatans->inputlaporankegiatans->inputusulankegiatans)->nama_kegiatan ?? '-' }}
-          </strong>
-          telah
-          <span class="{{ $catatan->status_verifikasilaporankegiatan === 'accepted'
-                    ? 'text-green-700'
-                    : 'text-red-700' }}">
-            {{ ucfirst($catatan->status_verifikasilaporankegiatan) }}
-          </span>.
-        </p>
-
-        <p class="mt-2 italic">
-          {{ $catatan->catatan_verifikasilaporankegiatan ?: 'Tidak ada catatan tambahan.' }}
-        </p>
-
-        <p class="text-sm text-gray-600 mt-1">
-          Diverifikasi pada
-          {{ \Carbon\Carbon::parse($catatan->tanggalverifikasi_inputlaporankegiatan)->format('d/m/Y H:i') }}
-        </p>
-      </div>
-      @endforeach
-      @endif
-
       <!-- Cards -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <div class="p-5 sm:p-6 rounded-xl bg-[#FFE6EB] shadow-sm">

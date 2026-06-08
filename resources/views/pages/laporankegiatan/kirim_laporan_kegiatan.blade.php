@@ -7,8 +7,10 @@
         {{-- Main Content --}}
         <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
 
+
             {{-- Header --}}
             @include('layouts.navigation')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
             {{-- 📝 FORM KIRIM LAPORAN KEGIATAN --}}
             <form method="POST" action="{{ route('admin.laporankegiatan.kirim', $laporankegiatans->id) }}" enctype="multipart/form-data">
@@ -49,8 +51,12 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
                             <div class="relative">
-                                <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                                <input type="text"
+    id="tanggal_surat"
+    name="tanggal_surat"
+    value="{{ old('tanggal_surat') }}"
+    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="dd-mm-yyyy"
+    required>
                                 @error('tanggal_surat')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -175,4 +181,19 @@
             </form>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    flatpickr("#tanggal_surat", {
+        locale: "id",
+        altInput: true,
+        altFormat: "d-m-Y",
+        dateFormat: "Y-m-d"
+    });
+
+});
+</script>
 </x-app-layout>

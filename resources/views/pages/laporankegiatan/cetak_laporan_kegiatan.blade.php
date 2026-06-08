@@ -5,6 +5,7 @@
 
             {{-- Button Close --}}
             <button @click="open = false" class="absolute top-2 right-3 text-gray-500 hover:text-gray-700"> ✕ </button>
+            <div class="px-6 py-4 max-h-[80vh] overflow-y-auto">
 
             {{-- Header Judul Usulan yang Dicetak --}}
             <div class="mb-4">
@@ -27,49 +28,213 @@
                     <!-- 🔻 DIVIDER -->
                     <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    <!-- content grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-sm">
+                    <!-- ========================= -->
+<!-- DATA LAPORAN KEGIATAN -->
+<!-- ========================= -->
 
-                        <!-- Nama Kegiatan -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $usulan->inputusulankegiatans->nama_kegiatan ?? '-' }}
-                            </p>
-                        </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 text-sm">
 
-                        <!-- Diajukan Oleh -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $usulan->subunitkerjas->sub_unitkerja ?? '-' }}
-                            </p>
-                        </div>
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->subunitkerjas?->sub_unitkerja ?? '-' }}
+        </p>
+    </div>
 
-                        <!-- Lokasi -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $usulan->inputlaporankegiatans->laporankegiatans->lokasi_kegiatan ?? '-' }}
-                            </p>
-                        </div>
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Unit Kerja</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->subunitkerjas?->unitkerjas?->unitkerja ?? '-' }}
+        </p>
+    </div>
 
-                        <!-- Tanggal -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{
-                    $usulan->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan && $usulan->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan
-                    ? \Carbon\Carbon::parse($usulan->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->format('d F Y')
-                      . ' s/d ' .
-                      \Carbon\Carbon::parse($usulan->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->format('d F Y')
-                    : '-'
-                }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->inputusulankegiatans?->nama_kegiatan ?? '-' }}
+        </p>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Cara Pelatihan</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->carapelatihans?->cara_pelatihan ?? '-' }}
+        </p>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->lokasi_kegiatan ?? '-' }}
+        </p>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
+        <p class="font-medium text-[#5A5A5A]">
+            @if(
+                $usulan->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan &&
+                $usulan->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
+            )
+                {{ \Carbon\Carbon::parse($usulan->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->translatedFormat('d F Y') }}
+                s/d
+                {{ \Carbon\Carbon::parse($usulan->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->translatedFormat('d F Y') }}
+            @else
+                -
+            @endif
+        </p>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Waktu Pelaksanaan</p>
+        <p class="font-medium text-[#5A5A5A]">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->waktumulai_kegiatan ?? '-' }}
+            -
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->waktuselesai_kegiatan ?? '-' }}
+        </p>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Link Undangan</p>
+        <a href="{{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkundangan_laporan }}"
+           target="_blank"
+           class="text-blue-600 hover:underline break-all">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkundangan_laporan ?? '-' }}
+        </a>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Link Materi</p>
+        <a href="{{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkmateri_laporan }}"
+           target="_blank"
+           class="text-blue-600 hover:underline break-all">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkmateri_laporan ?? '-' }}
+        </a>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Link Daftar Hadir</p>
+        <a href="{{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkdaftarhadir_laporan }}"
+           target="_blank"
+           class="text-blue-600 hover:underline break-all">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkdaftarhadir_laporan ?? '-' }}
+        </a>
+    </div>
+
+    <div>
+        <p class="text-gray-400 text-xs mb-1">Link Dokumentasi</p>
+        <a href="{{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkdokumentasi_laporan }}"
+           target="_blank"
+           class="text-blue-600 hover:underline break-all">
+            {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->linkdokumentasi_laporan ?? '-' }}
+        </a>
+    </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- RINCIAN LAPORAN -->
+<!-- ========================= -->
+
+<div class="mt-6 border-t pt-4">
+    <p class="text-gray-400 text-xs mb-2">Rincian Laporan</p>
+
+    <div class="text-sm text-[#5A5A5A] leading-relaxed whitespace-pre-line">
+        {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->rincian_laporan ?? '-' }}
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- PENUTUP LAPORAN -->
+<!-- ========================= -->
+
+<div class="mt-6 border-t pt-4">
+    <p class="text-gray-400 text-xs mb-2">Penutup Laporan</p>
+
+    <div class="text-sm text-[#5A5A5A] leading-relaxed whitespace-pre-line">
+        {{ $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->penutup_laporan ?? '-' }}
+    </div>
+</div>
+<!-- ========================= -->
+<!-- FILE PENDUKUNG LAPORAN -->
+<!-- ========================= -->
+
+<div class="mt-6 border-t pt-4">
+    <p class="text-gray-400 text-xs mb-4">File Pendukung Laporan</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 text-sm">
+
+        {{-- Rundown --}}
+        <div>
+            <p class="text-gray-400 text-xs mb-1">Rundown Kegiatan</p>
+
+            @if($usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->rundown_laporan)
+                <a href="{{ asset('storage/'.$usulan->inputlaporankegiatans->laporankegiatans->detaillaporankegiatans->rundown_laporan) }}"
+                   target="_blank"
+                   class="text-blue-600 hover:underline">
+                    Lihat File Rundown
+                </a>
+            @else
+                <span class="text-[#5A5A5A]">-</span>
+            @endif
+        </div>
+
+        {{-- Peserta --}}
+        <div>
+            <p class="text-gray-400 text-xs mb-1">Daftar Peserta Kegiatan</p>
+
+            @if($usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->peserta_laporan)
+                <a href="{{ asset('storage/'.$usulan->inputlaporankegiatans->laporankegiatans->detaillaporankegiatans->peserta_laporan) }}"
+                   target="_blank"
+                   class="text-blue-600 hover:underline">
+                    Lihat File Peserta
+                </a>
+            @else
+                <span class="text-[#5A5A5A]">-</span>
+            @endif
+        </div>
+
+        {{-- Template Sertifikat --}}
+        <div>
+            <p class="text-gray-400 text-xs mb-1">Template Sertifikat Kegiatan</p>
+
+            @if($usulan->inputlaporankegiatans?->laporankegiatans?->sertifikats?->templatesertifikat_kegiatan)
+                <a href="{{ asset('storage/'.$usulan->inputlaporankegiatans->laporankegiatans->sertifikats->templatesertifikat_kegiatan) }}"
+                   target="_blank"
+                   class="text-blue-600 hover:underline">
+                    Lihat Template Sertifikat
+                </a>
+            @else
+                <span class="text-[#5A5A5A]">-</span>
+            @endif
+        </div>
+
+    </div>
+</div>
+<!-- ========================= -->
+<!-- DOKUMENTASI KEGIATAN -->
+<!-- ========================= -->
+
+<div class="mt-6 border-t pt-4">
+    <p class="text-gray-400 text-xs mb-4">Dokumentasi Kegiatan</p>
+
+    @php
+        $gambar = $usulan->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->gambardokumentasi_laporan ?? [];
+    @endphp
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        @forelse($gambar as $file)
+            <a href="{{ asset('storage/'.$file) }}" target="_blank">
+                <img src="{{ asset('storage/'.$file) }}"
+                     class="w-full h-40 object-cover rounded-lg border hover:opacity-90 transition">
+            </a>
+        @empty
+            <p class="text-[#5A5A5A]">Tidak ada dokumentasi.</p>
+        @endforelse
+
+    </div>
+</div>
 
             {{-- Form Review Usulan --}}
 <div class="mt-6 relative flex items-center justify-between">
@@ -99,6 +264,7 @@
             Cetak Laporan
         </button>
     </form>
+</div>
 
 </div>
         </div>

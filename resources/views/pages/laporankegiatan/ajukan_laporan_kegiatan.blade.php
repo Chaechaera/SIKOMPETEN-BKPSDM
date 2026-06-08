@@ -9,6 +9,7 @@
 
             {{-- Header --}}
             @include('layouts.navigation')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
             <form method="POST" action="{{ route('admin.laporankegiatan.store', $usulankegiatans->id) }}" enctype="multipart/form-data">
                 @csrf
@@ -107,10 +108,12 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 Tanggal Kegiatan Mulai
                             </label>
-                            <input type="date" name="tanggalmulai_kegiatan"
-                                value="{{ old('tanggalmulai_kegiatan', $usulankegiatans?->tanggalmulai_kegiatan) }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
-                                bg-gray-50 text-gray-700 p-2" required>
+                            <input type="text"
+    id="tanggalmulai_kegiatan"
+    name="tanggalmulai_kegiatan"
+    value="{{ old('tanggalmulai_kegiatan', $laporankegiatans?->tanggalmulai_kegiatan) }}"
+    class="flatpickr block w-full text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="dd-mm-yyyy"
+    required>
                         </div>
 
                         {{-- Tanggal Selesai --}}
@@ -118,10 +121,12 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 Tanggal Kegiatan Selesai
                             </label>
-                            <input type="date" name="tanggalselesai_kegiatan"
-                                value="{{ old('tanggalselesai_kegiatan', $usulankegiatans?->tanggalselesai_kegiatan) }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
-                                bg-gray-50 text-gray-700 p-2" required>
+                            <input type="text"
+    id="tanggalselesai_kegiatan"
+    name="tanggalselesai_kegiatan"
+    value="{{ old('tanggalselesai_kegiatan', $laporankegiatans?->tanggalselesai_kegiatan) }}"
+    class="flatpickr block w-full text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="dd-mm-yyyy"
+    required>
                         </div>
 
                         {{-- Waktu Mulai --}}
@@ -129,10 +134,12 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 Waktu Kegiatan Dimulai
                             </label>
-                            <input type="time" name="waktumulai_kegiatan"
-                                value="{{ old('waktumulai_kegiatan', $usulankegiatans?->waktumulai_kegiatan) }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
-                                bg-gray-50 text-gray-700 p-2" required>
+                             <input type="text"
+       id="waktumulai_kegiatan"
+       name="waktumulai_kegiatan"
+       value="{{ old('waktumulai_kegiatan', $laporankegiatans?->waktumulai_kegiatan) }}"
+       class="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50 p-2" placeholder="-- : --"
+       required>
                         </div>
 
                         {{-- Waktu Selesai --}}
@@ -140,10 +147,12 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 Waktu Kegiatan Berakhir
                             </label>
-                            <input type="time" name="waktuselesai_kegiatan"
-                                value="{{ old('waktuselesai_kegiatan', $usulankegiatans?->waktuselesai_kegiatan) }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
-                                bg-gray-50 text-gray-700 p-2" required>
+                            <input type="text"
+       id="waktuselesai_kegiatan"
+       name="waktuselesai_kegiatan"
+       value="{{ old('waktuselesai_kegiatan', $laporankegiatans?->waktuselesai_kegiatan) }}"
+       class="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg bg-gray-50 p-2" placeholder="-- : --"
+       required>
                         </div>
 
                     </div>
@@ -178,4 +187,44 @@
             </form>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    flatpickr("#tanggalmulai_kegiatan", {
+        locale: "id",
+        altInput: true,
+        altFormat: "d-m-Y",
+        dateFormat: "Y-m-d"
+    });
+
+    flatpickr("#tanggalselesai_kegiatan", {
+        locale: "id",
+        altInput: true,
+        altFormat: "d-m-Y",
+        dateFormat: "Y-m-d"
+    });
+
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+flatpickr("#waktumulai_kegiatan", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true
+});
+
+flatpickr("#waktuselesai_kegiatan", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true
+});
+</script>
 </x-app-layout>

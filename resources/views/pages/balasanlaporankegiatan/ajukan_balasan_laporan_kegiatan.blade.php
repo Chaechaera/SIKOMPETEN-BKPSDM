@@ -9,6 +9,7 @@
 
             {{-- Header --}}
             @include('layouts.navigation')
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
             {{-- 📝 FORM BALASAN LAPORAN HASIL KEGIATAN --}}
             <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.store', $laporankegiatans->id) }}" enctype="multipart/form-data">
@@ -77,13 +78,15 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan</label>
                             <div class="relative">
                                 <input type="text"
-                                    value="{{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan
-                            ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
-                            \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}"
-                                    class="block w-full text-sm text-gray-700 
-                                  border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
-                                  focus:outline-none p-2" readonly>
+    value="{{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan
+        ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d-m-Y') . ' s/d ' .
+          \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->format('d-m-Y')
+        : '-' }}"
+    class="block w-full text-sm text-gray-700 
+    border border-[#E0E7FF] rounded-lg
+    bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
+    focus:outline-none p-2"
+    readonly>
                                 @error('tanggalpelaksanaan_kegiatan')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -149,8 +152,12 @@
                     {{-- Tanggal Keluar Sertifikat  --}}
                     <div>
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Sertifikat Kegiatan Dikeluarkan</label>
-                        <input type="date" name="tanggalkeluarsertifikat_kegiatan" value="{{ old('tanggalkeluarsertifikat_kegiatan') }}"
-                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-20 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
+                        <input type="text"
+    id="tanggalkeluarsertifikat_kegiatan"
+    name="tanggalkeluarsertifikat_kegiatan"
+    value="{{ old('tanggalkeluarsertifikat_kegiatan') }}"
+    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-gray-20 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="dd-mm-yyyy"
+    required>
                         @error('tanggalkeluarsertifikat_kegiatan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
@@ -199,6 +206,22 @@
             </form>
         </main>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    flatpickr("#tanggalkeluarsertifikat_kegiatan", {
+        locale: "id",
+        altInput: true,
+        altFormat: "d-m-Y",
+        dateFormat: "Y-m-d"
+    });
+
+});
+</script>
 
     <script>
         const designArea = document.getElementById("designArea");

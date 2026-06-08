@@ -122,7 +122,7 @@ class LaporanKegiatansController extends Controller
 
 /* ================= CARD FIX ================= */
 
-   $total = $all->count();
+$total = $all->count();
 
 $disetujui = $all->filter(fn($item) =>
     $item->status_laporan_ui === 'accepted' ||
@@ -133,16 +133,30 @@ $menunggu = $all->filter(fn($item) =>
     in_array($item->status_laporan_ui, ['need_review'])
 )->count();
 
-    /* ================= VIEW ================= */
+/* ================= CARD FIX ================= */
+$counts = [
+    'pending'     => $all->where('status_laporan_ui', 'pending')->count(),
+    'completed'   => $all->where('status_laporan_ui', 'completed')->count(),
+    'need_review' => $all->where('status_laporan_ui', 'need_review')->count(),
+    'accepted'    => $all->where('status_laporan_ui', 'accepted')->count(),
+    'rejected'    => $all->where('status_laporan_ui', 'rejected')->count(),
+    'finish'      => $all->where('status_laporan_ui', 'finish')->count(),
+];
+$colors = [
+    'pending'     => 'bg-[#FFE6EB]',
+    'completed'   => 'bg-[#E3EEFF]',
+    'need_review' => 'bg-[#F2E9FF]',
+    'accepted'    => 'bg-[#E6FFF0]',
+    'rejected'    => 'bg-[#FFE6E6]',
+    'finish'      => 'bg-[#FFF7E6]',
+];
 
-    return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
-        'usulankegiatans',
-        'total',
-        'disetujui',
-        'menunggu'
-    ));
-
-    return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
+/* ================= VIEW ================= */
+return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
+    'usulankegiatans',
+    'counts',
+    'colors'
+));
 }
 
     /**
