@@ -316,6 +316,37 @@
 
                 <span class="text-gray-300">|</span>
 
+    {{-- ARCHIVE --}}
+@if(
+    $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui === 'finish'
+    && !$u->inputlaporankegiatans?->laporankegiatans?->is_archived
+)
+    <form action="{{ route('admin.laporankegiatan.archive', $u->inputlaporankegiatans->id) }}"
+          method="POST"
+          onsubmit="return confirm('Yakin arsipkan laporan ini?')">
+        @csrf
+
+        <button type="submit"
+                class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#5B2C89] text-white font-medium hover:bg-[#7a3db3] transition">
+            Arsipkan
+        </button>
+    </form>
+
+@elseif(
+    $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
+)
+    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
+        Arsipkan
+    </span>
+
+@else
+    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+        Arsipkan
+    </span>
+@endif
+
+                <span class="text-gray-300">|</span>
+
                 {{-- HAPUS --}}
                 <form action="{{ route('admin.laporankegiatan.destroy', $u->inputlaporankegiatans->id) }}"
                       method="POST"

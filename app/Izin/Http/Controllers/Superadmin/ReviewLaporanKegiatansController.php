@@ -26,7 +26,12 @@ class ReviewLaporanKegiatansController extends Controller
         'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
         'subunitkerjas'
     ])
-    ->whereHas('inputlaporankegiatans.laporankegiatans')
+    ->whereHas(
+    'inputlaporankegiatans.laporankegiatans',
+    function ($q) {
+        $q->where('is_archived', 0);
+    }
+)
 
     ->leftJoin('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
     ->leftJoin('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
@@ -104,6 +109,125 @@ class ReviewLaporanKegiatansController extends Controller
     );
 
     return view('pages.laporankegiatan.pending_list_laporan_kegiatan', compact('usulankegiatans'));
+}
+
+/**
+     * ARCHIVE
+     */
+
+public function archive($id)
+{
+    $laporan = Izin_Laporankegiatans::findOrFail($id);
+
+    $laporan->update([
+        'is_archived' => 1
+    ]);
+
+    return back()->with(
+        'success',
+        'Laporan berhasil diarsipkan'
+    );
+}
+public function unarchive($id)
+{
+    $laporan = Izin_Laporankegiatans::findOrFail($id);
+
+    $laporan->update([
+        'is_archived' => 0
+    ]);
+
+    return back()->with(
+        'success',
+        'Laporan berhasil dipulihkan'
+    );
+}
+public function archivePage(Request $request)
+{
+    $query = Izin_Usulankegiatans::with([
+        'inputusulankegiatans',
+        'inputlaporankegiatans',
+        'inputlaporankegiatans.laporankegiatans',
+        'subunitkerjas'
+    ])
+    ->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
+        $q->where('is_archived', 1);
+    });
+
+    // SEARCH
+    if ($request->filled('search')) {
+
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+
+            $q->whereHas('inputusulankegiatans', function ($q2) use ($search) {
+                $q2->where('nama_kegiatan', 'like', "%{$search}%");
+            })
+
+            ->orWhereHas('subunitkerjas', function ($q2) use ($search) {
+                $q2->where('singkatan', 'like', "%{$search}%");
+            })
+
+             // Nomor Sertifikat & Tanggal Keluar Sertifikat
+        ->orWhereHas(
+            'inputlaporankegiatans.laporankegiatans.sertifikats',
+            function ($q2) use ($search) {
+
+                $q2->where('nomorsertifikat_kegiatan', 'like', "%{$search}%")
+                   ->orWhere('tanggalkeluarsertifikat_kegiatan', 'like', "%{$search}%");
+            }
+        );
+        });
+    }
+
+    // FILTER TAHUN BERDASARKAN TANGGAL KELUAR SERTIFIKAT
+if ($request->filled('tahun')) {
+
+    $query->whereHas(
+        'inputlaporankegiatans.laporankegiatans.sertifikats',
+        function ($q) use ($request) {
+
+            $q->whereYear(
+                'tanggalkeluarsertifikat_kegiatan',
+                $request->tahun
+            );
+        }
+    );
+}
+
+// SORT BERDASARKAN TANGGAL KELUAR SERTIFIKAT
+$sort = $request->get('sort', 'desc');
+
+$query->leftJoin(
+    'izin_inputlaporankegiatans',
+    'izin_inputlaporankegiatans.inputusulankegiatan_id',
+    '=',
+    'izin_usulankegiatans.id'
+)
+->leftJoin(
+    'izin_laporankegiatans',
+    'izin_laporankegiatans.id',
+    '=',
+    'izin_inputlaporankegiatans.laporankegiatan_id'
+)
+->leftJoin(
+    'izin_sertifikats',
+    'izin_sertifikats.laporankegiatan_id',
+    '=',
+    'izin_laporankegiatans.id'
+)
+->select('izin_usulankegiatans.*')
+->orderBy(
+    'izin_sertifikats.tanggalkeluarsertifikat_kegiatan',
+    $sort
+);
+    $usulankegiatans = $query->paginate(20)
+        ->withQueryString();
+
+    return view(
+        'pages.balasanlaporankegiatan.arsip_balasan_laporan',
+        compact('usulankegiatans')
+    );
 }
 
     /**

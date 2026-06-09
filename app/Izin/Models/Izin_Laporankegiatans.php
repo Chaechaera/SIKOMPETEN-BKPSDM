@@ -18,7 +18,8 @@ class Izin_Laporankegiatans extends Model
         'tanggalselesai_kegiatan',
         'waktumulai_kegiatan',
         'waktuselesai_kegiatan',
-        'statuslaporan_kegiatan'
+        'statuslaporan_kegiatan',
+        'is_archived',
     ];
 
     /* ========== RELATIONS ========== */

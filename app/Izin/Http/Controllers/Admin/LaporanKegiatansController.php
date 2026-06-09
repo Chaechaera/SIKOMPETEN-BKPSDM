@@ -87,6 +87,11 @@ class LaporanKegiatansController extends Controller
         });
     }
 
+    //ARCHIVE
+    $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
+    $q->where('is_archived', 0);
+    });
+
     // 🔥 AMBIL DATA
     $data = $query->get();
 
@@ -466,6 +471,86 @@ if (!$laporankegiatans) {
         else $hasil = ucwords($hasil);
 
         return $formatRupiah . ' (' . $hasil . ')';
+    }
+
+    public function archivePage(Request $request)
+{
+    $user = Auth::user();
+
+    $query = Izin_Usulankegiatans::with([
+        'inputusulankegiatans',
+        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir'
+    ])
+    ->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
+        $q->where('is_archived', 1);
+    });
+
+    // 🔐 ROLE FILTER
+    if ($user->role == 'admin') {
+        $query->where('subunitkerja_id', $user->subunitkerja_id);
+    }
+
+    // 🔎 SEARCH
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->whereHas('inputusulankegiatans', function ($q) use ($search) {
+            $q->where('nama_kegiatan', 'like', "%$search%");
+        });
+    }
+
+    // 📅 TAHUN
+    if ($request->filled('tahun')) {
+        $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
+            $q->whereYear('tanggalmulai_kegiatan', $request->tahun);
+        });
+    }
+
+    // 🔃 SORT (INI YANG KAMU LUPA)
+    $sort = $request->get('sort', 'desc');
+
+    $query->join('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
+          ->join('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
+          ->select('izin_usulankegiatans.*')
+          ->orderBy('izin_laporankegiatans.tanggalmulai_kegiatan', $sort);
+
+    // 📦 PAGINATION
+    $usulankegiatans = $query->paginate(20)->withQueryString();
+
+    return view('pages.laporankegiatan.arsip_laporan_kegiatan', compact('usulankegiatans'));
+}
+
+    public function archive($id)
+{
+    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
+        ->findOrFail($id);
+
+    $laporan = $input->laporankegiatans;
+
+    if ($laporan) {
+        $laporan->update([
+            'is_archived' => 1
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Laporan berhasil diarsipkan');
+}
+
+public function unarchive($id)
+{
+    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
+        ->findOrFail($id);
+
+    $laporan = $input->laporankegiatans;
+
+    if ($laporan) {
+        $laporan->update([
+            'is_archived' => 0
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Laporan berhasil dikembalikan');
+
     }
 
     public function destroy($id)

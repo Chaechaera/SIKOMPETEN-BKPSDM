@@ -113,23 +113,23 @@
 
         </div>
     </div>
-                <div class="border rounded-lg overflow-hidden">
+                <div class="border rounded-lg overflow-x-auto">
                     <table class="w-full text-sm table-fixed">
                         <thead>
                             <tr class="bg-gray-50 border-b text-center text-gray-600">
                                 <th class="py-3 px-4 w-32">Nomor Surat</th>
                                 <th class="py-3 px-4 w-24">OPD</th>
-                                <th class="py-3 px-4 w-60">Nama Kegiatan</th>
+                                <th class="py-3 px-4 w-48">Nama Kegiatan</th>
                                 <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
                                 <th class="py-3 px-4 w-28">Status Usulan</th>
-                                <th class="py-3 px-4 w-48">Update Progress</th>
-                                <th class="py-3 px-4 w-20">Aksi</th>
+                                <th class="py-3 px-4 w-52">Update Progress</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             @forelse ($usulankegiatans as $index => $u)
-                            <tr class="border-b hover:bg-gray-50">
+                            <tr class="border-b hover:bg-gray-50"
+                            x-data="{ openDokumen: false }">
 
                                 <!-- Nomor Surat -->
                                 <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
@@ -157,68 +157,67 @@
                                 </td>
 
                                 <!-- Update Progress -->
-                                <td class="py-3 px-4 text-center" x-data="{ openProgress: false }">
-                                    <div class="flex justify-center gap-2">
-                                        {{-- ===================== CETAK DOKUMEN ===================== --}}
-                                        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
-                                        <form method="POST"
-                                            action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->inputlaporankegiatans->laporankegiatans->id) }}"
-                                            onsubmit="return confirm('Yakin cetak?')">
-                                            @csrf
-                                            <button type="submit"
-                                                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
-                                                Cetak
-                                            </button>
-                                        </form>
-                                        @else
-                                        <button
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-                                            Cetak
-                                        </button>
-                                        @endif
+<td class="py-3 px-4 text-center">
+    <div class="flex justify-center items-center gap-2">
 
-                                        {{-- ===================== KIRIM DOKUMEN ===================== --}}
-                                        
-                                        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
-                                        <a href="{{ route(
-    'superadmin.balasanlaporankegiatan.kirim',
-    $u->inputlaporankegiatans->laporankegiatans->id
-)}}"
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
-                                            Kirim
-                                        </a>
-                                        @else
-                                        <button
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Kirim</button>
-                                        @endif
+        {{-- CETAK --}}
+        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
+            <form method="POST"
+                action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->inputlaporankegiatans->laporankegiatans->id) }}"
+                onsubmit="return confirm('Yakin cetak?')">
+                @csrf
+                <button type="submit"
+                    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
+                    Cetak
+                </button>
+            </form>
+        @else
+            <button
+                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                Cetak
+            </button>
+        @endif
 
+        {{-- KIRIM --}}
+        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
+            <a href="{{ route(
+                'superadmin.balasanlaporankegiatan.kirim',
+                $u->inputlaporankegiatans->laporankegiatans->id
+            ) }}"
+                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
+                Kirim
+            </a>
+        @else
+            <button
+                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                Kirim
+            </button>
+        @endif
 
-                                        {{-- ===================== REVIEW DOKUMEN ===================== --}}
-                                        @if($u->isReviewLaporan())
-                                        <button
-                                            onclick="openReviewModal('{{ $u->inputlaporankegiatans->laporankegiatans->id }}', 'laporankegiatans')"
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
-                                            Review
-                                        </button>
-                                        @else
-                                        <button
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Review</button>
-                                        @endif
-                                    </div>
-                                </td>
+        {{-- REVIEW --}}
+        @if($u->isReviewLaporan())
+            <button
+                onclick="openReviewModal('{{ $u->inputlaporankegiatans->laporankegiatans->id }}', 'laporankegiatans')"
+                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
+                Review
+            </button>
+        @else
+            <button
+                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                Review
+            </button>
+        @endif
 
-                                <!-- Tombol Aksi -->
-                                <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
-                                    <div class="flex justify-center gap-2">
-                                        <div class="flex justify-center items-center gap-2 text-sm">
+        {{-- UPDATE --}}
+        <button
+    type="button"
+    @click="openDokumen = true"
+    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition">
+    Update
+</button>
 
-                                        {{-- TOMBOL LIHAT DOKUMEN --}}
-                                        <a @click="openDokumen = true"
-                                        class="text-blue-600 hover:underline cursor-pointer">
-                                        Detail
-                                        </a>
-
-                                        <!-- MODAL DETAIL -->
+    </div>
+    <!-- MODAL DETAIL -->
                                         <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
                                             <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
 
@@ -249,36 +248,70 @@
                                                         Lihat Surat dan Laporan Hasil
                                                     </a>
                                                 </div>
-                                            </div>
-                                        </div>
 
-                                        {{-- TOMBOL HAPUS --}}
-                                        <span class="text-gray-400">|</span>
-                                        <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
-                                                method="POST"
-                                                class="inline"
-                                                onsubmit="return confirm('Yakin hapus usulan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                        <button type="submit"
-                                                class="text-red-600 hover:underline">
-                                                Hapus
-                                        </button>
-                                        </form>
-                                    </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-gray-500 p-4">
-                                    Tidak ada data laporan kegiatan.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                                    <p class="text-sm text-gray-500 my-6">
+                                                    Pilih aksi yang ingin dilakukan:
+                                                    </p>
+
+                                                    <div class="flex flex-col space-y-3 font-bold">
+                                                    
+                                                    {{-- ARCHIVE --}}
+                                                    @if(
+                                                        $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui === 'finish'
+                                                        && !$u->inputlaporankegiatans?->laporankegiatans?->is_archived
+                                                    )
+
+                                                    <form
+                                                        action="{{ route(
+                                                        'superadmin.laporankegiatan.archive',
+                                                        $u->inputlaporankegiatans->laporankegiatans->id
+                                                    ) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Yakin arsipkan laporan ini?')">
+                                                    @csrf
+
+                                                    <button
+                                                        type="submit"
+                                                        class="block w-full px-4 py-2 rounded-lg bg-[#5B2C89] text-white">
+                                                        Arsipkan
+                                                    </button>
+
+                                                    </form>
+
+                                                    @elseif(
+                                                        $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
+                                                    )
+
+                                                    <span
+                                                        class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
+                                                        Arsipkan
+                                                    </span>
+
+                                                    @else
+
+                                                    <span
+                                                        class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+                                                        Arsipkan
+                                                    </span>
+
+                                                    @endif
+</td>
+                                    <div class="flex justify-center gap-2">
+                                        <div class="flex justify-center items-center gap-2 text-sm">
+                                                    </div>
+                                                </div>
+                                
+                                                                                </tr>
+                                                                                @empty
+                                                                                <tr>
+                                                                                    <td colspan="7" class="text-center text-gray-500 p-4">
+                                                                                        Tidak ada data laporan kegiatan.
+                                                                                    </td>
+                                                                                </tr>
+                                                                                @endforelse
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
 
                 {{-- Footer Pagination --}}
                 <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">

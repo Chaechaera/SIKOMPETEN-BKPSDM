@@ -121,6 +121,17 @@ Route::middleware('auth')->group(function () {
         //Daftar Laporan Kegiatan
         Route::get('/admin/laporankegiatan/daftar_laporankegiatan', [LaporanKegiatansController::class, 'index'])->name('admin.laporankegiatan.index');
 
+        // ARCHIVED
+
+        Route::get('/admin/laporankegiatan/arsip', [LaporanKegiatansController::class, 'archivePage'])
+        ->name('admin.laporankegiatan.arsip');
+
+        Route::post('/admin/laporankegiatan/{id}/archive', [LaporanKegiatansController::class, 'archive'])
+        ->name('admin.laporankegiatan.archive');
+
+        Route::post('/admin/laporankegiatan/{id}/unarchive', [LaporanKegiatansController::class, 'unarchive'])
+        ->name('admin.laporankegiatan.unarchive');
+
         // Buat Laporan Hasil Kegiatan
         Route::get('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.create');
         Route::post('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.store');
@@ -152,6 +163,8 @@ Route::middleware('auth')->group(function () {
         // Download Sertifikat Kegiatan dalam ZIP
         Route::get('/admin/sertifikat/{id}/downloadZIP', [SertifikatsController::class, 'downloadZIP'])->name('admin.sertifikat.download');
     });
+
+    
 
     // Bagian Superadmin
     Route::middleware(['role:superadmin'])->group(function () {
@@ -226,8 +239,25 @@ Route::patch('/superadmin/laporanpeserta/{id}/reject',
         // Kirim Surat Balasan Laporan Hasil Kegiatan
         Route::get('/superadmin/balasanlaporankegiatan/{id}/kirim', [BalasanLaporanKegiatansController::class, 'kirim'])->name('superadmin.balasanlaporankegiatan.kirim');
         Route::post('/superadmin/balasanlaporankegiatan/{id}/kirim', [BalasanLaporanKegiatansController::class, 'storeFinal'])->name('superadmin.balasanlaporankegiatan.kirim');
-    });
-});
 
+        // ARCHIVE LAPORAN
+
+Route::post(
+    '/superadmin/laporankegiatan/{id}/archive',
+    [ReviewLaporanKegiatansController::class, 'archive']
+)->name('superadmin.laporankegiatan.archive');
+
+Route::post(
+    '/superadmin/laporankegiatan/{id}/unarchive',
+    [ReviewLaporanKegiatansController::class, 'unarchive']
+)->name('superadmin.laporankegiatan.unarchive');
+
+Route::get(
+    '/superadmin/laporankegiatan/arsip',
+    [ReviewLaporanKegiatansController::class, 'archivePage']
+)->name('superadmin.laporankegiatan.arsip');
+});
+    });
+        
 
 require __DIR__ . '/auth.php';

@@ -88,17 +88,23 @@
                 </a>
 
                 <!-- Daftar Laporan -->
-                <a href="{{ route('superadmin.laporankegiatan.pending') }}"
-                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
-               {{ Route::is('superadmin.laporankegiatan*')
-                    ? 'bg-[#1C1F4A] text-white'
-                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+                <!-- Daftar Laporan -->
+<a href="{{ route('superadmin.laporankegiatan.pending') }}"
+    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+    {{
+        Route::is('superadmin.laporankegiatan*')
+        && !Route::is('superadmin.laporankegiatan.arsip')
+            ? 'bg-[#1C1F4A] text-white'
+            : 'text-gray-600 hover:bg-[#E8EDFF]'
+    }}">
 
-                    <img src="{{ Route::is('superadmin.laporankegiatan*')
-                    ? asset('images/file-white.png')
-                    : asset('images/file.png') }}"
-                        class="w-5 shrink-0">
-
+                    <img src="{{
+    Route::is('superadmin.laporankegiatan*')
+    && !Route::is('superadmin.laporankegiatan.arsip')
+        ? asset('images/file-white.png')
+        : asset('images/file.png')
+}}"
+class="w-5 shrink-0">
                     <span x-show="sidebarOpen">Daftar Laporan Kegiatan</span>
                 </a>
 
@@ -155,6 +161,21 @@
 
                     <span x-show="sidebarOpen">Daftar Laporan Peserta</span>
                 </a>
+
+                <!-- Arsip Laporan  -->
+                <a href="{{ route('superadmin.laporankegiatan.arsip') }}"
+    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+    {{ Route::is('superadmin.laporankegiatan.arsip')
+        ? 'bg-[#1C1F4A] text-white'
+        : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+    <img src="{{ Route::is('superadmin.laporankegiatan.arsip')
+        ? asset('images/Archive-white.png')
+        : asset('images/Archive.png') }}"
+        class="w-5 shrink-0">
+
+    <span x-show="sidebarOpen">Arsip Laporan</span>
+</a>
 
                 <!-- Informasi -->
                 <a href="{{ route('superadmin.informasi') }}"
