@@ -12,6 +12,7 @@ use App\Izin\Models\Izin_RefSubunitkerjas;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
+use App\Izin\Models\Izin_Verifikasiusulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
@@ -124,10 +125,51 @@ class UsulanKegiatansController extends Controller
             $usulankegiatans->where('statususulan_kegiatan', $request->status);
         }
 
+        $notifikasiReview = \App\Izin\Models\Izin_Verifikasiusulankegiatans::with([
+            'usulankegiatans.inputusulankegiatans'
+        ])
+        ->where('is_read', false)
+        ->whereHas('usulankegiatans', function ($q) use ($user) {
+
+            if ($user->role === 'admin') {
+                $q->where('subunitkerja_id', $user->subunitkerja_id);
+            }
+
+            if ($user->role === 'user') {
+                $q->where('dibuat_oleh', $user->id);
+            }
+
+        })
+        ->latest('tanggalverifikasi_inputusulankegiatan')
+        ->get();
+        
         $usulankegiatans = $usulankegiatans->orderBy('updated_at', 'desc')->paginate(20)->appends($request->query());
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
-        return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
+        return view(
+            'pages.usulankegiatan.list_usulan_kegiatan',
+            compact(
+                'usulankegiatans',
+                'notifikasiReview'
+            )
+        );
+    }
+
+    /**
+     * Tutup notifikasi review usulan kegiatan
+     */
+    public function closeNotification($id)
+    {
+        $notif = Izin_Verifikasiusulankegiatans::findOrFail($id);
+
+        $notif->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     /**

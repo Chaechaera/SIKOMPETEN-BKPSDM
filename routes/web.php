@@ -145,7 +145,9 @@ Route::middleware('auth')->group(function () {
 
         // Download Sertifikat Kegiatan dalam ZIP
         Route::get('/admin/sertifikat/{id}/downloadZIP', [SertifikatsController::class, 'downloadZIP'])->name('admin.sertifikat.download');
-    });
+    
+        // Close Notification
+        Route::post('/usulan/notifikasi/{id}/close',[UsulanKegiatansController::class, 'closeNotification'])->name('admin.usulankegiatan.notification.close');});
 
     // Bagian Superadmin
     Route::middleware(['role:superadmin'])->group(function () {

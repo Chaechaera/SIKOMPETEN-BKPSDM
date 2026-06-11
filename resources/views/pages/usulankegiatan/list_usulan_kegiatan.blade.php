@@ -74,6 +74,45 @@
                 </form>
             </div>
 
+            @if($notifikasiReview->count())
+            @foreach($notifikasiReview as $notif)
+            <div
+                x-data="{ show: true }"
+                x-show="show"
+                class="mb-4">
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 relative">
+                    <button
+                        onclick="closeNotification({{ $notif->id }})"
+                        class="absolute top-3 right-4 text-gray-500 hover:text-gray-700">
+                        ✕
+                    </button>
+                    <h3 class="font-semibold text-[#2B3674] mb-2">
+                        📢 Catatan Review Usulan Kegiatan
+                    </h3>
+                    <p>
+                        <strong>
+                            {{ $notif->usulankegiatans->inputusulankegiatans->nama_kegiatan }}
+                        </strong>
+                        telah
+                        <span class="{{
+                            $notif->status_verifikasiusulankegiatan === 'accepted'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }}">
+                            {{ ucfirst($notif->status_verifikasiusulankegiatan) }}
+
+                        </span>.
+                    </p>
+
+                    <p class="mt-2 italic">
+                        {{ $notif->catatan_verifikasiusulankegiatan ?: 'Tidak ada catatan tambahan.' }}
+                    </p>
+                </div>
+            </div>
+            @endforeach
+            @endif
+
             <!-- TABLE -->
             <div class="bg-white rounded-xl shadow p-6">
                 <div class="border rounded-lg overflow-hidden">
@@ -91,13 +130,22 @@
 
                         <tbody>
                             @forelse ($usulankegiatans as $index => $u)
+
+                            <tbody x-data="{ openReview: false }">
                             <tr class="border-b hover:bg-gray-50">
 
                                 <!-- Nomor Otomatis -->
                                 <td class="py-3 px-4 text-center">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
 
                                 <!-- Nama Kegiatan -->
-                                <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
+                                <td class="py-3 px-4">
+                                    <button
+                                        @click="openReview = !openReview"
+                                        class="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left">
+
+                                        {{ $u->inputusulankegiatans->nama_kegiatan }}
+                                    </button>
+                                </td>
 
                                 <!-- Tanggal Pelaksanaan Kegiatan -->
                                 <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
@@ -296,7 +344,56 @@
                                         </form>
                                     </div>
                                 </td>
+                            @if($u->verifikasiusulankegiatanterakhir)
+                            <tr
+                                x-show="openReview"
+                                x-transition>
+                                <td colspan="6" class="bg-blue-50 px-6 py-4">
+                                    <div class="rounded-lg border border-blue-200 bg-white p-4">
+                                        <h4 class="font-semibold text-[#2B3674] mb-3">
+                                            📢 Catatan Review Usulan Kegiatan
+                                        </h4>
+                                        <div class="space-y-2 text-sm">
+                                            <p>
+                                                <strong>Status Verifikasi:</strong>
+
+                                                <span class="{{
+                                                    $u->verifikasiusulankegiatanterakhir->status_verifikasiusulankegiatan === 'accepted'
+                                                    ? 'text-green-600'
+                                                    : 'text-red-600'
+                                                }}">
+                                                    {{
+                                                        ucfirst(
+                                                            $u->verifikasiusulankegiatanterakhir->status_verifikasiusulankegiatan
+                                                        )
+                                                    }}
+                                                </span>
+                                            </p>
+                                            <p>
+                                                <strong>Catatan:</strong>
+
+                                                {{
+                                                    $u->verifikasiusulankegiatanterakhir->catatan_verifikasiusulankegiatan
+                                                    ?: 'Tidak ada catatan tambahan.'
+                                                }}
+                                            </p>
+                                            <p>
+                                                <strong>Tanggal Verifikasi:</strong>
+
+                                                {{
+                                                    \Carbon\Carbon::parse(
+                                                        $u->verifikasiusulankegiatanterakhir->tanggalverifikasi_inputusulankegiatan
+                                                    )->format('d/m/Y H:i')
+                                                }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
+
+                            @endif
+                            </tr>
+                            </tbody>
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-gray-500 py-4">
@@ -355,6 +452,20 @@
                     </div>
                 `;
             }
+        }
+
+        function closeNotification(id)
+        {
+            fetch(`/admin/usulankegiatan/notifikasi/${id}/close`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN':
+                        document.querySelector(
+                            'meta[name="csrf-token"]'
+                        ).content
+                }
+            })
+            .then(() => location.reload());
         }
     </script>
 
