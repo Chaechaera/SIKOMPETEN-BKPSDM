@@ -21,6 +21,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UsulanKegiatansController extends Controller
 {
+    /**
+     * Tampilkan Rekapitulasi Kegiatan Pengembangan Kompetensi ASN
+     */
     public function rekap()
     {
         // Ambil parameter search dan tahun dari request
@@ -104,7 +107,7 @@ class UsulanKegiatansController extends Controller
 
                     // persen dari jumlah kegiatan
                     'persen_20' => $jumlah_kegiatan_valid > 0
-                        ? round(($jp20 / ($jp0_10 + $jp11_19 + $jp20)) * $total_jp) . '%'
+                        ? round(($jp20 / ($jp0_10 + $jp11_19 + $jp20)) * 100) . '%'
                         : '0%',
                 ];
             })
@@ -150,15 +153,14 @@ class UsulanKegiatansController extends Controller
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
-        // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        // Ambil user yang sedang aktif saat ini
+        $activeRole = session('active_role', Auth::user()->role);
 
-        // Redirect ke halaman rekapitulasi kegiatan berdasarkan role
-        if ($user->role === 'superadmin') {
+        if ($activeRole === 'superadmin') {
             return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
         }
 
-        if ($user->role === 'admin') {
+        if ($activeRole === 'admin') {
             return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
         }
 
@@ -338,7 +340,7 @@ class UsulanKegiatansController extends Controller
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::with([
@@ -347,11 +349,20 @@ class UsulanKegiatansController extends Controller
             'detailusulankegiatans'
         ])->findOrFail($id);
 
+        //$kirimusulankegiatans = $usulankegiatans->kirimusulankegiatans;
+
+        //$pengirim = $kirimusulankegiatans?->nipadmin_inputusulankegiatan; // relasi ke user pengirim
+
+        //$unitkerjaId = $pengirim?->subunitkerjas->unitkerja_id;
+
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $unitkerjaId = $user->subunitkerjas->unitkerja_id;
-        $kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        //$unitkerjaId = $user->subunitkerjas->unitkerja_id;
+        //$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->latest()->first();
+        $kop = $usulankegiatans->inputusulankegiatans?->kopunitkerjas;
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$ttd = $usulankegiatans->inputusulankegiatans?->kopunitkerjas?->ttdunitkerjas;
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$stempel = $usulankegiatans->inputusulankegiatans?->kopunitkerjas?->stempelunitkerjas;
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -373,6 +384,16 @@ class UsulanKegiatansController extends Controller
                         $values = array_values($row);
                         $jadwalpelaksanaan_kegiatan[] = $values;
                     }
+                    /*foreach ($sheet->toArray(null, true, true, true) as $row) {
+
+                        $values = [];
+
+                        foreach (array_values($row) as $cell) {
+                            $values[] = $this->rapikanText($cell);
+                        }
+
+                        $jadwalpelaksanaan_kegiatan[] = $values;
+                    }*/
                 } catch (\Exception $e) {
                     $jadwalpelaksanaan_kegiatan = [];
                 }
@@ -387,7 +408,8 @@ class UsulanKegiatansController extends Controller
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user' => $user,
+            //'pengirim' => $pengirim,
+            //user' => $user,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF

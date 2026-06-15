@@ -78,7 +78,7 @@ class AdminController extends Controller
 
         $usulanDisetujui = (clone $queryUsulan)
             ->get()
-            ->filter(fn($item) => $item->status_ui === 'accepted')
+            ->filter(fn($item) => $item->status_ui === 'accepted' || $item->status_ui === 'finish')
             ->count();
 
         $usulanDitolak = (clone $queryUsulan)
@@ -119,9 +119,8 @@ class AdminController extends Controller
             ->get()
             ->filter(
                 fn($item) =>
-                $item->status_ui === 'accepted'
-                    && $item->isLaporan()
-            )
+                $item->isLaporan()
+                    && in_array($item->status_ui, ['accepted', 'finish'])            )
             ->count();
 
         $laporanDitolak = (clone $queryUsulan)

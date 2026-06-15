@@ -52,4 +52,12 @@ class Izin_Inputusulankegiatans extends Model
     {
         return $this->hasOne(Izin_Pelaksanaankegiatans::class, 'inputusulankegiatan_id');
     }
+
+    public function kirimbalasanusulankegiatans()
+{
+    return $this->belongsTo(
+        Izin_Kirimbalasanusulankegiatans::class,
+        'kirimbalasanusulankegiatan_id'
+    );
+}
 }

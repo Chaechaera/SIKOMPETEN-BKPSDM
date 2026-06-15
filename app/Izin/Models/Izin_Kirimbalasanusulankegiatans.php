@@ -20,4 +20,9 @@ class Izin_Kirimbalasanusulankegiatans extends Model
         'nipadmin_cetakbalasanusulankegiatan',
         'tanggalcetak_balasanusulankegiatan'
     ];
+
+    public function identitassurats()
+    {
+        return $this->belongsTo(Izin_Identitassurats::class, 'identitassurat_id');
+    }
 }

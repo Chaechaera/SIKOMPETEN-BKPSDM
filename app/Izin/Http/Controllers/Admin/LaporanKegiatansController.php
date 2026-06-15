@@ -204,7 +204,7 @@ class LaporanKegiatansController extends Controller
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
         $laporankegiatans = Izin_Laporankegiatans::with([
@@ -217,10 +217,13 @@ class LaporanKegiatansController extends Controller
         ])->findOrFail($id);
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $unitkerjaId = $user->subunitkerjas->unitkerja_id;
-        $kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        //$unitkerjaId = $user->subunitkerjas->unitkerja_id;
+        //$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $kop = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->kopunitkerjas;
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -301,7 +304,7 @@ class LaporanKegiatansController extends Controller
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user'   => $user,
+            //'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF

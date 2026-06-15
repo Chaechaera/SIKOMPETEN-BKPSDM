@@ -93,6 +93,9 @@ class SuperadminController extends Controller
         $laporanPesertaDisetujui = Izin_Laporanpesertakegiatans::where(
             'statuslaporan_pesertakegiatan',
             'approved'
+        )->orWhere(
+            'statuslaporan_pesertakegiatan',
+            'finish'
         )->count();
 
         $laporanPesertaDitolak = Izin_Laporanpesertakegiatans::where(

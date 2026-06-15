@@ -101,8 +101,23 @@
                         {{-- Verifikasi --}}
                         <td class="p-4">
                             <div class="flex justify-center gap-2">
-                                {{-- Tombol Verifikasi --}}
-                                @if(!$user->hasVerifiedEmail())
+                                @if($user->status === 'aktif')
+                                <button
+                                    type="button"
+                                    disabled
+                                    class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed">
+                                    Aktifkan
+                                </button>
+                                <form method="POST" action="{{ route('dashboard.users.deactivate', $user) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button
+                                        type="submit"
+                                        class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-merahCabai text-white hover:bg-merahCabai/60">
+                                        Nonaktifkan
+                                    </button>
+                                </form>
+                                @else
                                 <form method="POST" action="{{ route('dashboard.users.verify-email', $user) }}">
                                     @csrf
                                     @method('PATCH')
@@ -112,22 +127,10 @@
                                         Aktifkan
                                     </button>
                                 </form>
-                                @else
                                 <button
-                                    class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-abuabuMuda text-abuabuSedang cursor-not-allowed">
-                                    Aktifkan
-                                </button>
-                                @endif
-
-                                {{-- Tombol Nonaktifkan (UI only for now) --}}
-                                @if($user->status === 'aktif')
-                                <button
-                                    class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-merahCabai text-white hover:bg-merahCabai/60">
-                                    Nonaktifkan
-                                </button>
-                                @else
-                                <button
-                                    class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-abuabuMuda text-abuabuSedang cursor-not-allowed">
+                                    type="button"
+                                    disabled
+                                    class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-gray-300 text-gray-500 cursor-not-allowed">
                                     Nonaktifkan
                                 </button>
                                 @endif

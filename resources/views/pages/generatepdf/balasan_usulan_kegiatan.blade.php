@@ -228,7 +228,7 @@
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -333,30 +333,30 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
+                    <td><strong>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $usulankegiatans->balasanusulankegiatans?->identitassurats?->tanggal_surat
-                    ? \Carbon\Carbon::parse($usulankegiatans->balasanusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+                {{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->tanggal_surat
+                    ? \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
                     : '' }}
             </p>
         </div>
@@ -364,14 +364,14 @@
 
     <div class="tujuan">
         <p>Yth.</p>
-        <p>Kepala Badan Kepegawaian dan Pengembangan SDM</p>
+        <p>{{ $ttdPengusul?->jabatanpenanggungjawab_opd ?? '-' }}</p>
         <p>Kota Surakarta</p>
         <p><strong>di SURAKARTA</strong></p>
     </div>
 
     {{-- =================== ISI SURAT =================== --}}
     <div class="content">
-        <p class="indent">Menindaklanjuti surat Kepala {{ $user->subunitkerjas->sub_unitkerja }} Kota Surakarta nomor
+        <p class="indent">Menindaklanjuti surat {{ $ttdPengusul?->jabatanpenanggungjawab_opd ?? '-' }} Kota Surakarta nomor
             <strong>{{ $usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->nomor_surat ?? '-' }}</strong> tanggal {{ \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y') ?? '-' }} 
             perihal {{ $usulankegiatans->inputusulankegiatans->kirimusulankegiatans?->identitassurats?->perihal_surat ?? '-' }}, bersama ini kami sampaikan hal-hal berikut:
         </p>
@@ -389,7 +389,7 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         <div class="ttd-wrapper">
@@ -406,8 +406,9 @@
 
         </div>
 
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 </body>
 

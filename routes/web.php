@@ -35,6 +35,7 @@ Route::get('/dashboard', function () {
 Route::middleware(['superadmin'])->group(function () {
     Route::resource('/users', UserManagementController::class);
     Route::patch('/users/{user}/verify-email', [UserManagementController::class, 'verifyEmail'])->name('dashboard.users.verify-email');
+    Route::patch('/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('dashboard.users.deactivate');
     Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('dashboard.users.update-role');
 });
 
@@ -202,6 +203,9 @@ Route::middleware('auth')->group(function () {
         // Kirim Surat Balasan Laporan Hasil Kegiatan
         Route::get('/superadmin/balasanlaporankegiatan/{id}/kirim', [BalasanLaporanKegiatansController::class, 'kirim'])->name('superadmin.balasanlaporankegiatan.kirim');
         Route::post('/superadmin/balasanlaporankegiatan/{id}/kirim', [BalasanLaporanKegiatansController::class, 'storeFinal'])->name('superadmin.balasanlaporankegiatan.kirim');
+
+        // Download Laporan Peserta Kegiatan
+        Route::get('/superadmin/laporanpesertakegiatan/{id}/download', [LaporanPesertaKegiatansController::class, 'download'])->name('superadmin.laporanpesertakegiatan.download');
     });
 });
 

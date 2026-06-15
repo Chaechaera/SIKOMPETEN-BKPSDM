@@ -75,36 +75,33 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
-    // Email Verification
-    Route::get('verify-email', EmailVerificationPromptController::class)
-        ->name('verification.notice');
+        // Email Verification
+        Route::get('verify-email', EmailVerificationPromptController::class)
+            ->name('verification.notice');
 
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
+        Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
 
-    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
+        Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+            ->name('password.confirm');
+        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+        Route::put('password', [PasswordController::class, 'update'])
+            ->name('password.update');
+    /*
+    |--------------------------------------------------------------------------
+    | Switch Panel Routes
+    |--------------------------------------------------------------------------
+    */
 
-    // Password Confirmation & Update
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-        ->name('password.confirm');
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
-    Route::put('password', [PasswordController::class, 'update'])
-        ->name('password.update');
-
-    // Switch Panel (Admin <-> Superadmin)
     Route::post('/switch-panel/{role}', function ($role) {
 
         $allowedRoles = ['admin', 'superadmin', 'user'];
-
         if (!in_array($role, $allowedRoles)) {
             abort(403);
         }
 
         $realRole = Auth::user()->role;
-
         if ($realRole === 'superadmin') {
         } elseif ($realRole === 'admin') {
             if (!in_array($role, ['user', 'admin'])) {
@@ -128,3 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
