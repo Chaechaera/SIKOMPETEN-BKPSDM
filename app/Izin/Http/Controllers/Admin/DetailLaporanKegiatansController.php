@@ -82,18 +82,13 @@ class DetailLaporanKegiatansController extends Controller
         }
 
         // Upload template sertifikat kegiatan
-        $templatePath = null;
+        $sertifikats = [
+            'laporankegiatan_id' => $request->laporankegiatan_id
+        ];
 
-if ($request->hasFile('templatesertifikat_kegiatan')) {
-    $templatePath = $request->file('templatesertifikat_kegiatan')
-        ->store('izin/template_sertifikat', 'public');
-}
-
-$sertifikats = [
-    'laporankegiatan_id' => $request->laporankegiatan_id,
-    'jenissertifikat_kegiatan' => $request->jenissertifikat_kegiatan,
-    'templatesertifikat_kegiatan' => $templatePath,
-];
+        if ($request->hasFile('templatesertifikat_kegiatan')) {
+            $sertifikats['templatesertifikat_kegiatan'] = $request->file('templatesertifikat_kegiatan')->store('izin/template_sertifikat', 'public');
+        }
 
         // Simpan dan update sertifikat
         Izin_Sertifikats::updateOrCreate(
@@ -144,6 +139,13 @@ $sertifikats = [
 
             foreach (array_slice($path_peserta_laporan, 1) as $row) {
 
+        // Skip jika baris kosong
+        if (
+        empty(trim($row[0] ?? '')) ||
+        empty(trim($row[1] ?? ''))
+        ) {
+        continue;
+        }
                 $namaSubunitkerja = trim($row[3] ?? "");
 
                 // Cari id dari nama
@@ -193,7 +195,8 @@ $sertifikats = [
         }
 
         // Redirect ke halaman dashboard admin
-        return redirect()->route('admin.dashboard')->with('success', 'Usulan Kegiatan Berhasil Disimpan Secara Lengkap!');
+       return redirect()->route('admin.laporankegiatan.index')
+                     ->with('success', 'Laporan berhasil disimpan');
     }
 
     /**

@@ -316,29 +316,29 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->nomor_surat ?? '' }}</td>                </tr>
+                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>                </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
+                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
+                    <td>{{ $balasanlaporankegiatans->laporankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
+                    <td><strong>{{ $balasanlaporankegiatans->laporankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->tanggal_surat
-                    ? \Carbon\Carbon::parse($balasanlaporankegiatans->laporankegiatans?->inputlaporankegiatans?->kirimbalasanlaporankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+                {{ $balasanlaporankegiatans->laporankegiatans?->identitassurats?->tanggal_surat
+                    ? \Carbon\Carbon::parse($balasanlaporankegiatans->laporankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
                     : '' }}
             </p>
         </div>
@@ -353,15 +353,16 @@
 
     {{-- =================== ISI SURAT =================== --}}
         <div class="content">
-        <p class="indent">Menindaklanjuti surat {{ $ttdPengusul?->jabatanpenanggungjawab_opd ?? '-' }} Kota Surakarta Nomor:
+        <p class="indent">Menindaklanjuti surat Kepala {{ $user->subunitkerjas->sub_unitkerja }} Kota Surakarta Nomor:
             <strong>{{ $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->kirimlaporankegiatans?->identitassurats?->nomor_surat ?? '-' }}</strong> tanggal {{ \Carbon\Carbon::parse ($balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->kirimlaporankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y') ?? '-' }} 
             perihal {{ $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->kirimlaporankegiatans?->identitassurats?->perihal_surat ?? '-' }} yang telah dikirimkan kepada BKPSDM
-            Kota Surakarta melalui website SIKOMPETEN, bersama ini kami sampaikan hal-hal berikut:</p>
+            Kota Surakarta melalui tautan
+            <a href="#">https://bit.ly/uploadlaporanbangkom2025</a>, bersama ini kami sampaikan hal-hal berikut:</p>
 
         <ol>
-            <li>Kegiatan {{ $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }} sudah sesuai dengan ketentuan Pengembangan Kompetensi dan ditetapkan nomor register sertifikat
+            <li>Kegiatan {{ $laporan->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }} sudah sesuai dengan ketentuan Pengembangan Kompetensi dan ditetapkan nomor register sertifikat
                 yaitu:
-                <strong>{{ $balasanlaporankegiatans->laporankegiatans->sertifikats->nomorsertifikat_kegiatan ?? '-' }}</strong> dengan tanggal sertifikat {{ \Carbon\Carbon::parse($balasanlaporankegiatans->laporankegiatans->sertifikats->tanggalkeluarsertifikat_kegiatan)->translatedFormat('d F Y') ?? '-' }}.
+                <strong>{{ $laporan->sertifikats->nomorsertifikat_kegiatan ?? '-' }}</strong> dengan tanggal sertifikat {{ \Carbon\Carbon::parse($laporan->sertifikats->tanggalkeluarsertifikat_kegiatan)->translatedFormat('d F Y') ?? '-' }}.
             </li>
             <li>Nomor register sertifikat adalah nomor sertifikat yang tertulis pada sertifikat Pengembangan Kompetensi Workshop.</li>
             <li>Berdasarkan materi dan waktu pelaksanaan kegiatan yang dilaksanakan selama 3 hari penuh maka pengakuan

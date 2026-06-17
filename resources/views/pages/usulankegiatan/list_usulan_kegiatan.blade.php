@@ -38,8 +38,8 @@
                         <!-- Nomor Otomatis -->
                         <td class="py-3 px-4">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
 
-                        <!-- Nama Kegiatan -->
-                        <td class="py-3 px-4 text-left font-semibold">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
+                                <!-- Nama Kegiatan -->
+                                <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
 
                         <!-- Tanggal Pelaksanaan Kegiatan -->
                         <td class="py-3 px-4 whitespace-nowrap">
@@ -126,22 +126,22 @@
                                                 Lihat Pelaksanaan Kegiatan
                                             </a>
 
-                                            {{-- Update Laporan --}}
-                                            @if($u->status_ui === 'in_progress')
-                                            <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
-                                                class="block px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1]">
-                                                Update Laporan Hasil Kegiatan
-                                            </a>
-                                            @else
-                                            <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
-                                                Update Laporan Hasil Kegiatan
-                                            </span>
-                                            @endif
+                                                    {{-- Update Laporan --}}
+                                                    @if($u->status_ui === 'in_progress')
+                                                    <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
+                                                        class="block px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1]">
+                                                        Update Laporan Hasil Kegiatan
+                                                    </a>
+                                                    @else
+                                                    <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
+                                                        Update Laporan Hasil Kegiatan
+                                                    </span>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </td>
+                                </td>
 
                         <!-- Tombol Aksi -->
                         <td class="py-3 px-4" x-data="{ openDokumen: false }">

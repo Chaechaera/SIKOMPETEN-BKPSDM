@@ -151,6 +151,21 @@
                     <span x-show="sidebarOpen">Rekapitulasi</span>
                 </a>
 
+                <!-- Sertifikat -->
+                <a href="{{ route('admin.sertifikat') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
+               {{ Route::is('admin.sertifikat')
+                    ? 'bg-[#1C1F4A] text-white'
+                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+
+                    <img src="{{ Route::is('admin.sertifikat')
+                    ? asset('images/Award-white.png')
+                    : asset('images/Award.png') }}"
+                        class="w-5 shrink-0">
+
+                    <span x-show="sidebarOpen">Sertifikat</span>
+                </a>
+
                 <!-- Informasi -->
                 <a href="{{ route('admin.informasi') }}"
                     class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
