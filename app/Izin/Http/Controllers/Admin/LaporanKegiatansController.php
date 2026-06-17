@@ -12,41 +12,58 @@ use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
-use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
 
-
 class LaporanKegiatansController extends Controller
 {
     /**
      * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
-    public function index(Request $request)
-{
-    $user = Auth::user();
+    public function index()
+    {
+        $user = Auth::user();
 
-        // Eager load relasi dari model
         $usulankegiatans = Izin_Usulankegiatans::with([
-        'inputusulankegiatans',
-        'inputusulankegiatans.pelaksanaankegiatans',
-        'inputlaporankegiatans.laporankegiatans',
-        ])->whereHas('inputusulankegiatans.pelaksanaankegiatans')->orderByDesc('created_at');
+            'inputusulankegiatans',
+            'inputusulankegiatans.pelaksanaankegiatans',
+            'inputlaporankegiatans.laporankegiatans',
+        ])
+            ->whereHas('inputusulankegiatans.pelaksanaankegiatans')
+            ->get();
 
-        if ($user->role == 'admin') {
-            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        // =========================
+        // 🔥 FILTER DULU (collection)
+        // =========================
+        if ($user->role === 'admin') {
+            $usulankegiatans = $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
         }
 
-        if ($user->role == 'user') {
-            $usulankegiatans->where('dibuat_oleh', $user->id);
+        if ($user->role === 'user') {
+            $usulankegiatans = $usulankegiatans->where('dibuat_oleh', $user->id);
         }
 
-        $usulankegiatans = $usulankegiatans->paginate(20);
+        // 🔥 baru reset index
+        $usulankegiatans = $usulankegiatans->values();
 
-        // Redirect ke halaman daftar pengajuan usulan kegiatan
+        // 🔥 PAGINATION
+        $page = request()->get('page', 1);
+        $perPage = 20;
+
+        $usulankegiatans = new LengthAwarePaginator(
+            $usulankegiatans->forPage($page, $perPage),
+            $usulankegiatans->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
         return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
     }
 
@@ -99,7 +116,7 @@ class LaporanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            'statuslaporan_kegiatan' => 'draft'
+            'statuslaporan_kegiatan' => 'completed'
         ]);
 
         // Simpan data inputlaporankegiatan
@@ -128,10 +145,10 @@ class LaporanKegiatansController extends Controller
         $inputlaporankegiatans = $usulankegiatans->inputlaporankegiatans;
         $laporankegiatans = $inputlaporankegiatans->laporankegiatans;
 
-        // Verifikasi bahwa status laporankegiatan tidak sama dengan draft
-        if (!in_array($laporankegiatans->status_laporan_ui, ['draft', 'rejected'])) {
-    abort(403, 'Usulan sudah tidak dapat diubah.');
-}
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
+        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
+            abort(403, 'Usulan sudah tidak dapat diubah.');
+        }
 
         // Pastikan detaillaporankegiatan selalu ada
         $detaillaporankegiatans = $laporankegiatans->detaillaporankegiatans ?? new Izin_Detaillaporankegiatans();
@@ -162,10 +179,10 @@ class LaporanKegiatansController extends Controller
         $inputlaporan = $usulankegiatans->inputlaporankegiatans;
         $laporankegiatans = $inputlaporan->laporankegiatans;
 
-        // Verifikasi bahwa status laporankegiatan tidak sama dengan draft
-        if (!in_array($laporankegiatans->status_laporan_ui, ['draft', 'rejected'])) {
-    abort(403, 'Laporan tidak bisa diedit.');
-}
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
+        if ($laporankegiatans->statuslaporan_kegiatan !== 'completed') {
+            abort(403);
+        }
 
         // Update data laporankegiatan
         $laporankegiatans->update([
@@ -175,9 +192,7 @@ class LaporanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            'statuslaporan_kegiatan' => 'draft'
         ]);
-        $laporankegiatans->verifikasilaporankegiatans()->delete();
 
         // Lanjutkan proses store ke controller detaillaporankegiatan
         return app(DetailLaporanKegiatansController::class)->store($request);
@@ -192,25 +207,23 @@ class LaporanKegiatansController extends Controller
         //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
-        // Ambil dari USULAN, bukan langsung laporan
-$usulan = Izin_Usulankegiatans::with([
-    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-    'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
-    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-    'inputlaporankegiatans.laporankegiatans.sertifikats'
-])->findOrFail($id);
-
-// Ambil laporan dari relasi
-$laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
-
-if (!$laporankegiatans) {
-    abort(404, 'Laporan tidak ditemukan');
-}
+        $laporankegiatans = Izin_Laporankegiatans::with([
+            'detaillaporankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
+            'detaillaporankegiatans.pesertakegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        ])->findOrFail($id);
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        //$unitkerjaId = $user->subunitkerjas->unitkerja_id;
+        //$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $kop = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->kopunitkerjas;
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $unitkerjaId)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -258,9 +271,8 @@ if (!$laporankegiatans) {
             }
         }
 
-        
-
-       $gambardokumentasi_laporan = [];
+        // Baca file gambar dokumentasi laporan kegiatan kalau ada
+        $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
             $files_gambardokumentasi = $laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan ?? [];
             foreach ($files_gambardokumentasi as $file) {
@@ -280,17 +292,6 @@ if (!$laporankegiatans) {
         // Ambil atribut khusus untuk laporan kegiatan
         $atribut_khusus = $laporankegiatans->detaillaporankegiatans->atribut_khusus ?? [];
 
-       $identitas = optional(
-    optional(
-        $laporankegiatans
-            ->inputlaporankegiatans
-            ->cetaklaporankegiatans
-    )->identitassurats
-);
-
-$rundown_laporan = [];
-$peserta_laporan = [];
-
         // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.laporan_hasil_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
@@ -303,7 +304,7 @@ $peserta_laporan = [];
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user'   => $user,
+            //'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF
@@ -370,175 +371,4 @@ $peserta_laporan = [];
 
         return $formatRupiah . ' (' . $hasil . ')';
     }
-
-    public function archivePage(Request $request)
-{
-    $user = Auth::user();
-
-    $query = Izin_Usulankegiatans::with([
-        'inputusulankegiatans',
-        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir'
-    ])
-    ->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
-        $q->where('is_archived', 1);
-    });
-
-    // 🔐 ROLE FILTER
-    if ($user->role == 'admin') {
-        $query->where('subunitkerja_id', $user->subunitkerja_id);
-    }
-
-    // 🔎 SEARCH
-    if ($request->filled('search')) {
-        $search = $request->search;
-
-        $query->whereHas('inputusulankegiatans', function ($q) use ($search) {
-            $q->where('nama_kegiatan', 'like', "%$search%");
-        });
-    }
-
-    // 📅 TAHUN
-    if ($request->filled('tahun')) {
-        $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
-            $q->whereYear('tanggalmulai_kegiatan', $request->tahun);
-        });
-    }
-
-    // 🔃 SORT (INI YANG KAMU LUPA)
-    $sort = $request->get('sort', 'desc');
-
-    $query->join('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
-          ->join('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
-          ->select('izin_usulankegiatans.*')
-          ->orderBy('izin_laporankegiatans.tanggalmulai_kegiatan', $sort);
-
-    // 📦 PAGINATION
-    $usulankegiatans = $query->paginate(20)->withQueryString();
-
-    return view('pages.laporankegiatan.arsip_laporan_kegiatan', compact('usulankegiatans'));
-}
-
-public function preview(Request $request, $id)
-{
-    $usulan = Izin_Usulankegiatans::with([
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-    ])->findOrFail($id);
-
-    $laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
-
-    $identitas = (object)[
-        'nomor_surat'   => $request->nomor_surat,
-        'tanggal_surat' => $request->tanggal_surat,
-        'sifat_surat'   => $request->sifat_surat,
-        'lampiran_surat'=> '1 Bendel',
-        'perihal_surat' => $request->perihal_surat,
-    ];
-
-    $gambardokumentasi_laporan = [];
-
-    if ($laporankegiatans?->detaillaporankegiatans?->gambardokumentasi_laporan) {
-
-        foreach ($laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan as $file) {
-
-            $path = storage_path('app/public/' . $file);
-
-            if (file_exists($path)) {
-                $gambardokumentasi_laporan[] = $path;
-            }
-        }
-    }
-
-    $pdf = PDF::loadView(
-        'pages.generatepdf.laporan_hasil_kegiatan',
-        compact(
-            'usulan',
-            'laporankegiatans',
-            'identitas',
-            'gambardokumentasi_laporan'
-        )
-    );
-
-    return response($pdf->output(), 200)
-        ->header('Content-Type', 'application/pdf');
-}
-
-public function checkNomorSurat(Request $request)
-{
-    $exists = \DB::table('izin_identitassurats')
-        ->where('nomor_surat', $request->nomor_surat)
-        ->exists();
-
-    return response()->json([
-        'exists' => $exists
-    ]);
-}
-
-public function unarchive($id)
-{
-    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
-        ->findOrFail($id);
-
-    $laporan = $input->laporankegiatans;
-
-    if ($laporan) {
-        $laporan->update([
-            'is_archived' => 0
-        ]);
-    }
-
-    return redirect()->back()->with('success', 'Laporan berhasil dikembalikan');
-
-    }
-
-    public function destroy($id)
-{
-    $input = Izin_Inputlaporankegiatans::with([
-        'laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-        'laporankegiatans.verifikasilaporankegiatans',
-        'laporankegiatans.sertifikats',
-        'laporankegiatans.balasanlaporankegiatans',
-        'cetaklaporankegiatans'
-    ])->findOrFail($id);
-
-    $laporan = $input->laporankegiatans;
-
-    if ($laporan) {
-
-        // 1. hapus peserta
-        $detail = $laporan->detaillaporankegiatans;
-        if ($detail) {
-            $detail->pesertakegiatans()->delete();
-            $detail->delete();
-        }
-
-        // 2. hapus verifikasi
-        $laporan->verifikasilaporankegiatans()->delete();
-
-        // 3. hapus sertifikat
-        if ($laporan->sertifikats) {
-            $laporan->sertifikats->delete();
-        }
-
-        // 4. hapus balasan
-        if ($laporan->balasanlaporankegiatans) {
-            $laporan->balasanlaporankegiatans->delete();
-        }
-
-        // 5. hapus cetak
-        if ($input->cetaklaporankegiatans) {
-            $input->cetaklaporankegiatans->delete();
-        }
-    }
-
-    // 6. HAPUS INPUT  
-    $input->delete();
-
-    // 7. HAPUS LAPORAN
-    if ($laporan) {
-        $laporan->delete();
-    }
-
-    return redirect()->route('admin.laporankegiatan.index')
-        ->with('success', 'Laporan berhasil dihapus');
-}
 }

@@ -4,7 +4,6 @@ namespace App\Izin\Models;
 
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Pelaksanaankegiatans;
-use App\Izin\Models\Izin_Cetaklaporankegiatans;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,18 +22,13 @@ class Izin_Inputlaporankegiatans extends Model
     /* ========== RELATIONS ========== */
 
     public function laporankegiatans()
-{
-    return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');
-}
+    {
+        return $this->belongsTo(Izin_Laporankegiatans::class, 'laporankegiatan_id');
+    }
 
     public function inputusulankegiatans()
     {
         return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
-    }
-
-    public function usulankegiatans()
-    {
-    return $this->belongsTo(Izin_Usulankegiatans::class, 'usulankegiatan_id');
     }
 
     public function kirimlaporankegiatans()
@@ -46,4 +40,12 @@ class Izin_Inputlaporankegiatans extends Model
     {
         return $this->belongsTo(Izin_Pelaksanaankegiatans::class, 'pelaksanaankegiatan_id');
     }
+
+    public function kirimbalasanlaporankegiatans()
+{
+    return $this->belongsTo(
+        Izin_Kirimbalasanlaporankegiatans::class,
+        'kirimbalasanlaporankegiatan_id'
+    );
+}
 }

@@ -4,7 +4,6 @@ namespace App\Izin\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Izin_Kirimbalasanlaporankegiatans extends Model
 {
@@ -21,4 +20,9 @@ class Izin_Kirimbalasanlaporankegiatans extends Model
         'nipadmin_cetakbalasanlaporankegiatan',
         'tanggalcetak_balasanlaporankegiatan'
     ];
+
+    public function identitassurats()
+    {
+        return $this->belongsTo(Izin_Identitassurats::class, 'identitassurat_id');
+    }
 }

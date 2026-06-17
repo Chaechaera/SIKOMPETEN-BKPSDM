@@ -86,18 +86,17 @@
                     <span x-show="sidebarOpen">Daftar Usulan Kegiatan</span>
                 </a>
 
-                <!-- Daftar Laporan -->
+                <!-- Daftar Laporan Kegiatan -->
                 <a href="{{ route('superadmin.laporankegiatan.pending') }}"
-                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
-               {{ Route::is('superadmin.laporankegiatan*')
-                    ? 'bg-[#1C1F4A] text-white'
-                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                    {{ Route::is('superadmin.laporankegiatan*')
+                    ? 'bg-biruMariana text-white'
+                    : 'text-abuabuSedang hover:bg-abuabuMuda/75' }}">
 
-                    <img src="{{ Route::is('superadmin.laporankegiatan*')
-                    ? asset('images/file-white.png')
-                    : asset('images/file.png') }}"
-                        class="w-5 shrink-0">
-
+                    <!-- ICON -->
+                    <i data-lucide="folders" class="w-5 h-5 shrink-0
+                        {{ Route::is('superadmin.laporankegiatan*') ? 'text-white' : 'text-abuabuSedang' }}">
+                    </i>
                     <span x-show="sidebarOpen">Daftar Laporan Kegiatan</span>
                 </a>
 
@@ -136,6 +135,20 @@
                         {{ Route::is('superadmin.laporanpeserta.index') ? 'text-white' : 'text-abuabuSedang' }}">
                     </i>
                     <span x-show="sidebarOpen">Daftar Laporan Peserta</span>
+                </a>
+
+                <!-- Rekapitulasi -->
+                <a href="{{ route('superadmin.rekapitulasi') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                    {{ Route::is('superadmin.rekapitulasi')
+                    ? 'bg-biruMariana text-white'
+                    : 'text-abuabuSedang hover:bg-abuabuMuda/75' }}">
+
+                    <!-- ICON -->
+                    <i data-lucide="chart-column-big" class="w-5 h-5 shrink-0
+                        {{ Route::is('superadmin.rekapitulasi') ? 'text-white' : 'text-abuabuSedang' }}">
+                    </i>
+                    <span x-show="sidebarOpen">Rekapitulasi</span>
                 </a>
 
                 <!-- Informasi -->

@@ -56,41 +56,40 @@
                     Detail Gambar Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
                 </h2>
 
-                    <a href="{{ auth()->user()->role == 'admin' ? route('admin.usulankegiatan.index') : route('superadmin.usulankegiatan.pending')}}"
-                        class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-semibold transition">
-                        ← Kembali
-                    </a>
+                <a href="{{ auth()->user()->role == 'admin' ? route('admin.usulankegiatan.index') : route('superadmin.usulankegiatan.pending')}}"
+                    class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-semibold transition">
+                    ← Kembali
+                </a>
 
-                </div>
-                <!-- 🔻 DIVIDER -->
-                <div class="my-4 border-t-2 border-gray-200"></div>
-
-                {{-- List Gambar yang Ditampilkan dalam Grid Kotak --}}
-                @if(!empty($buktipelaksanaan_kegiatanFiles) && count($buktipelaksanaan_kegiatanFiles))
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach($buktipelaksanaan_kegiatanFiles as $file)
-                    <div class="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
-                        <a href="{{ Storage::url($file) }}" target="_blank">
-                            <img
-                                src="{{ Storage::url($file) }}"
-                                class="w-full h-full object-cover"
-                                alt="Bukti Pelaksanaan Kegiatan">
-                        </a>
-                    </div>
-                    @endforeach
-                </div>
-                {{-- ✅ PAGINATION --}}
-                @if($buktipelaksanaan_kegiatanFiles instanceof \Illuminate\Pagination\LengthAwarePaginator && $buktipelaksanaan_kegiatanFiles->hasPages())
-                <div class="mt-6">
-                    {{ $buktipelaksanaan_kegiatanFiles->links() }}
-                </div>
-                @endif
-                @else
-                <p class="text-gray-500 text-center py-10">
-                    Belum Ada Gambar Bukti Pelaksanaan Kegiatan yang Diunggah
-                </p>
-                @endif
             </div>
-        </main>
+            <!-- 🔻 DIVIDER -->
+            <div class="my-4 border-t-2 border-gray-200"></div>
+
+            {{-- List Gambar yang Ditampilkan dalam Grid Kotak --}}
+            @if(!empty($buktipelaksanaan_kegiatanFiles) && count($buktipelaksanaan_kegiatanFiles))
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                @foreach($buktipelaksanaan_kegiatanFiles as $file)
+                <div class="border rounded-lg overflow-hidden shadow hover:shadow-lg transition">
+                    <a href="{{ Storage::url($file) }}" target="_blank">
+                        <img
+                            src="{{ Storage::url($file) }}"
+                            class="w-full h-full object-cover"
+                            alt="Bukti Pelaksanaan Kegiatan">
+                    </a>
+                </div>
+                @endforeach
+            </div>
+            {{-- ✅ PAGINATION --}}
+            @if($buktipelaksanaan_kegiatanFiles instanceof \Illuminate\Pagination\LengthAwarePaginator && $buktipelaksanaan_kegiatanFiles->hasPages())
+            <div class="mt-6">
+                {{ $buktipelaksanaan_kegiatanFiles->links() }}
+            </div>
+            @endif
+            @else
+            <p class="text-gray-500 text-center py-10">
+                Belum Ada Gambar Bukti Pelaksanaan Kegiatan yang Diunggah
+            </p>
+            @endif
+        </div>
     </div>
 </x-app-layout>

@@ -4,82 +4,89 @@ namespace App\Izin\Http\Controllers\Admin;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Kirimlaporankegiatans;
+use App\Izin\Models\Izin_Kirimusulankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Usulankegiatans;
+use App\Izin\Services\IdentitasSuratsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class KirimLaporanKegiatansController extends Controller
 {
-    public function create($id)
+    /**
+     * Tampilkan Form Kirim Laporan Hasil Kegiatan Final
+     */
+    public function create($laporankegiatan_id)
     {
-        $usulan = Izin_Usulankegiatans::with([
-            'inputlaporankegiatans.laporankegiatans'
-        ])->findOrFail($id);
+        // Temukan laporankegiatan berdasarkan id laporankegiatan
+        $laporankegiatans = Izin_Laporankegiatans::findOrFail($laporankegiatan_id);
 
-        $laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
+        // Temukan usulan kegiatan terkait
+        $usulan = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans;
 
-        if (!$laporankegiatans) {
-            abort(404, 'Laporan tidak ditemukan');
-        }
-
-        return view('pages.laporankegiatan.kirim_laporan_kegiatan', [
-            'usulan' => $usulan,
-            'laporankegiatans' => $laporankegiatans
-        ]);
+        // Redirect ke halaman kirim laporan hasil kegiatan
+        return view('pages.laporankegiatan.kirim_laporan_kegiatan', ['usulan' => $usulan, 'laporankegiatans' => $laporankegiatans]);
     }
 
-    public function store(Request $request, $id)
-{
-    $request->validate([
-        'filekirim_inputlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
-    ]);
+    /**
+     * Simpan File Kirim Laporan Hasil Kegiatan Final
+     */
+    public function store(Request $request, IdentitasSuratsService $identitassuratservice)
+    {
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
 
-    $usulan = Izin_Usulankegiatans::with([
-        'inputlaporankegiatans.laporankegiatans',
-        'inputlaporankegiatans.cetaklaporankegiatans.identitassurats'
-    ])->findOrFail($id);
-
-    $input = $usulan->inputlaporankegiatans; // atau tanpa first kalau bukan collection
-
-    if (!$input) {
-        abort(404, 'Input laporan tidak ditemukan');
-    }
-
-    $laporan = $input->laporankegiatans;
-
-    if (!$laporan) {
-        abort(404, 'Laporan tidak ditemukan');
-    }
-
-    $cetak = $input->cetaklaporankegiatans?->first();
-    $identitas = $cetak?->identitassurats;
-
-    if (!$identitas) {
-        abort(404, 'Silakan cetak dulu sebelum kirim');
-    }
-
-    $filePath = $request->file('filekirim_inputlaporankegiatan')
-        ->store('izin/kirim', 'public');
-
-    DB::transaction(function () use ($input, $laporan, $identitas, $filePath) {
-
-        Izin_Kirimlaporankegiatans::create([
-            'inputlaporankegiatan_id' => $input->id,
-            'identitassurat_id' => $identitas->id,
-            'filekirim_inputlaporankegiatan' => $filePath,
-            'tanggalkirim_inputlaporankegiatan' => now(),
-            'nipadmin_inputlaporankegiatan' => Auth::user()->nip,
-            'statuslaporan_kegiatan' => 'need_review',
+        // Validasi request
+        $request->validate([
+            'filekirim_inputlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
+            'laporankegiatan_id' => 'required',
         ]);
 
-        $laporan->update([
-            'statuslaporan_kegiatan' => 'need_review',
-        ]);
-    });
+        // Transaksi DB berlangsung
+        DB::transaction(function () use ($request, $identitassuratservice, $user) {
 
-    return redirect()->route('admin.laporankegiatan.index')
-        ->with('success', 'Laporan berhasil dikirim');
-}
+            // Eager load relasi dari model dan temukan laporan berdasarkan request id laporankegiatan
+            $laporan = Izin_Laporankegiatans::with('inputlaporankegiatans')->findOrFail($request->laporankegiatan_id);
+
+            // Simpan identitassurat
+            $identitassurats = $identitassuratservice->create(
+                $request->only([
+                    'nomor_surat',
+                    'tanggal_surat',
+                    'perihal_surat',
+                    'sifat_surat',
+                    'lampiran_surat',
+                ])
+            );
+
+            // Upload file kirim laporan hasil kegiatan final
+            if ($request->hasFile('filekirim_inputlaporankegiatan')) {
+                $kirimlaporankegiatans = $request->file('filekirim_inputlaporankegiatan')
+                    ->storeAs(
+                        'izin/filekirim_inputlaporankegiatan',
+                        time() . '_' . $request->file('filekirim_inputlaporankegiatan')->getClientOriginalName(),
+                        'public'
+                    );
+            }
+
+            // Simpan data kirim laporan hasil kegiatan final
+            Izin_Kirimlaporankegiatans::create([
+                'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
+                'identitassurat_id' => $identitassurats->id,
+                'filekirim_inputlaporankegiatan' => $kirimlaporankegiatans,
+                'tanggalkirim_inputlaporankegiatan' => now(),
+                'nipadmin_inputlaporankegiatan' => $user->nip,
+                'statuslaporan_kegiatan' => 'need_review',
+            ]);
+
+            // Update status laporan kegiatan menjadi "need review"
+            $laporan->update([
+                'statuslaporan_kegiatan' => 'need_review',
+            ]);
+        });
+
+        // Redirect ke halaman daftar pengajuan usulan kegiatan
+        return redirect()->route('admin.usulankegiatan.index')->with('success', 'Usulan kegiatan berhasil dikirim!');
+    }
 }
