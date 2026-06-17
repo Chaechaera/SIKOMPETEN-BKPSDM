@@ -82,18 +82,30 @@ class DetailLaporanKegiatansController extends Controller
         }
 
         // Upload template sertifikat kegiatan
-        $templatePath = null;
+        $sertifikats = [
+            'laporankegiatan_id' => $request->laporankegiatan_id
+        ];
+
+        // PRIORITAS:
+// 1. Kalau upload → pakai upload
+// 2. Kalau pilih default → pakai template bawaan
 
 if ($request->hasFile('templatesertifikat_kegiatan')) {
-    $templatePath = $request->file('templatesertifikat_kegiatan')
-        ->store('izin/template_sertifikat', 'public');
-}
 
-$sertifikats = [
-    'laporankegiatan_id' => $request->laporankegiatan_id,
-    'jenissertifikat_kegiatan' => $request->jenissertifikat_kegiatan,
-    'templatesertifikat_kegiatan' => $templatePath,
-];
+    $sertifikats['templatesertifikat_kegiatan'] =
+        $request->file('templatesertifikat_kegiatan')
+        ->store('izin/template_sertifikat', 'public');
+
+} elseif ($request->pakai_template_default == 1) {
+
+    $path = public_path('images/Template Sertifikat.jpeg');
+
+    $sertifikats['templatesertifikat_kegiatan'] =
+        Storage::disk('public')->putFile(
+            'izin/template_sertifikat',
+            new \Illuminate\Http\File($path)
+        );
+}
 
         // Simpan dan update sertifikat
         Izin_Sertifikats::updateOrCreate(
@@ -144,6 +156,13 @@ $sertifikats = [
 
             foreach (array_slice($path_peserta_laporan, 1) as $row) {
 
+        // Skip jika baris kosong
+        if (
+        empty(trim($row[0] ?? '')) ||
+        empty(trim($row[1] ?? ''))
+        ) {
+        continue;
+        }
                 $namaSubunitkerja = trim($row[3] ?? "");
 
                 // Cari id dari nama
@@ -193,7 +212,8 @@ $sertifikats = [
         }
 
         // Redirect ke halaman dashboard admin
-        return redirect()->route('admin.dashboard')->with('success', 'Usulan Kegiatan Berhasil Disimpan Secara Lengkap!');
+       return redirect()->route('admin.laporankegiatan.index')
+                     ->with('success', 'Laporan berhasil disimpan');
     }
 
     /**

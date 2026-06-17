@@ -616,7 +616,7 @@
 <body>
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
     <div class="kop-container">
-        @if($laporankegiatans->detaillaporankegiatans->jeniskop_laporankegiatan === 'kop_text')
+   @if(optional($laporankegiatans?->detaillaporankegiatans)->jeniskop_laporankegiatan === 'kop_text')
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="kop-logo" alt="Logo Pemerintah Kota Surakarta">
         @endif
@@ -659,35 +659,39 @@
         <div class="meta-left">
             <table class="meta-table">
                 <tr>
-                    <td class="label">Nomor</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->nomor_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Sifat</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Lampiran</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Perihal</td>
-                    <td class="colon">:</td>
-                    <td><strong>{{ $laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
-                </tr>
+    <td class="label">Nomor</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->nomor_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Sifat</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->sifat_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Lampiran</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->lampiran_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Perihal</td>
+    <td class="colon">:</td>
+    <td><strong>{{ $identitas->perihal_surat ?? '-' }}</strong></td>
+</tr>
             </table>
         </div>
 
         <div class="meta-right">
-            <p>Surakarta,
-                {{ $laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->tanggal_surat
-    ? \Carbon\Carbon::parse($laporankegiatans->inputlaporankegiatans?->kirimlaporankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
-    : '' }}
-            </p>
-        </div>
+    <p>
+        Surakarta,
+{{ $identitas?->tanggal_surat
+    ? \Carbon\Carbon::parse($identitas->tanggal_surat)->format('d-m-Y')
+    : '-' }}
+    </p>
+</div>
     </div>
 
     <div class="tujuan">
@@ -1385,7 +1389,6 @@
     </div>
     </div>
 
-    {{-- ====================== LAMPIRAN DOKUMENTASI HASIL KEGIATAN ====================== --}}
     @if(!empty($gambardokumentasi_laporan))
     <div class="page-break"></div>
 
@@ -1410,6 +1413,4 @@
     @else
     <p style="text-align:center; color:gray;">Tidak ada dokumentasi kegiatan.</p>
     @endif
-</body>
-
 </html>

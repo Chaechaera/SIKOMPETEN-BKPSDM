@@ -25,7 +25,9 @@ $realRole = Auth::user()->role;
             <div>
                 <h1 class="text-2xl font-medium text-biruDark">
                     <span x-text="greeting"></span>,
-                    <span class="font-bold">{{ Auth::user()->nama }}🪄</span>
+                    <span class="font-bold">
+    {{ Auth::user()->nama }} - {{ Auth::user()->subunitkerjas?->sub_unitkerja ?? '-' }} 🪄
+</span>
                 </h1>
                 <p class="text-sm font-normal text-abuabuCerah">
                     Hope you have a good day and good mood for work today!

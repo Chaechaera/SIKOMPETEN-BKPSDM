@@ -9,6 +9,7 @@ use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Izin\Models\Izin_Laporankegiatans;
 
 class SuperadminController extends Controller
 {
@@ -136,7 +137,7 @@ class SuperadminController extends Controller
         $persenUsulanDisetujui = $totalUsulan > 0
             ? round(($usulanDisetujui / $totalUsulan) * 100)
             : 0;
-        
+
         $persenUsulanDitolak = $totalUsulan > 0
             ? round(($usulanDitolak / $totalUsulan) * 100)
             : 0;
@@ -189,4 +190,35 @@ class SuperadminController extends Controller
             'persenLaporanPesertaDitolak',
         ));
     }
+{
+    // TOTAL
+    $total = Izin_Laporankegiatans::count();
+
+    // DISETUJUI
+    $disetujui = Izin_Laporankegiatans::get()
+        ->filter(fn($item) =>
+            in_array($item->status_laporan_ui, ['accepted', 'finish'])
+        )->count();
+
+    // MENUNGGU (FIX sesuai kebutuhan kamu)
+    $menunggu = Izin_Laporankegiatans::get()
+        ->filter(fn($item) =>
+            $item->status_laporan_ui === 'need_review'
+        )->count();
+
+    //DATA TERBARU
+    $laporans = Izin_Laporankegiatans::with([
+        'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.subunitkerjas'
+    ])
+    ->latest()
+    ->take(5)
+    ->get();
+
+    return view('pages.dashboard.superadmin', compact(
+        'total',
+        'disetujui',
+        'menunggu',
+        'laporans'
+    ));
 }
+
