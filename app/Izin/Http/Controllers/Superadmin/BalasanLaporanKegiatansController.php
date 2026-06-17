@@ -6,6 +6,7 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
 use App\Izin\Models\Izin_Kirimbalasanlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Stempelunitkerjas;
@@ -14,6 +15,7 @@ use App\Izin\Services\IdentitasSuratsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 
 class BalasanLaporanKegiatansController extends Controller
@@ -184,7 +186,7 @@ $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
     // 🔹 SERTIFIKAT (biar tetap ada di view)
     $sertifikats = $laporankegiatans->sertifikats;
 
-    return view('pages.balasanlaporankegiatan.kirim_balasan_laporan_kegiatan', 
+    return view('pages.balasanlaporankegiatan.kirim_balasan_laporan_kegiatan',
         compact('laporankegiatans', 'nomorSurat', 'sertifikats')
     );
 }

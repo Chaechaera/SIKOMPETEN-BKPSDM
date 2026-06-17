@@ -1,22 +1,13 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.superadmin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
-
-            <!-- JUDUL -->
-            <div class="bg-white rounded-xl shadow p-6 mb-4">
-                <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">DAFTAR LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                <p class="text-sm text-gray-500 max-w-4xl">
-                    Daftar laporan kegiatan yang dilaporkan oleh OPD yang saat ini perlu untuk diproses dan diverifikasi.
-                </p>
-            </div>
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">DAFTAR LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Daftar laporan kegiatan yang dilaporkan oleh OPD yang saat ini perlu untuk diproses dan diverifikasi.
+            </p>
+        </div>
 
             <!-- TABLE -->
 <div class="bg-white rounded-xl shadow p-6">
@@ -26,27 +17,27 @@
 
         {{-- Search --}}
 <form method="GET" class="flex-1 relative">
-    <input 
-        type="text" 
-        name="search" 
-        value="{{ request('search') }}" 
-        placeholder="Cari nama kegiatan, nomor surat, atau OPD..." 
-        onkeyup="this.form.submit()" 
+    <input
+        type="text"
+        name="search"
+        value="{{ request('search') }}"
+        placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
+        onkeyup="this.form.submit()"
         class="w-full pl-10 pr-4 py-2 border rounded-lg"
     />
 
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" 
-        fill="none" 
-        viewBox="0 0 24 24" 
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
         stroke="currentColor"
     >
-        <path 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            stroke-width="2" 
-            d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" 
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
         />
     </svg>
 </form>
@@ -136,25 +127,25 @@
     {{ $u->inputlaporankegiatans->cetaklaporankegiatans->identitassurats->nomor_surat ?? '-' }}
 </td>
 
-                                <!-- OPD -->
-                                <td class="py-3 px-4 text-center font-medium text-gray-800">{{ $u->subunitkerjas->singkatan ?? '-' }}</td>
+                        <!-- OPD -->
+                        <td class="py-3 px-4 font-semibold">{{ $u->subunitkerjas->singkatan ?? '-' }}</td>
 
-                                <!-- Nama Kegiatan -->
-                                <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
+                        <!-- Nama Kegiatan -->
+                        <td class="py-3 px-4 text-left font-semibold">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
 
-                                <!-- Tanggal Pelaksanaan Kegiatan -->
-                                <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                    {{$u->tanggalmulai_kegiatan && $u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan
+                        <!-- Tanggal Pelaksanaan Kegiatan -->
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{$u->tanggalmulai_kegiatan && $u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan
                                         ? \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->format('d/m/Y') . ' - ' .
                                         \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->format('d/m/Y') : '-'}}
-                                </td>
+                        </td>
 
-                                <!-- Status Usulan Kegiatan -->
-                                <td class="py-3 px-4 text-center">
-                                    <span class="{{ $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui_class }}">
-                                        {{ str_replace('_', ' ', $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui) }}
-                                    </span>
-                                </td>
+                        <!-- Status Usulan Kegiatan -->
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            <span class="{{ $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui_class }}">
+                                {{ str_replace('_', ' ', $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui) }}
+                            </span>
+                        </td>
 
                                 <!-- Update Progress -->
 <td class="py-3 px-4 text-center">
@@ -225,19 +216,19 @@
                                         <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
                                             <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
 
-                                                {{-- Button Close --}}
-                                                <button type="button" @click="openDokumen = false"
-                                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg font-bold">
-                                                    ✖
-                                                </button>
+                                        {{-- Button Close --}}
+                                        <button @click="openDokumen = false"
+                                            class="absolute top-3 right-3">
+                                            <i data-lucide="x"></i>
+                                        </button>
 
                                                 <h2 class="text-lg font-bold text-gray-700 mb-4">
                                                     Detail Dokumen
                                                 </h2>
 
-                                                <p class="text-sm text-gray-500 mb-6">
-                                                    Pilih dokumen yang ingin dilihat:
-                                                </p>
+                                        <p class="text-sm font-normal text-abuabuCerah mb-6">
+                                            Pilih dokumen terkait usulan kegiatan yang ingin dilihat.
+                                        </p>
 
                                                 <div class="flex flex-col space-y-3 font-bold">
                                                     {{-- Lihat Surat Balasan Usulan --}}
@@ -258,7 +249,7 @@
                                                     </p>
 
                                                     <div class="flex flex-col space-y-3 font-bold">
-                                                    
+
                                                     {{-- ARCHIVE --}}
                                                     @if(
                                                         $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui === 'finish'
@@ -304,7 +295,7 @@
                                         <div class="flex justify-center items-center gap-2 text-sm">
                                                     </div>
                                                 </div>
-                                
+
                                                                                 </tr>
                                                                                 @empty
                                                                                 <tr>
@@ -317,18 +308,16 @@
                                                                         </table>
                                                                     </div>
 
-                {{-- Footer Pagination --}}
-                <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">
-                    <span>
-                        {{ $usulankegiatans->firstItem() }}–{{ $usulankegiatans->lastItem() }}
-                        dari {{ $usulankegiatans->total() }} data
-                    </span>
-                    <div>
-                        {{ $usulankegiatans->links() }}
-                    </div>
-                </div>
-            </div>
-        </main>
+        {{-- Pagination --}}
+        <div class="mt-4">
+            {{ $usulankegiatans->appends(request()->query())->links() }}
+        </div>
+
+        {{-- Empty State --}}
+        <div id="emptyState" class="hidden text-center py-12 text-abuabuSedang">
+            Tidak ada data yang sesuai dengan pencarian
+        </div>
+    </div>
     </div>
 
     <!-- Modal Container -->

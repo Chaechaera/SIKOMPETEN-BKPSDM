@@ -14,6 +14,10 @@ class Izin_Ttdunitkerjas extends Model
     protected $fillable = [
         'unitkerja_id',
         'subunitkerja_id',
+        'jabatanpenanggungjawab_opd',
+        'pangkatpenanggungjawab_opd',
+        'namakepala_opd',
+        'nipkepala_opd',
         'gambarttd_opd'
     ];
 

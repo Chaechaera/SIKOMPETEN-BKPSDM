@@ -126,6 +126,10 @@ class KopUnitKerjasController extends Controller
         Izin_Ttdunitkerjas::create([
             'unitkerja_id' => $user->subunitkerjas->unitkerja_id,
             'subunitkerja_id' => $user->subunitkerja_id,
+            'jabatanpenanggungjawab_opd' => $request->jabatanpenanggungjawab_opd,
+            'pangkatpenanggungjawab_opd' => $request->pangkatpenanggungjawab_opd,
+            'namakepala_opd' => $request->namakepala_opd,
+            'nipkepala_opd' => $request->nipkepala_opd,
             'gambarttd_opd' => $gambarttdopd_path
         ]);
 
@@ -158,10 +162,10 @@ class KopUnitKerjasController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Tampilkan data berdasarkan id kopunitkerja
-        $data = Izin_Kopunitkerjas::findOrFail($id);
+        $kop = Izin_Kopunitkerjas::findOrFail($id);
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop->subunitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop->subunitkerja_id)->first();
 
-        // Validasi request
         $request->validate([
             'unitkerja_id' => 'required',
             'subunitkerja_id' => 'required',
@@ -172,11 +176,17 @@ class KopUnitKerjasController extends Controller
             'website_opd' => 'nullable',
             'email_opd' => 'nullable|email',
             'kodepos_opd' => 'nullable',
-            'gambarkop_opd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048'
+            'jabatanpenanggungjawab_opd' => 'required',
+            'pangkatpenanggungjawab_opd' => 'required',
+            'namakepala_opd' => 'required',
+            'nipkepala_opd' => 'required',
+            'gambarkop_opd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'gambarttd_opd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+            'gambarstempel_opd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048'
         ]);
 
-        // Update data request
-        $updateData = [
+        // ================== UPDATE KOP ==================
+        $kop->update([
             'nama_opd' => $request->nama_opd,
             'lokasi_opd' => $request->lokasi_opd,
             'telepon_opd' => $request->telepon_opd,
@@ -184,23 +194,60 @@ class KopUnitKerjasController extends Controller
             'website_opd' => $request->website_opd,
             'email_opd' => $request->email_opd,
             'kodepos_opd' => $request->kodepos_opd,
-        ];
+        ]);
+
+        // ================== UPDATE TTD ==================
+        if ($ttd) {
+            $ttd->update([
+                'jabatanpenanggungjawab_opd' => $request->jabatanpenanggungjawab_opd,
+                'pangkatpenanggungjawab_opd' => $request->pangkatpenanggungjawab_opd,
+                'namakepala_opd' => $request->namakepala_opd,
+                'nipkepala_opd' => $request->nipkepala_opd,
+            ]);
+        }
+
 
         // Update data gambar kop OPD
         if ($request->hasFile('gambarkop_opd')) {
-            if ($data->gambarkop_opd) {
-                Storage::disk('public')->delete($data->gambarkop_opd);
+            if ($kop->gambarkop_opd) {
+                Storage::disk('public')->delete($kop->gambarkop_opd);
             }
-            $updateData['gambarkop_opd'] = $request->file('gambarkop_opd')
+            $kop->gambarkop_opd = $request->file('gambarkop_opd')
                 ->storeAs(
                     'izin/gambarkop_opd',
                     time() . '_' . $request->file('gambarkop_opd')->getClientOriginalName(),
                     'public'
                 );
+            $kop->save();
         }
 
-        // Update seluruh data yang diedit
-        $data->update($updateData);
+        // Update data gambar TTD OPD
+        if ($request->hasFile('gambarttd_opd')) {
+            if ($ttd->gambarttd_opd) {
+                Storage::disk('public')->delete($ttd->gambarttd_opd);
+            }
+            $ttd->gambarttd_opd = $request->file('gambarttd_opd')
+                ->storeAs(
+                    'izin/gambarttd_opd',
+                    time() . '_' . $request->file('gambarttd_opd')->getClientOriginalName(),
+                    'public'
+                );
+            $ttd->save();
+        }
+
+        // Update data gambar stempel OPD
+        if ($request->hasFile('gambarstempel_opd')) {
+            if ($stempel->gambarstempel_opd) {
+                Storage::disk('public')->delete($stempel->gambarstempel_opd);
+            }
+            $stempel->gambarstempel_opd = $request->file('gambarstempel_opd')
+                ->storeAs(
+                    'izin/gambarstempel_opd',
+                    time() . '_' . $request->file('gambarstempel_opd')->getClientOriginalName(),
+                    'public'
+                );
+            $stempel->save();
+        }
 
         // Redirect ke halaman dashboard admin
         return redirect()->route('admin.dashboard')

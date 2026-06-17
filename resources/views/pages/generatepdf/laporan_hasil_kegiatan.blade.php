@@ -228,7 +228,7 @@
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -406,7 +406,7 @@
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -717,15 +717,14 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         <div class="ttd-wrapper">
 
             {{-- ===== STAMPEL ===== --}}
             @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer"
-                alt="Stempel OPD">
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
@@ -735,8 +734,9 @@
 
         </div>
 
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 
     <div class="page-break"></div>
@@ -1366,27 +1366,27 @@
         </p>
 
         <div class="ttd">
-            <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
-            <p><strong>Kota Surakarta</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
+        <p><strong>Kota Surakarta</strong></p>
 
-            <div class="ttd-wrapper">
+        <div class="ttd-wrapper">
 
-                {{-- ===== STAMPEL ===== --}}
-                @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-                <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer"
-                    alt="Stempel OPD">
-                @endif
+            {{-- ===== STAMPEL ===== --}}
+            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @endif
 
-                {{-- ===== TTD ===== --}}
-                @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-                <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
-                @endif
+            {{-- ===== TTD ===== --}}
+            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @endif
 
-            </div>
-
-            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
         </div>
+
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+    </div>
     </div>
 
     @if(!empty($gambardokumentasi_laporan))

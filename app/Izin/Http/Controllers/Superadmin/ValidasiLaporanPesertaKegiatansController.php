@@ -4,38 +4,91 @@ namespace App\Izin\Http\Controllers\Superadmin;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Laporanpesertakegiatans;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 
 class ValidasiLaporanPesertaKegiatansController extends Controller
 {
-    // List laporan peserta
+    /**
+     * Tampilkan List Laporan Peserta
+     */
     public function index()
     {
-        $laporans = Izin_Laporanpesertakegiatans::with(['users', 'sertifikats'])
-            ->latest()
-            ->paginate(10);
+        // Ambil request search dan status
+        $search = request('search');
+        $status = request('statuslaporan_pesertakegiatan');
 
-        return view('pages.laporanpesertakegiatan.validasi_laporan_peserta', compact('laporans'));
+        // Eager Load relasi dan filter berdasarkan search dan status
+        $laporans = Izin_Laporanpesertakegiatans::with([
+            'users',
+            'sertifikats',
+            'pesertakegiatans'
+        ])->orderBy('created_at', 'desc')
+            ->get()
+            ->filter(function ($row) use ($search, $status) {
+
+                $matchSearch = true;
+                $matchStatus  = true;
+
+                if ($search) {
+                    $matchSearch =
+                        str_contains(strtolower($row->pesertakegiatans->nama_peserta ?? ''), strtolower($search)) ||
+                        str_contains(strtolower($row->sertifikats->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? ''), strtolower($search));
+                }
+
+                if ($status) {
+                    $matchStatus = $row->statuslaporan_pesertakegiatan === $status;
+                }
+
+                return $matchSearch && $matchStatus;
+            });
+
+        // pagination manual karena sudah pakai collection
+        $laporans = $laporans->values();
+
+        $page = request()->get('page', 1);
+        $perPage = 20;
+
+        $laporans = new LengthAwarePaginator(
+            $laporans->forPage($page, $perPage),
+            $laporans->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('pages.laporanpesertakegiatan.validasi_laporan_peserta', compact('laporans', 'search', 'status'));
     }
 
-    // Approve laporan
-    public function approve($id)
+    /**
+     * Approve Laporan Peserta Kegiatan
+     */
+    public function approve(Request $request, $id)
     {
         $laporan = Izin_Laporanpesertakegiatans::findOrFail($id);
 
         $laporan->update([
-            'statuslaporan_pesertakegiatan' => 'approved'
+            'statuslaporan_pesertakegiatan' => 'approved',
+            'catatanlaporan_pesertakegiatan' => $request->catatanlaporan_pesertakegiatan
+
         ]);
 
         return back()->with('success', 'Laporan berhasil disetujui.');
     }
 
-    // Reject laporan
-    public function reject($id)
+    /**
+     * Reject Laporan Peserta Kegiatan
+     */
+    public function reject(Request $request, $id)
     {
         $laporan = Izin_Laporanpesertakegiatans::findOrFail($id);
 
         $laporan->update([
-            'statuslaporan_pesertakegiatan' => 'rejected'
+            'statuslaporan_pesertakegiatan' => 'rejected',
+            'catatanlaporan_pesertakegiatan' => $request->catatanlaporan_pesertakegiatan
         ]);
 
         return back()->with('success', 'Laporan berhasil ditolak.');

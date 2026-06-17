@@ -24,8 +24,8 @@
                     </p>
                 </div>
 
-                {{-- Step Progress --}}
-                <x-step-progress :usulan="$usulankegiatans" :is-laporan="true" />
+            {{-- Step Progress --}}
+            <x-step-progress :usulan="$usulankegiatans" :is-laporan="true" />
 
                 {{-- =========================================================== --}}
                 {{-- === BAGIAN 1: PREVIEW DATA UTAMA LAPORAN HASIL KEGIATAN === --}}
@@ -36,7 +36,7 @@
                     <!-- DIVIDER -->
                     <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         {{-- Unit Kerja --}}
                         <div class="md:col-span-2">
@@ -44,7 +44,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unit Kerja</label>
                             <input type="text"
                                 value="{{ $unitkerjas ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="unitkerja_id" value="{{ $unitkerja_id ?? '' }}">
@@ -56,7 +56,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sub Unit Kerja</label>
                             <input type="text"
                                 value="{{ $subunitkerjas ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
@@ -67,7 +67,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nama Kegiatan</label>
                             <input type="text"
                                 value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="nama_kegiatan"
@@ -78,7 +78,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan</label>
                             <select disabled
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-1000 cursor-not-allowed p-2">
                                 @foreach($carapelatihans as $c)
                                     <option value="{{ $c->id }}"
@@ -98,7 +98,7 @@
                             </label>
                             <input type="text"
                                 value="{{ auth()->user()->nama }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="dibuat_oleh" value="{{ auth()->id() }}">
@@ -110,7 +110,7 @@
                             <div class="relative">
                                 <input type="text" name="lokasi_kegiatan"
                                     value="{{ old('lokasi_kegiatan', $laporankegiatans?->lokasi_kegiatan) }}"
-                                    class="block w-full text-sm border border-gray-200 rounded-lg 
+                                    class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-50 text-gray-700 p-2" required>
                             </div>
                         </div>
@@ -169,36 +169,36 @@
                     </div>
                 </div>
 
-                {{-- =============================================================================== --}}
-                {{-- === BAGIAN 2: DATA KHUSUS LAPORAN HASIL KEGIATAN BERDASARKAN CARA PELATIHAN === --}}
-                {{-- =============================================================================== --}}
-                @php
-                $carapelatihanId = $usulankegiatans->carapelatihans->id ?? null;
-                $config = config('atribut_khusus');
-                $atributKhusus = $carapelatihanId && isset($config[$carapelatihanId]['fields']) ? $config[$carapelatihanId]['fields'] : [];
-                @endphp
+            {{-- =============================================================================== --}}
+            {{-- === BAGIAN 2: DATA KHUSUS LAPORAN HASIL KEGIATAN BERDASARKAN CARA PELATIHAN === --}}
+            {{-- =============================================================================== --}}
+            @php
+            $carapelatihanId = $usulankegiatans->carapelatihans->id ?? null;
+            $config = config('atribut_khusus');
+            $atributKhusus = $carapelatihanId && isset($config[$carapelatihanId]['fields']) ? $config[$carapelatihanId]['fields'] : [];
+            @endphp
 
                 @if($atributKhusus)
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
                     <h2 class="text-lg font-bold text-blue-600 mb-4">Lengkapi Data Khusus Laporan Hasil Kegiatan</h2>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    @foreach($atributKhusus as $key => $field)
-                    <div class="mt-3">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">{{ $field['label'] }}</label>
-                        <div class="relative">
+                @foreach($atributKhusus as $key => $field)
+                <div class="mt-3">
+                    <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">{{ $field['label'] }}</label>
+                    <div class="relative">
                         @if($field['type'] === 'textarea')
                         <textarea name="{{ $key }}" class="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="{{ $field['label'] }}">{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}</textarea>
                         @else
                         <input type="{{ $field['type'] }}" name="{{ $key }}" class="block w-full text-sm text-gray-700 border border-gray-200 rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="https://docs.google.com/..." value="{{ old($key, $laporankegiatans->detaillaporankegiatans->atribut_khusus[$key] ?? '') }}">
                         @endif
-                        </div>
                     </div>
-                    @endforeach
                 </div>
-                @endif
+                @endforeach
+            </div>
+            @endif
 
                 {{-- ============================================================= --}}
                 {{-- === BAGIAN 3: LENGKAPI DATA DETAIL LAPORAN HASIL KEGIATAN === --}}
@@ -206,13 +206,13 @@
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <h2 class="text-lg font-bold text-blue-600 mb-4">Lengkapi Data Tambahan Laporan Hasil Kegiatan</h2>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    {{-- Kop Surat --}}
-                    <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Pilih Jenis Kop yang Digunakan</label>
-                        <div class="relative">
+                {{-- Kop Surat --}}
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Pilih Jenis Kop yang Digunakan</label>
+                    <div class="relative">
                         <label class="cursor-pointer items-center gap-6 block text-sm font-semibold text-[#5A5A5A] mb-2">
                             <input type="radio"
                                 name="jeniskop_laporankegiatan"
@@ -228,23 +228,23 @@
                             Kop Gambar
                         </label>
                     </div>
-                    </div>
+                </div>
 
-                    {{-- Data Detail --}}
-                    @php
-                    $fields = [
-                    'rincian_laporan' => [
-                    'label' => 'Rincian Laporan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
-                    'numbering' => false
-                    ],
-                    'penutup_laporan' => [
-                    'label' => 'Penutup Laporan',
-                    'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
-                    'numbering' => false
-                    ],
-                    ];
-                    @endphp
+                {{-- Data Detail --}}
+                @php
+                $fields = [
+                'rincian_laporan' => [
+                'label' => 'Rincian Laporan',
+                'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                'numbering' => false
+                ],
+                'penutup_laporan' => [
+                'label' => 'Penutup Laporan',
+                'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
+                'numbering' => false
+                ],
+                ];
+                @endphp
 
                     @foreach($fields as $name => $field)
                     <div class="mt-4">
@@ -270,18 +270,18 @@
                     </div>
                     @endforeach
 
-                    {{-- Rundown Kegiatan --}}
-                    <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                            Unggah Rundown Kegiatan
-                            <span class="text-gray-400 text-sm">(Excel)</span>
-                        </label>
-                        <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
-                        <p class="text-sm text-gray-500">Contoh nama file: rundown_kegiatan.xlsx</p>
-                        <div class="relative mb-3 mt-2">
-                            <input type="file" name="rundown_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700 
+                {{-- Rundown Kegiatan --}}
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                        Unggah Rundown Kegiatan
+                        <span class="text-gray-400 text-sm">(Excel)</span>
+                    </label>
+                    <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
+                    <p class="text-sm text-gray-500">Contoh nama file: rundown_kegiatan.xlsx</p>
+                    <div class="relative mb-3 mt-2">
+                        <input type="file" name="rundown_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2">
                         @if(!empty($laporankegiatans->detaillaporankegiatans?->rundown_laporan))
                         <p class="text-sm text-gray-600 mt-2">File Sebelumnya:
@@ -293,21 +293,21 @@
                         @error('rundown_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
-                        </div>
                     </div>
+                </div>
 
-                    {{-- Peserta Kegiatan --}}
-                    <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                            Unggah Peserta Kegiatan
-                            <span class="text-gray-400 text-sm">(Excel)</span>
-                        </label>
-                        <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
-                        <p class="text-sm text-gray-500">Contoh nama file: peserta_kegiatan.xlsx</p>
-                        <div class="relative mb-3 mt-2">
-                            <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700 
+                {{-- Peserta Kegiatan --}}
+                <div class="mt-4">
+                    <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                        Unggah Peserta Kegiatan
+                        <span class="text-gray-400 text-sm">(Excel)</span>
+                    </label>
+                    <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
+                    <p class="text-sm text-gray-500">Contoh nama file: peserta_kegiatan.xlsx</p>
+                    <div class="relative mb-3 mt-2">
+                        <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2">
                         @if(!empty($laporankegiatans->detaillaporankegiatans?->peserta_laporan))
                         <p class="text-sm text-gray-600 mt-2">File Sebelumnya:
@@ -319,8 +319,8 @@
                         @error('peserta_laporan')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                         @enderror
-                        </div>
                     </div>
+                </div>
 
                     {{-- Link Undangan Kegiatan --}}
                     <div class="mt-4">
@@ -375,9 +375,9 @@
     {{-- INPUT UTAMA --}}
     <input type="file" id="fileInput"
         accept=".jpg,.png,.jpeg"
-        class="block w-full text-sm text-gray-700 
+        class="block w-full text-sm text-gray-700
         border border-[#E0E7FF] rounded-lg cursor-pointer
-        bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
+        bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
         focus:outline-none p-2">
 
     {{-- ERROR --}}
@@ -415,9 +415,9 @@
         <input type="file" name="templatesertifikat_kegiatan"
             id="uploadInput"
             accept=".png,.jpg"
-            class="block w-full text-sm text-gray-700 
+            class="block w-full text-sm text-gray-700
             border border-[#E0E7FF] rounded-lg cursor-pointer
-            bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
+            bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
             focus:outline-none p-2 mt-2">
     </div>
 
@@ -437,8 +437,8 @@
 
     {{-- Tombol Batal (Kiri) --}}
     <a href="{{ route('admin.usulankegiatan.index') }}"
-        class="w-40 text-center py-2.5 rounded-lg 
-        bg-gray-300 text-gray-700 font-semibold 
+        class="w-40 text-center py-2.5 rounded-lg
+        bg-gray-300 text-gray-700 font-semibold
         hover:bg-gray-200 transition">
         Batal
     </a>
@@ -452,8 +452,8 @@
 
     {{-- Tombol Submit (Kanan) --}}
     <button type="submit"
-        class="w-40 py-2.5 rounded-lg 
-        bg-[#FFA41B] text-white font-semibold 
+        class="w-40 py-2.5 rounded-lg
+        bg-[#FFA41B] text-white font-semibold
         hover:bg-[#ff9600] transition">
         Submit Laporan
     </button>
@@ -506,7 +506,7 @@ flatpickr("#waktuselesai_kegiatan", {
 
     <script>
         /* Untuk Eksekusi Ukuran Textarea */
-        // Event untuk textarea 
+        // Event untuk textarea
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.smart-textarea').forEach(textarea => {
                 resizeTextarea(textarea);
@@ -530,6 +530,25 @@ flatpickr("#waktuselesai_kegiatan", {
                     }
                 });
             });
+
+            const radios = document.querySelectorAll('input[name="jenissertifikat_kegiatan"]');
+    const uploadWrapper = document.getElementById('uploadTemplateWrapper');
+
+    function toggleUpload() {
+        const selected = document.querySelector('input[name="jenissertifikat_kegiatan"]:checked')?.value;
+
+        if (selected === 'template_opd') {
+            uploadWrapper.style.display = 'block';
+        } else {
+            uploadWrapper.style.display = 'none';
+        }
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', toggleUpload);
+    });
+
+    toggleUpload(); // 🔥 initial load (penting buat edit mode)
         });
 
         // Fungsi untuk resize textarea
@@ -622,7 +641,7 @@ flatpickr("#waktuselesai_kegiatan", {
         hiddenInput.name = 'gambardokumentasi_laporan[]';
         hiddenInput.files = dt.files;
         hiddenInput.style.display = 'none'; // WAJIB
-        
+
 
         fileContainer.appendChild(hiddenInput);
 

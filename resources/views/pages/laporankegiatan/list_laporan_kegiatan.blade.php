@@ -1,11 +1,5 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
-
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+    <div class="space-y-4 px-6 py-4">
 
             {{-- Header --}}
             @include('layouts.navigation')
@@ -106,7 +100,7 @@
 </form>
 
 <div x-data="{ openSort: false }" class="relative">
-    
+
     <!-- ICON SORT -->
     <button @click="openSort = !openSort"
         class="border rounded-lg px-3 py-2 text-sm bg-white hover:bg-gray-100 flex items-center gap-1">
@@ -148,12 +142,12 @@
                             </tr>
                         </thead>
 
-                        <tbody>
-                            @forelse ($usulankegiatans as $index => $u)
-                            <tr class="border-b hover:bg-gray-50">
+                <tbody>
+                    @forelse ($usulankegiatans as $index => $u)
+                    <tr class="border-b text-center text-sm font-normal hover:bg-abuabuCerah/30">
 
-                                <!-- Nomor Otomatis -->
-                                <td class="py-3 px-4 text-center">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
+                        <!-- Nomor Otomatis -->
+                        <td class="py-3 px-4">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
 
                                 <!-- Nama Kegiatan -->
                                 <td class="py-3 px-4 font-medium text-gray-800">
@@ -165,12 +159,12 @@
                                     </button>
                                 </td>
 
-                                <!-- Tanggal Pelaksanaan Kegiatan -->
-                                <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                    {{ $u->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan && $u->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
+                        <!-- Tanggal Pelaksanaan Kegiatan -->
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{ $u->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan && $u->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
                                         ? \Carbon\Carbon::parse(optional($u->inputlaporankegiatans?->laporankegiatans)->tanggalmulai_kegiatan)->format('d/m/Y') . ' - ' .
                                         \Carbon\Carbon::parse(optional($u->inputlaporankegiatans?->laporankegiatans)->tanggalselesai_kegiatan)->format('d/m/Y') : '-'}}
-                                </td>
+                        </td>
 
                                 <!-- Status Laporan Kegiatan -->
                                 <td class="py-3 px-4 text-center">
@@ -214,7 +208,7 @@
                                         @else
                                         <button class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">Kirim</button>
                                         @endif
-                                        
+
 {{-- BUTTON UPDATE --}}
 <button type="button"
     @click="openModal = true"
@@ -456,24 +450,21 @@ $balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
                                     Tidak ada data laporan kegiatan.
                                 </td>
                             </tr>
-                            
+
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                {{-- Footer Pagination --}}
-                <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">
-                    <span>
-                        {{ $usulankegiatans->firstItem() }}–{{ $usulankegiatans->lastItem() }}
-                        dari {{ $usulankegiatans->total() }} data
-                    </span>
-                    <div>
-                        {{ $usulankegiatans->links() }}
-                    </div>
-                </div>
-            </div>
-        </main>
+        {{-- Pagination --}}
+        <div class="mt-4">
+            {{ $usulankegiatans->appends(request()->query())->links() }}
+        </div>
+
+        {{-- Empty State --}}
+        <div id="emptyState" class="hidden text-center py-12 text-abuabuSedang">
+            Tidak ada data yang sesuai dengan pencarian
+        </div>
     </div>
 
 

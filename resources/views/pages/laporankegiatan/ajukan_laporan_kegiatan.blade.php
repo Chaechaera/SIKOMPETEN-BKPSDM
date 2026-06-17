@@ -11,9 +11,9 @@
             @include('layouts.navigation')
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-            <form method="POST" action="{{ route('admin.laporankegiatan.store', $usulankegiatans->id) }}" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="laporankegiatan_id" value="{{ $usulankegiatans->laporankegiatans->id ?? '' }}">
+        <form method="POST" action="{{ route('admin.laporankegiatan.store', $usulankegiatans->id) }}" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="laporankegiatan_id" value="{{ $usulankegiatans->laporankegiatans->id ?? '' }}">
 
                 <div class="bg-white rounded-xl shadow p-6 mb-4">
                     <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
@@ -24,8 +24,8 @@
                     </p>
                 </div>
 
-                {{-- Step Progress --}}
-                <x-step-progress :usulan="$usulankegiatans" :is-laporan="true"/>
+            {{-- Step Progress --}}
+            <x-step-progress :usulan="$usulankegiatans" :is-laporan="true" />
 
                 <div class="bg-white rounded-xl shadow p-6 mb-10">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -35,7 +35,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Unit Kerja</label>
                             <input type="text"
                                 value="{{ $unitkerjas ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="unitkerja_id" value="{{ $unitkerja_id ?? '' }}">
@@ -46,7 +46,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sub Unit Kerja</label>
                             <input type="text"
                                 value="{{ $subunitkerjas ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
@@ -57,7 +57,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nama Kegiatan</label>
                             <input type="text"
                                 value="{{ $usulankegiatans->inputusulankegiatans?->nama_kegiatan ?? '' }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="nama_kegiatan"
@@ -68,7 +68,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan</label>
                             <select disabled
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-1000 cursor-not-allowed p-2">
                                 @foreach($carapelatihans as $c)
                                     <option value="{{ $c->id }}"
@@ -88,7 +88,7 @@
                             </label>
                             <input type="text"
                                 value="{{ auth()->user()->nama }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-200 text-gray-600 cursor-not-allowed p-2"
                                 readonly>
                             <input type="hidden" name="dibuat_oleh" value="{{ auth()->id() }}">
@@ -99,7 +99,7 @@
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lokasi Kegiatan</label>
                             <input type="text" name="lokasi_kegiatan"
                                 value="{{ old('lokasi_kegiatan', $usulankegiatans?->lokasi_kegiatan) }}"
-                                class="block w-full text-sm border border-gray-200 rounded-lg 
+                                class="block w-full text-sm border border-gray-200 rounded-lg
                                 bg-gray-50 text-gray-700 p-2" required>
                         </div>
 
@@ -163,7 +163,7 @@
 
     {{-- Kiri --}}
     <a href="{{ route('admin.laporankegiatan.index') }}"
-        class="w-40 text-center py-2.5 bg-gray-300 text-gray-700 
+        class="w-40 text-center py-2.5 bg-gray-300 text-gray-700
         rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
         Batal
     </a>
@@ -177,7 +177,7 @@
 
     {{-- Kanan --}}
     <button type="submit" name="statuslaporan_kegiatan" value="draft"
-        class="w-40 text-center py-2.5 bg-[#FFA41B] text-white 
+        class="w-40 text-center py-2.5 bg-[#FFA41B] text-white
         rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
         Ajukan Laporan
     </button>

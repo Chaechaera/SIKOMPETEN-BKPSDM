@@ -1,44 +1,28 @@
 <!-- Dashboard Super Admin Page -->
 <x-app-layout>
-<div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-{{-- Sidebar --}}
-        @php
-    $activeRole = session('active_role', auth()->user()->role);
-@endphp
+        {{-- STATISTIK CARDS USULAN--}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">RANGKUMAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI</h1>
 
-@if ($activeRole === 'superadmin')
-    @include('pages.sidebar.superadmin')
-@else
-    @include('pages.sidebar.admin')
-@endif
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
-
-            {{-- STATISTIK CARDS --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="p-5 sm:p-6 rounded-xl bg-[#FFE6EB] shadow-sm">
-                    <h2 class="text-gray-700 text-sm font-medium">Total Usulan</h2>
-                    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">24</p>
-                    <p class="text-xs text-[#E74C3C] mt-1">+3 minggu ini</p>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-2 sm:p-3 rounded-xl bg-kuningBening shadow-sm">
+                    <h2 class="text-sm font-medium">Total Usulan yang Masuk</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $totalUsulan }}</p>
+                    <p class="text-xs text-merahBata mt-2">+{{ $usulanMingguIni }} minggu ini</p>
                 </div>
 
-                <div class="p-5 sm:p-6 rounded-xl bg-[#FFE5B4] shadow-sm">
-                <h2 class="text-gray-700 text-sm font-medium">Menunggu Verifikasi</h2>
-                <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">8</p>
-                    <span class="inline-block mt-2 text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded border">
-                        Perlu Ditindaklanjuti
-                    </span>
+                <div class="p-2 sm:p-3 rounded-xl bg-unguBening shadow-sm">
+                    <h2 class="text-sm font-medium">Usulan yang Menunggu Verifikasi</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $usulanPending }}</p>
+                    <p class="text-xs text-merahBata mt-2">+{{ $usulanMingguIni }} minggu ini</p>
                 </div>
 
-                <div class="p-5 sm:p-6 rounded-xl bg-[#DFFFE0] shadow-sm">
-                    <h2 class="text-gray-700 text-sm font-medium">Usulan Disetujui</h2>
-                    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">14</p>
-                    <p class="text-xs text-green-600">58% dari total</p>
+                <div class="p-2 sm:p-3 rounded-xl bg-hijauMint shadow-sm">
+                    <h2 class="text-sm font-medium">Usulan yang Disetujui</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $usulanDisetujui }}</p>
+                    <p class="text-xs text-hijauDaun mt-2">{{ $persenUsulanDisetujui }}% dari total</p>
                 </div>
 
                 <div class="p-5 sm:p-6 rounded-xl bg-[#E3EEFF] shadow-sm">
@@ -79,71 +63,121 @@
                     </p>
                 </div>
             </div>
-            </div>
+        </div>
 
-            {{-- BUTTON ACTION --}}
-            <div class="flex justify-end">
-                <a href="{{ url('surat-balasan-usulan') }}">
-                <a href="{{ url('balasan-usulan') }}">
-            <button
-                class="bg-[#FFA41B] text-white px-6 py-2 rounded-lg text-medium hover:bg-[#ff9600] transition">
-                Buat Surat Balasan
-            </button>
+        {{-- DATA USULAN TERBARU --}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8 mt-10">
+            <div class="flex items-center justify-between mb-4">
+                <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">DAFTAR USULAN KEGIATAN BARU</h1>
+
+                <a href="{{ route('admin.usulankegiatan.create') }}"
+                    class="w-2/12 py-3 bg-orangeMuda text-white rounded-lg text-center font-semibold hover:bg-orangeMuda/80 transition">
+                    Lihat Semua Usulan
                 </a>
 
             </div>
 
-            {{-- Recent Activity --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-4">
 
-            {{-- Usulan Terbaru --}}
-            <div class="bg-white shadow rounded-lg">
-        {{-- Header --}}
-        <div class="px-6 py-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-800">Usulan Terbaru</h3>
-            <p class="text-sm text-gray-500">5 usulan kegiatan terbaru yang masuk</p>
-        </div>
+                @foreach ($usulanTerbaru as $usulan)
 
-        {{-- Content --}}
-        <div class="px-6 py-4 space-y-3">
-            @php
-                $usulans = [
-                    ['id'=>1,'title'=>'Pelatihan Manajemen Keuangan','opd'=>'Dinas Pendidikan','status'=>'pending','date'=>'11 Nov 2025'],
-                    ['id'=>2,'title'=>'Workshop Pelayanan Publik','opd'=>'Dinas Kesehatan','status'=>'approved','date'=>'10 Nov 2025'],
-                    ['id'=>3,'title'=>'Bimtek Pengelolaan Aset','opd'=>'BPKAD','status'=>'pending','date'=>'9 Nov 2025'],
-                    ['id'=>4,'title'=>'Pelatihan SPBE','opd'=>'Diskominfo','status'=>'approved','date'=>'8 Nov 2025'],
-                    ['id'=>5,'title'=>'Sosialisasi Peraturan Baru','opd'=>'Sekretariat Daerah','status'=>'pending','date'=>'7 Nov 2025'],
-                ];
-            @endphp
+                <div class="bg-abuabuKoin rounded-2xl px-5 py-4 flex items-center">
 
-            @foreach ($usulans as $item)
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-900">{{ $item['title'] }}</p>
-                        <p class="text-xs text-gray-500 mt-1">{{ $item['opd'] }} • {{ $item['date'] }}</p>
+                    {{-- KOLOM KIRI --}}
+                    <div class="w-[50%]">
+                        <h5 class="font-bold text-base leading-tight">
+                            {{ $usulan->inputusulankegiatans->nama_kegiatan ?? '-' }}
+                        </h5>
+
+                        <p class="font-normal text-xs mt-2">
+                            {{ $usulan->subunitkerjas->sub_unitkerja ?? '-' }}
+                            <span class="mx-2">•</span>
+                            {{ \Carbon\Carbon::parse($usulan->tanggalmulai_kegiatan)->translatedFormat('d F Y') }}
+                        </p>
                     </div>
-                    <span class="px-2 py-1 rounded text-xs 
-                        @if($item['status'] === 'approved') bg-green-100 text-green-800 @else bg-yellow-100 text-yellow-800 border border-yellow-300 @endif">
-                        {{ $item['status'] === 'approved' ? 'Disetujui' : 'Pending' }}
-                    </span>
+
+                    {{-- GARIS --}}
+                    <div class="w-0.5 h-14 bg-black mx-6"></div>
+
+                    {{-- KOLOM TENGAH --}}
+                    <div class="w-[35%]">
+                        <p class="font-bold text-sm">
+                            {{ $usulan->lokasi_kegiatan }}
+                        </p>
+                    </div>
+
+                    {{-- STATUS --}}
+                    <div class="w-[15%] flex justify-end">
+                        <span class="px-6 py-2 rounded-lg text-sm font-bold border {{ $usulan->status_ui_class }}">
+                            {{ ucfirst(str_replace('_', ' ', $usulan->status_ui)) }}
+                        </span>
+                    </div>
+
                 </div>
-            @endforeach
-
-            <a href="/usulan-masuk" class="w-full mt-4 text-blue-600 text-left hover:underline block">
-    Lihat Semua Usulan →
-</a>
-
-
+                @endforeach
+            </div>
         </div>
-    </div>
 
-    {{-- Laporan Terbaru --}}
-    <div class="bg-white shadow rounded-lg">
-        {{-- Header --}}
-        <div class="px-6 py-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-800">Laporan Terbaru</h3>
-            <p class="text-sm text-gray-500">5 laporan hasil kegiatan terbaru</p>
-        </div>
+            {{-- STATISTIK CARDS LAPORAN --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8 mt-10">
+                <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">RANGKUMAN LAPORAN KEGIATAN PENGEMBANGAN KOMPETENSI</h1>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-2 sm:p-3 rounded-xl bg-kuningBening shadow-sm">
+                        <h2 class="text-sm font-medium">Total Laporan yang Masuk</h2>
+                        <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanMasuk }}</p>
+                        <p class="text-xs text-merahBata mt-2">+{{ $laporanMingguIni }} minggu ini</p>
+                    </div>
+
+                    <div class="p-2 sm:p-3 rounded-xl bg-unguBening shadow-sm">
+                        <h2 class="text-sm font-medium">Laporan yang Menunggu Verifikasi</h2>
+                        <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanPending }}</p>
+                        <p class="text-xs text-merahBata mt-2">+{{ $laporanMingguIni }} minggu ini</p>
+                    </div>
+
+                    <div class="p-2 sm:p-3 rounded-xl bg-hijauMint shadow-sm">
+                        <h2 class="text-sm font-medium">Laporan yang Disetujui</h2>
+                        <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanDisetujui }}</p>
+                        <p class="text-xs text-hijauDaun mt-2">{{ $persenLaporanDisetujui }}% dari total</p>
+                    </div>
+
+                    <div class="p-2 sm:p-3 rounded-xl bg-merahBening shadow-sm">
+                        <h2 class="text-sm font-medium">Laporan yang Ditolak</h2>
+                        <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanDitolak }}</p>
+                        <p class="text-xs text-merahCabai mt-2">{{ $persenLaporanDitolak }}% dari total</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- DATA LAPORAN TERBARU --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8 mt-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">DAFTAR LAPORAN KEGIATAN BARU</h1>
+
+                    <a href="{{ route('admin.usulankegiatan.create') }}"
+                        class="w-2/12 py-3 bg-orangeMuda text-white rounded-lg text-center font-semibold hover:bg-orangeMuda/80 transition">
+                        Lihat Semua Laporan
+                    </a>
+                </div>
+
+                <div class="space-y-4">
+
+                @foreach ($laporanTerbaru as $laporan)
+
+                <div class="bg-abuabuKoin rounded-2xl px-5 py-4 flex items-center">
+
+                    {{-- KOLOM KIRI --}}
+                    <div class="w-[50%]">
+                        <h5 class="font-bold text-base leading-tight">
+                            {{ $laporan->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
+                        </h5>
+
+                        <p class="font-normal text-xs mt-2">
+                            {{ $laporan->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->subunitkerjas->sub_unitkerja ?? '-' }}
+                            <span class="mx-2">•</span>
+                            {{ \Carbon\Carbon::parse($laporan->tanggalmulai_kegiatan)->translatedFormat('d F Y') }}
+                        </p>
+                    </div>
 
         {{-- Content --}}
         <div class="px-6 py-4 space-y-3">
@@ -182,12 +216,28 @@
     </div>
 @endforeach
 
-            <a href="{{ route('superadmin.laporankegiatan.pending') }}" 
+            <a href="{{ route('superadmin.laporankegiatan.pending') }}"
    class="w-full mt-4 text-blue-600 text-left hover:underline">
     Lihat Semua Laporan →
 </a>
         </div>
-    </div>
+
+        {{-- STATISTIK CARDS SERTIFIKAT --}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8 mt-10">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">RANGKUMAN LAPORAN DAN SERTIFIKAT PESERTA KEGIATAN</h1>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-2 sm:p-3 rounded-xl bg-kuningBening shadow-sm">
+                    <h2 class="text-sm font-medium">Total Laporan Peserta yang Masuk</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $totalLaporanPeserta }}</p>
+                    <p class="text-xs text-merahBata mt-2">+{{ $laporanPesertaMingguIni }} minggu ini</p>
+                </div>
+
+                <div class="p-2 sm:p-3 rounded-xl bg-hijauMint shadow-sm">
+                    <h2 class="text-sm font-medium">Laporan Peserta yang Disetujui</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanPesertaDisetujui }}</p>
+                    <p class="text-xs text-hijauDaun mt-2">{{ $persenLaporanPesertaDisetujui }}% dari total</p>
+                </div>
 
 </div>
             {{-- INFO ALERT --}}
@@ -207,6 +257,6 @@
 </div>
 
         </div>
-    </main>
-</div>
+    </div>
+
 </x-app-layout>

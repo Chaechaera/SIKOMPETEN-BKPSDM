@@ -11,11 +11,11 @@
             @include('layouts.navigation')
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-            {{-- 📝 FORM KIRIM BALASAN LAPORAN KEGIATAN --}}
-            <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.kirim', $laporankegiatans->id) }}" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="laporankegiatan_id" value="{{ $laporankegiatans->id }}">
-                <input type="hidden" name="next_route" value="superadmin.balasanlaporankegiatan.kirim">
+        {{-- 📝 FORM KIRIM BALASAN LAPORAN KEGIATAN --}}
+        <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.kirim', $laporankegiatans->id) }}" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="laporankegiatan_id" value="{{ $laporankegiatans->id }}">
+            <input type="hidden" name="next_route" value="superadmin.balasanlaporankegiatan.kirim">
 
                 <div class="bg-white rounded-xl shadow p-6 mb-4">
                     <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR KIRIM BALASAN LAPORAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
@@ -40,16 +40,16 @@
                             <p class="text-xs text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
                             <p class="text-xs text-gray-500">Contoh nama file: file_balasan_laporan_kegiatan.pdf</p>
                             <div class="relative mb-3 mt-2">
-                                <input type="file" name="filekirim_balasanlaporankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
+                                <input type="file" name="filekirim_balasanlaporankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" required>
-                                @error('filekirim_balasanlaporankegiatan')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            @error('filekirim_balasanlaporankegiatan')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
+                </div>
 
                     {{-- =========================================== --}}
                     {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}

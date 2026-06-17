@@ -5,6 +5,7 @@ namespace App\Izin\Http\Controllers\Admin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Detaillaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
@@ -14,6 +15,7 @@ use App\Izin\Models\Izin_Usulankegiatans;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
 
@@ -304,7 +306,7 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
         // Ambil dari USULAN, bukan langsung laporan
@@ -373,7 +375,7 @@ if (!$laporankegiatans) {
             }
         }
 
-        
+
 
        $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
@@ -646,7 +648,7 @@ public function unarchive($id)
         }
     }
 
-    // 6. HAPUS INPUT  
+    // 6. HAPUS INPUT
     $input->delete();
 
     // 7. HAPUS LAPORAN

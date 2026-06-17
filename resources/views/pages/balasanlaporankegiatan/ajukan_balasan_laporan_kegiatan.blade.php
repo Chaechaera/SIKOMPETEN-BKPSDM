@@ -11,9 +11,9 @@
             @include('layouts.navigation')
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-            {{-- 📝 FORM BALASAN LAPORAN HASIL KEGIATAN --}}
-            <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.store', $laporankegiatans->id) }}" enctype="multipart/form-data">
-                @csrf
+        {{-- 📝 FORM BALASAN LAPORAN HASIL KEGIATAN --}}
+        <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.store', $laporankegiatans->id) }}" enctype="multipart/form-data">
+            @csrf
 
                 <div class="bg-white rounded-xl shadow p-6 mb-4">
                     <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
@@ -28,10 +28,10 @@
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
                     <h2 class="text-lg font-bold text-blue-600 mb-4">Preview Data Utama Kegiatan</h2>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         {{-- Nama Kegiatan --}}
                         <div class="md:col-span-2">
@@ -39,12 +39,12 @@
                             <div class="relative">
                                 <input type="text"
                                     value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '' }}"
-                                    class="block w-full text-sm text-gray-700 
+                                    class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" readonly>
-                            </div>
                         </div>
+                    </div>
 
                         {{-- Sub Unit Kerja --}}
                         <div>
@@ -52,13 +52,13 @@
                             <div class="relative">
                                 <input type="text"
                                     value="{{ $subunitkerjas ?? '' }}"
-                                    class="block w-full text-sm text-gray-700 
+                                    class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" readonly>
-                                <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
-                            </div>
+                            <input type="hidden" name="subunitkerja_id" value="{{ $subunitkerja_id ?? '' }}">
                         </div>
+                    </div>
 
                         {{-- Cara Pelatihan --}}
                         <div>
@@ -66,12 +66,12 @@
                             <div class="relative">
                                 <input type="text"
                                     value="{{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->carapelatihans->cara_pelatihan ?? '' }}"
-                                    class="block w-full text-sm text-gray-700 
+                                    class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" readonly>
-                            </div>
                         </div>
+                    </div>
 
                         {{-- Tanggal Pelaksanaan Kegiatan --}}
                         <div>
@@ -82,7 +82,7 @@
         ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d-m-Y') . ' s/d ' .
           \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->format('d-m-Y')
         : '-' }}"
-    class="block w-full text-sm text-gray-700 
+    class="block w-full text-sm text-gray-700
     border border-[#E0E7FF] rounded-lg
     bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
     focus:outline-none p-2"
@@ -93,30 +93,30 @@
                             </div>
                         </div>
 
-                        {{-- Lama Kegiatan Terlaksana  --}}
-                        @php
-                        $lamaHari = '-';
-                        if($laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan)
-                        {
-                        $start = \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan);
-                        $end = \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan);
-                        $lamaHari = $start->diffInDays($end) + 1;
-                        }
-                        @endphp
+                    {{-- Lama Kegiatan Terlaksana  --}}
+                    @php
+                    $lamaHari = '-';
+                    if($laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan)
+                    {
+                    $start = \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan);
+                    $end = \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan);
+                    $lamaHari = $start->diffInDays($end) + 1;
+                    }
+                    @endphp
 
-                        <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lama Kegiatan Terlaksana</label>
-                            <div class="relative">
-                                <input type="text"
-                                    value="{{ $lamaHari != '-' ? $lamaHari.' hari' : '-' }}"
-                                    class="block w-full text-sm text-gray-700 
+                    <div>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lama Kegiatan Terlaksana</label>
+                        <div class="relative">
+                            <input type="text"
+                                value="{{ $lamaHari != '-' ? $lamaHari.' hari' : '-' }}"
+                                class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" readonly>
-                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
                 {{-- ============================================================= --}}
                 {{-- ======== BAGIAN 2: LENGKAPI BALASAN LAPORAN KEGIATAN ======== --}}
@@ -124,17 +124,17 @@
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
                     <h2 class="text-lg font-bold text-blue-600 mb-4">Lengkapi Balasan Laporan Kegiatan</h2>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                <!-- 🔻 DIVIDER -->
+                <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     {{-- Nomor Sertifikat Kegiatan  --}}
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Sertifikat Kegiatan</label>
-                        <input type="text" name="nomorsertifikat_kegiatan" value="{{ $sertifikats->nomorsertifikat_kegiatan ?? '-' }}" class="block w-full text-sm text-gray-700 
+                        <input type="text" name="nomorsertifikat_kegiatan" value="{{ $sertifikats->nomorsertifikat_kegiatan ?? '-' }}" class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
-                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] 
+                                  bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC]
                                   focus:outline-none p-2" readonly>
                         <input type="hidden" name="sertifikat_id" value="{{ $sertifikats->id ?? '' }}">
                     </div>
@@ -170,7 +170,18 @@
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Canvas Desain Sertifikat Kegiatan OPD</label>
 
                         {{-- Ukuran Canvas Desain Srertifikat  --}}
-                        <div id="designArea" class="relative border rounded bg-gray-100 mx-auto"></div>
+                        <div class="w-full overflow-auto">
+    <div id="designArea"
+        class="relative border rounded bg-gray-100 mx-auto shadow-lg"
+        style="
+            width: 1123px;
+            height: 794px;
+            background-position:center;
+            background-repeat:no-repeat;
+            background-size:100% 100%;
+        ">
+    </div>
+</div>
                         <input type="hidden" name="fieldstemplatesertifikat_kegiatan" id="fieldstemplatesertifikat_kegiatan">
 
                         {{-- Elemen Drag and Drop  --}}
@@ -192,21 +203,20 @@
                         </div>
                     </div>
                 </div>
-                </div>
+            </div>
 
-                {{-- =========================================== --}}
-                {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
-                {{-- =========================================== --}}
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="submit"
-                        class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
-                        Kirim Balasan
-                    </button>
-                </div>
-            </form>
-        </main>
+            {{-- =========================================== --}}
+            {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
+            {{-- =========================================== --}}
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="submit"
+                    class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
+                    Kirim Balasan
+                </button>
+            </div>
+        </form>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 
@@ -262,31 +272,27 @@ document.addEventListener("DOMContentLoaded", function () {
         designArea.addEventListener("dragover", e => e.preventDefault());
 
         designArea.addEventListener("drop", e => {
-            e.preventDefault();
 
-            const type = e.dataTransfer.getData("placeholder");
-            if (!type) return;
+    e.preventDefault();
 
-            const rect = designArea.getBoundingClientRect();
+    const type = e.dataTransfer.getData("placeholder");
 
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+    if (!type) return;
 
-            const el = createPlaceholder(type);
-            designArea.appendChild(el);
+    const rect = designArea.getBoundingClientRect();
 
-            // anchor tengah biar presisi
-            const offsetX = el.offsetWidth / 2;
-            const offsetY = el.offsetHeight / 2;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-            const finalX = x - offsetX;
-            const finalY = y - offsetY;
+    const el = createPlaceholder(type);
 
-            el.style.left = finalX + "px";
-            el.style.top = finalY + "px";
+    el.style.left = x + "px";
+    el.style.top = y + "px";
 
-            saveMetadata();
-        });
+    designArea.appendChild(el);
+
+    saveMetadata();
+});
 
         // Fungsi untuk mengatur ukuran elemen drag and drop
         function getDefaultFontSize(type) {
@@ -296,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 case "nip_peserta":
                     return 24;
                 case "nomorsertifikatpeserta_kegiatan":
-                    return 18;
+                    return 20;
                 case "totalcapaianjp_kegiatan":
                     return 18;
                 default:
@@ -308,90 +314,115 @@ document.addEventListener("DOMContentLoaded", function () {
         |   BUAT ELEMEN DRAG AND DROP     |
         ================================ */
         function createPlaceholder(type) {
-            const el = document.createElement("div");
-            el.className = "absolute cursor-move select-none";
-            el.dataset.type = type;
 
-            el.style.fontFamily = "'Times New Roman', serif";
-            el.style.fontSize = getDefaultFontSize(type) + "px";
-            el.style.fontWeight = "bold";
-            el.style.color = "#000000";
-            el.style.textAlign = "center";
-            el.style.lineHeight = "1";
-            el.style.whiteSpace = "nowrap";
+    const el = document.createElement("div");
 
-            el.textContent = getSampleText(type);
+    el.className = `
+        absolute
+        cursor-move
+        select-none
+    `;
 
-            el.addEventListener("click", () => {
-                selectedElement = el;
-            });
+    el.dataset.type = type;
 
-            makeDraggable(el);
-            return el;
-        }
+    el.style.fontFamily = "'Times New Roman', serif";
+    el.style.fontSize = getDefaultFontSize(type) + "px";
+    el.style.fontWeight = "bold";
+    el.style.color = "#000";
+    el.style.textAlign = "center";
+    el.style.whiteSpace = "nowrap";
+    el.style.lineHeight = "1";
+
+    // INI PALING PENTING
+    el.style.transform = "translate(-50%, -50%)";
+
+    el.textContent = getSampleText(type);
+
+    makeDraggable(el);
+
+    return el;
+}
 
         /* ============================
-        |   DRAG KE CANVAS DESAIN     |  
+        |   DRAG KE CANVAS DESAIN     |
         ============================ */
         function makeDraggable(el) {
-            el.addEventListener("mousedown", e => {
 
-                let offsetX = e.clientX - el.getBoundingClientRect().left;
-                let offsetY = e.clientY - el.getBoundingClientRect().top;
+    el.addEventListener("mousedown", e => {
 
-                function onMove(e2) {
-                    const rect = designArea.getBoundingClientRect();
+        e.preventDefault();
 
-                    const x = e2.clientX - offsetX - rect.left;
-                    const y = e2.clientY - offsetY - rect.top;
+        selectedElement = el;
 
-                    el.style.left = x + "px";
-                    el.style.top = y + "px";
-                }
+        function onMove(e2) {
 
-                document.addEventListener("mousemove", onMove);
+            const rect = designArea.getBoundingClientRect();
 
-                document.addEventListener("mouseup", () => {
-                    document.removeEventListener("mousemove", onMove);
-                    saveMetadata();
-                }, {
-                    once: true
-                });
-            });
+            const x = e2.clientX - rect.left;
+            const y = e2.clientY - rect.top;
+
+            el.style.left = x + "px";
+            el.style.top = y + "px";
         }
+
+        document.addEventListener("mousemove", onMove);
+
+        document.addEventListener("mouseup", () => {
+
+            document.removeEventListener("mousemove", onMove);
+
+            saveMetadata();
+
+        }, {
+            once: true
+        });
+
+    });
+}
 
         /* =====================================
         |   SIMPAN FIELDS DALAM PERSEN (%)     |
         ===================================== */
         function saveMetadata() {
 
-            const result = [];
-            const parentRect = designArea.getBoundingClientRect();
+    const result = [];
 
-            designArea.querySelectorAll("[data-type]").forEach(el => {
+    const width = designArea.offsetWidth;
+    const height = designArea.offsetHeight;
 
-                const elRect = el.getBoundingClientRect();
+    designArea.querySelectorAll("[data-type]").forEach(el => {
 
-                const left = elRect.left - parentRect.left;
-                const top = elRect.top - parentRect.top;
+        const left = parseFloat(el.style.left);
+        const top = parseFloat(el.style.top);
 
-                const xPercent = (left / parentRect.width) * 100;
-                const yPercent = (top / parentRect.height) * 100;
+        // =========================
+        // KONVERSI PX -> %
+        // =========================
+        const xPercent = (left / width) * 100;
+        const yPercent = (top / height) * 100;
 
-                result.push({
-                    type: el.dataset.type,
-                    x_percent: xPercent,
-                    y_percent: yPercent,
-                    font_size: parseInt(el.style.fontSize),
-                    font_color: el.style.color,
-                    font_weight: el.style.fontWeight,
-                    text_align: el.style.textAlign
-                });
-            });
+        result.push({
+            type: el.dataset.type,
 
-            document.getElementById("fieldstemplatesertifikat_kegiatan").value =
-                JSON.stringify(result);
-        }
+            x_percent: xPercent,
+            y_percent: yPercent,
+
+            width: el.offsetWidth,
+            height: el.offsetHeight,
+
+            font_size: parseInt(el.style.fontSize),
+            font_color: el.style.color,
+            font_weight: el.style.fontWeight,
+            text_align: el.style.textAlign
+        });
+    });
+
+    document.getElementById(
+        "fieldstemplatesertifikat_kegiatan"
+    ).value = JSON.stringify(result);
+
+    console.log(result);
+}
 
         /* =========================================
         |    LOAD BACKGROUND SERTIFIKAT TEMPLATE   |
@@ -429,37 +460,39 @@ document.addEventListener("DOMContentLoaded", function () {
         ======================================== */
         function loadExisting() {
 
-            let data = @json($sertifikats->fieldstemplatesertifikat_kegiatan ?? []);
+    let data = @json($sertifikats->fieldstemplatesertifikat_kegiatan ?? []);
 
-            if (typeof data === "string") {
-                try {
-                    data = JSON.parse(data);
-                } catch {
-                    data = [];
-                }
-            }
+    if (typeof data === "string") {
 
-            if (!Array.isArray(data)) return;
-
-            data.forEach(f => {
-                const el = createPlaceholder(f.type);
-
-                const x = (f.x_percent / 100) * designArea.offsetWidth;
-                const y = (f.y_percent / 100) * designArea.offsetHeight;
-
-                el.style.left = x + "px";
-                el.style.top = y + "px";
-
-                el.style.fontSize = (f.font_size ?? 42) + "px";
-                el.style.color = f.font_color ?? "#000000";
-                el.style.fontWeight = f.font_weight ?? "bold";
-                el.style.textAlign = f.text_align ?? "center";
-
-                designArea.appendChild(el);
-            });
-
-            saveMetadata();
+        try {
+            data = JSON.parse(data);
+        } catch {
+            data = [];
         }
+    }
+
+    if (!Array.isArray(data)) return;
+
+    data.forEach(f => {
+
+        const el = createPlaceholder(f.type);
+
+        el.style.left =
+            ((f.x_percent / 100) * designArea.offsetWidth) + "px";
+
+        el.style.top =
+            ((f.y_percent / 100) * designArea.offsetHeight) + "px";
+
+        el.style.fontSize = (f.font_size ?? 36) + "px";
+        el.style.color = f.font_color ?? "#000";
+        el.style.fontWeight = f.font_weight ?? "bold";
+        el.style.textAlign = f.text_align ?? "center";
+
+        designArea.appendChild(el);
+    });
+
+    saveMetadata();
+}
 
         document.querySelector("form").addEventListener("submit", saveMetadata);
     </script>
