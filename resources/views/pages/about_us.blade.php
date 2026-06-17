@@ -77,18 +77,6 @@
                         teknologi global.
                     </p>
                 </div>
-
-                {{-- File --}}
-                <div class="mb-8">
-                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-2">FILE</h2>
-
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-2 border-t-2 border-gray-200"></div>
-                    <p class="text-sm text-gray-500">
-                        Tidak ada file yang tersedia saat ini
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 

@@ -14,9 +14,18 @@ class Izin_Laporanpesertakegiatans extends Model
     protected $fillable = [
         'pesertakegiatan_id',
         'sertifikat_id',
-        'filelaporan_pesertakegiatan',
         'statuslaporan_pesertakegiatan',
+        'catatanlaporan_pesertakegiatan',
+        'uraianpeserta_kegiatan',
+        'tujuanpeserta_kegiatan',
+        'rangkumanpeserta_kegiatan',
+        'kesimpulanpeserta_kegiatan',
+        'dokumentasipeserta_kegiatan',
         'uploaded_at',
+    ];
+
+    protected $casts = [
+        'dokumentasipeserta_kegiatan' => 'array',
     ];
 
     /* ========== RELATIONS ========== */
@@ -32,8 +41,12 @@ class Izin_Laporanpesertakegiatans extends Model
     }
 
     public function users()
-{
-    return $this->belongsTo(User::class, 'user_id');
-}
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
+        public function isNotifikasi(): bool
+    {
+        return $this->statuslaporan_pesertakegiatan === 'approved' || $this->statuslaporan_pesertakegiatan === 'rejected';
+    }
 }

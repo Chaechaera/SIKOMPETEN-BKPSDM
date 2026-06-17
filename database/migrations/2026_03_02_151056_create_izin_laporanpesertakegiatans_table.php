@@ -15,8 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pesertakegiatan_id')->constrained('izin_pesertakegiatans');
             $table->foreignId('sertifikat_id')->nullable()->constrained('izin_sertifikats');
-            $table->string('filelaporan_pesertakegiatan')->nullable();
             $table->enum('statuslaporan_pesertakegiatan', ['pending', 'approved', 'rejected', 'revisi'])->nullable();
+            $table->text('catatanlaporan_pesertakegiatan')->nullable();
+            $table->text('uraianpeserta_kegiatan')->nullable();
+            $table->text('tujuanpeserta_kegiatan')->nullable();
+            $table->text('rangkumanpeserta_kegiatan')->nullable();
+            $table->text('kesimpulanpeserta_kegiatan')->nullable();
+            $table->text('dokumentasipeserta_kegiatan')->nullable();
             $table->timestamp('uploaded_at')->nullable();   
             $table->timestamps();
         });

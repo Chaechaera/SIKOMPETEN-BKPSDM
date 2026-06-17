@@ -1,10 +1,16 @@
-<div class="p-6" x-data="{ open: true }">
+<div class="p-6"
+     x-data="{
+        open: true,
+        showPreview: false
+     }">
 
     <div x-show="open" class="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-50" x-transition>
         <div @click.away="open = false" class="bg-white rounded-lg shadow-lg w-full max-w-5xl p-8 relative">
 
             {{-- Button Close --}}
             <button @click="open = false" class="absolute top-2 right-3 text-gray-500 hover:text-gray-700"> ✕ </button>
+            <div class="px-6 py-4 max-h-[80vh] overflow-y-auto">
+
 
             {{-- Header Judul Usulan yang Direview --}}
             <div class="mb-4">
@@ -25,7 +31,7 @@
                     <div class="my-4 border-t-2 border-gray-200"></div>
 
                     <!-- content grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 text-sm">
 
                         <!-- Nama Kegiatan -->
                         <div>
@@ -71,6 +77,9 @@
                     <div class="my-4 border-t-2 border-gray-200"></div>
 
                     {{-- Form Review Laporan --}}
+                    @php
+                                $usulanId = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->id;
+                    @endphp
                     <form method="POST" action="{{ route('superadmin.laporankegiatan.reviewUpload', $laporankegiatans->id) }}">
                         @csrf
                         <div class="mb-4">
@@ -78,16 +87,43 @@
                             <textarea
                                 name="catatan_verifikasilaporankegiatan"
                                 id="catatan_verifikasilaporankegiatan"
-                                class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
                                 placeholder="Tuliskan catatan review untuk OPD"></textarea>
+                        </div>
+
+                        
+                        {{-- Preview Laporan --}}
+                        <div
+                            x-show="showPreview"
+                            x-transition
+                            class="mt-4 border border-gray-200 rounded-lg overflow-hidden">
+
+                            <template x-if="showPreview">
+                                <iframe
+                                    src="{{ route('superadmin.laporankegiatan.download', $usulanId) }}"
+                                    width="100%"
+                                    height="700">
+                                </iframe>
+                            </template>
                         </div>
 
                         {{-- Tombol Aksi --}}
                         <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                            <a href="{{ route('superadmin.laporankegiatan.download', $laporankegiatans->id) }}"
+
+                            <button
+                                type="button"
+                                @click="showPreview = !showPreview"
                                 class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
-                                Tinjau Laporan
-                            </a>
+
+                                <span x-show="!showPreview">
+                                    Tinjau Laporan
+                                </span>
+
+                                <span x-show="showPreview">
+                                    Sembunyikan Preview
+                                </span>
+
+                            </button>
                             <button
                                 type="submit"
                                 name="actionlaporan_kegiatan"
@@ -104,6 +140,7 @@
                             </button>
                         </div>
                     </form>
+                    </div>
                 </div>
             </div>
         </div>

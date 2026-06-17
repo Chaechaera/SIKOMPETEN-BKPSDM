@@ -7,14 +7,16 @@
 
     <title>SIKOMPETEN</title>
 
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
+    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-white font-sans antialiased">
+<body class="font-sans antialiased">
 
     {{-- Navbar --}}
     <x-izin-navbar />
@@ -22,7 +24,7 @@
     {{-- Hero Section --}}
     <x-izin-hero />
 
-    <!-- ======================= CEK SERTIFIKAT ASN ======================= -->
+    {{-- ======================= CEK SERTIFIKAT ASN ======================= -->
     <section class="py-10 px-6 bg-gray-50">
         <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg p-10">
 
@@ -122,7 +124,7 @@ async function cekSertifikat() {
     }
 }
 </script>
-    <!-- ======================= END CEK SERTIFIKAT ASN ======================= -->
+    <!-- ======================= END CEK SERTIFIKAT ASN ======================= --}}
 
     {{-- Fitur Section --}}
     <x-izin-fitur-section />

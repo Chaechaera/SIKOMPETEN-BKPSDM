@@ -16,6 +16,7 @@ class Izin_Balasanlaporankegiatans extends Model
         'inputlaporankegiatan_id',
         'sertifikat_id',
         'totalcapaianjp_kegiatan'
+        
     ]; 
 
     /* ========== RELATIONS ========== */
@@ -34,4 +35,13 @@ class Izin_Balasanlaporankegiatans extends Model
     {
         return $this->belongsTo(Izin_Sertifikats::class, 'sertifikat_id');
     }
+
+public function balasanlaporankegiatans()
+{
+    return $this->hasOne(
+        Izin_Kirimbalasanlaporankegiatans::class,
+        'inputlaporankegiatan_id', // FK di tabel balasan
+        'id' // PK di laporan
+    );
+}
 }
