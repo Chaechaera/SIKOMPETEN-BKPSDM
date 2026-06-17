@@ -228,7 +228,7 @@
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -397,7 +397,7 @@
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -489,7 +489,7 @@
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
-            table-layout: auto;
+            table-layout: fixed;
             font-size: 10.5pt;
             margin-top: 8px;
         }
@@ -519,6 +519,7 @@
         /* Kolom angka */
         .susunan-acara td:nth-child(n+6) {
             text-align: right;
+            width: fixed;
         }
 
         /* Judul Grup (Belanja Bahan Habis Pakai, dsb) */
@@ -534,23 +535,30 @@
         }
 
         /* Kolom Nomor agar kecil dan proporsional */
-        .susunan-acara td:first-child {
-            text-align: center;
-            width: 30px;
+        .susunan-acara td:first-child,
+.susunan-acara th:first-child {
+    text-align: center !important;
+    width: 25px !important;
+    max-width: 25px !important;
+    vertical-align: middle;
             font-size: 9.5pt;
-        }
+            padding: 1px 2px;
+            white-space: nowrap;
+
+}
 
         /* Agar teks kata panjang seperti “Belanja Operasional Lainnya” tidak nempel */
         .susunan-acara td,
         .susunan-acara th {
             white-space: normal;
-            overflow-wrap: break-word;
+            word-break: break-word;
+    overflow-wrap: anywhere;
         }
 
         /* Kolom nomor kecil & center */
         .susunan-acara .td-nomor {
+            width: 25px;
             text-align: center;
-            width: 22px;
             /* sebelumnya 30px, sekarang lebih rapat */
             font-size: 9pt;
             /* sedikit lebih kecil */
@@ -652,30 +660,30 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->identitassurats?->nomor_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
+                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $usulankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
+                    <td><strong>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $usulankegiatans->identitassurats?->tanggal_surat
-    ? \Carbon\Carbon::parse($usulankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
+                {{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->tanggal_surat
+    ? \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
     : '' }}
             </p>
         </div>
@@ -691,8 +699,8 @@
     <div class="content">
         <p class="indent">
             Guna meningkatkan kompetensi sumber daya manusia di lingkungan
-            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit,
-            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan
+            {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit,
+            {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan
             kompetensi
             "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}".
             Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan
@@ -705,7 +713,7 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         <div class="ttd-wrapper">
@@ -722,8 +730,9 @@
 
         </div>
 
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 
     <div class="page-break"></div>
@@ -779,8 +788,8 @@
         @php
         $letterIndex = 0; // mulai dari A
         function getLetter($i) {
-            $alphabet = range('A', 'Z');
-            return $alphabet[$i] ?? ('Z' . ($i - 25));
+        $alphabet = range('A', 'Z');
+        return $alphabet[$i] ?? ('Z' . ($i - 25));
         } // fallback kalau lewat Z
         @endphp
 
@@ -1048,7 +1057,7 @@
                 <li>SASARAN PESERTA
                     <p class="indent">
                         Sasaran peserta yang mengikuti kegiatan ini merupakan orang yang berasal dari ruang lingkup
-                        {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta yang mana meliputi: <br>
+                        {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja }} di Kota Surakarta yang mana meliputi: <br>
                         {!! nl2br(e($usulankegiatans->detailusulankegiatans->sasaranpeserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!}
                     </p>
                 </li>
@@ -1109,13 +1118,29 @@
             @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
             @php
             // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            $row = array_map(function ($cell) {
+            /*$row = array_map(function ($cell) {
             if (is_array($cell))
             $cell = implode(', ', array_filter($cell));
             $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
             $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
             return $cell === '' ? null : $cell;
-            }, $row);
+            }, $row);*/
+            $row = array_map(function ($cell) {
+
+    if (is_array($cell)) {
+        $cell = implode(', ', array_filter($cell));
+    }
+
+    $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
+
+    // jangan hapus spasi
+    $cell = trim($cell);
+
+    // rapikan spasi ganda
+    $cell = preg_replace('/\s+/', ' ', $cell);
+
+    return $cell === '' ? null : $cell;
+}, $row);
 
             // Cek apakah semua kolom benar-benar kosong
             $hasData = false;
@@ -1165,7 +1190,14 @@
                     @foreach($row as $i => $cell)
                     @php
                     // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
-                    $cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                    //$cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                    $cleanCell = trim($cell);
+
+$cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+$cleanCell = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleanCell);
+
+$cleanCell = preg_replace('/([a-zA-Z])\(/', '$1 (', $cleanCell);
                     $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
 
                     // Nomor kolom (kolom pertama) diperkecil
@@ -1191,7 +1223,7 @@
         </p>
 
         <div class="ttd">
-            <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+            <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
             <p><strong>Kota Surakarta</strong></p>
 
             <div class="ttd-wrapper">
@@ -1208,8 +1240,9 @@
 
             </div>
 
-            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+            <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+            <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+            <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
         </div>
     </div>
 </body>

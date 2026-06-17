@@ -53,9 +53,4 @@ class Izin_Inputusulankegiatans extends Model
     {
         return $this->hasOne(Izin_Pelaksanaankegiatans::class, 'inputusulankegiatan_id');
     }
-
-    public function cetakusulankegiatans()
-{
-    return $this->hasMany(Izin_Cetakusulankegiatans::class, 'inputusulankegiatan_id', 'id');
-}
 }

@@ -29,4 +29,14 @@ class Izin_RefSubunitkerjas extends Model
     {
         return $this->hasMany(Izin_Usulankegiatans::class, 'subunitkerja_id');
     }
+
+    public function ttdunitkerjas()
+{
+    return $this->hasMany(Izin_Ttdunitkerjas::class, 'subunitkerja_id');
+}
+
+public function stempelunitkerjas()
+{
+    return $this->hasMany(Izin_Stempelunitkerjas::class, 'subunitkerja_id');
+}
 }

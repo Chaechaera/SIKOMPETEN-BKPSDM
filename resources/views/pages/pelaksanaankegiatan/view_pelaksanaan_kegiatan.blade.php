@@ -1,69 +1,65 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+            <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
+                Ringkasan Data Kegiatan Pengembangan Kompetensi ASN
+            </h2>
 
-            {{-- Header --}}
-            @include('layouts.navigation')
+            <!-- 🔻 DIVIDER -->
+            <div class="my-4 border-t-2 border-gray-200"></div>
 
-            <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
+            <!-- content grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-sm">
 
-                <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
-                    Ringkasan Data Kegiatan Pengembangan Kompetensi ASN
-                </h2>
+                <!-- Nama Kegiatan -->
+                <div>
+                    <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
+                    <p class="font-semibold text-[#5A5A5A]">
+                        {{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
+                    </p>
+                </div>
 
-                <!-- 🔻 DIVIDER -->
-                <div class="my-4 border-t-2 border-gray-200"></div>
+                <!-- Diajukan Oleh -->
+                <div>
+                    <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
+                    <p class="font-semibold text-[#5A5A5A]">
+                        {{ $usulankegiatans->subunitkerjas->sub_unitkerja ?? '-' }}
+                    </p>
+                </div>
 
-                <!-- content grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-sm">
+                <!-- Lokasi -->
+                <div>
+                    <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
+                    <p class="font-semibold text-[#5A5A5A]">
+                        {{ $usulankegiatans->lokasi_kegiatan }}
+                    </p>
+                </div>
 
-                    <!-- Nama Kegiatan -->
-                    <div>
-                        <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
-                        <p class="font-semibold text-[#5A5A5A]">
-                            {{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
-                        </p>
-                    </div>
-
-                    <!-- Diajukan Oleh -->
-                    <div>
-                        <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
-                        <p class="font-semibold text-[#5A5A5A]">
-                            {{ $usulankegiatans->subunitkerjas->sub_unitkerja ?? '-' }}
-                        </p>
-                    </div>
-
-                    <!-- Lokasi -->
-                    <div>
-                        <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
-                        <p class="font-semibold text-[#5A5A5A]">
-                            {{ $usulankegiatans->lokasi_kegiatan }}
-                        </p>
-                    </div>
-
-                    <!-- Tanggal -->
-                    <div>
-                        <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
-                        <p class="font-semibold text-[#5A5A5A]">
-                            {{ $usulankegiatans->tanggalmulai_kegiatan && $usulankegiatans->tanggalselesai_kegiatan ? \Carbon\Carbon::parse($usulankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
+                <!-- Tanggal -->
+                <div>
+                    <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
+                    <p class="font-semibold text-[#5A5A5A]">
+                        {{ $usulankegiatans->tanggalmulai_kegiatan && $usulankegiatans->tanggalselesai_kegiatan ? \Carbon\Carbon::parse($usulankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
                     \Carbon\Carbon::parse($usulankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}
-                        </p>
-                    </div>
+                    </p>
                 </div>
             </div>
+        </div>
 
-            <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
-                        Detail Gambar Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
-                    </h2>
+                <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
+                    Detail Gambar Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
+                </h2>
+
+                    <a href="{{ auth()->user()->role == 'admin' ? route('admin.usulankegiatan.index') : route('superadmin.usulankegiatan.pending')}}"
+                        class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-semibold transition">
+                        ← Kembali
+                    </a>
 
                 </div>
                 <!-- 🔻 DIVIDER -->
@@ -83,27 +79,18 @@
                     </div>
                     @endforeach
                 </div>
-               {{-- ✅ PAGINATION --}}
-@if($buktipelaksanaan_kegiatanFiles instanceof \Illuminate\Pagination\LengthAwarePaginator && $buktipelaksanaan_kegiatanFiles->hasPages())
-<div class="mt-6">
-    {{ $buktipelaksanaan_kegiatanFiles->links() }}
-</div>
-@endif
-@else
-<p class="text-gray-500 text-center py-10">
-    Belum Ada Gambar Bukti Pelaksanaan Kegiatan yang Diunggah
-</p>
-@endif
-
-<div class="mt-12"> {{-- jarak dari atas --}}
-    <a href="{{ auth()->user()->role == 'admin' ? route('admin.usulankegiatan.index') : route('superadmin.usulankegiatan.pending')}}"
-        class="inline-block bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-semibold transition">
-        Kembali
-    </a>
-</div>
+                {{-- ✅ PAGINATION --}}
+                @if($buktipelaksanaan_kegiatanFiles instanceof \Illuminate\Pagination\LengthAwarePaginator && $buktipelaksanaan_kegiatanFiles->hasPages())
+                <div class="mt-6">
+                    {{ $buktipelaksanaan_kegiatanFiles->links() }}
+                </div>
+                @endif
+                @else
+                <p class="text-gray-500 text-center py-10">
+                    Belum Ada Gambar Bukti Pelaksanaan Kegiatan yang Diunggah
+                </p>
+                @endif
             </div>
-
-            
         </main>
     </div>
 </x-app-layout>

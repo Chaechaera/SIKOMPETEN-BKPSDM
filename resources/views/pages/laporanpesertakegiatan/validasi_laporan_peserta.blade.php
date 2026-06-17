@@ -1,188 +1,341 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div x-data="modalHandler()" class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.superadmin')
+        {{-- Card Informasi Rekapitulasi --}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">VALIDASI LAPORAN PESERTA KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Lakukan validasi laporan peserta kegiatan Pengembangan Kompetensi yang berstatus Pending agar sertifikat dapat diunduh.
+            </p>
+        </div>
 
-        {{-- Main Content --}}
-        <main class="flex-1 p-6 space-y-6 transition-all duration-300"
-              :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+        {{-- Search and Filtering --}}
+        <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
 
-            {{-- Header --}}
-            <div class="flex items-start gap-3">
-                <img src="{{ asset('images/rekap.png') }}" 
-                     alt="Validasi" 
-                     class="h-8 w-8 mt-1">
-                <div>
-                    <h1 class="text-2xl font-semibold text-[#2B3674]">
-                        VALIDASI LAPORAN PESERTA
-                    </h1>
-                    <p class="text-sm text-gray-500 max-w-2xl">
-                        Superadmin memverifikasi laporan sebelum sertifikat dapat diunduh
-                    </p>
-                </div>
+            {{-- Search --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
+                <form method="GET">
+                    <input type="text" id="searchInput" name="search" value="{{ request('search') }}" placeholder="Search ....." class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-abuabuGelap"><i data-lucide="search"></i></span>
+                </form>
             </div>
 
-            {{-- Flash Message --}}
-            @if(session('success'))
-                <div class="rounded-md bg-green-50 border border-green-100 px-4 py-3 text-green-800">
-                    {{ session('success') }}
-                </div>
-            @endif
+            {{-- Sub Unit Kerja Filter --}}
+            <form method="GET">
+                <select name="statuslaporan_pesertakegiatan" onchange="this.form.submit()"
+                    class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
+                    <option class="text-black" value="">Status Laporan Peserta</option>
+                    <option class="text-black" value="pending" {{ request('statuslaporan_pesertakegiatan') == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option class="text-black" value="approved" {{ request('statuslaporan_pesertakegiatan') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                    <option class="text-black" value="rejected" {{ request('statuslaporan_pesertakegiatan') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                    <option class="text-black" value="revisi" {{ request('statuslaporan_pesertakegiatan') == 'revisi' ? 'selected' : '' }}>Direvisi</option>
+                </select>
+            </form>
+        </div>
 
-            @if(session('error'))
-                <div class="rounded-md bg-red-50 border border-red-100 px-4 py-3 text-red-800">
-                    {{ session('error') }}
-                </div>
-            @endif
+        {{-- Flash Message --}}
+        @if(session('success'))
+        <div class="rounded-md bg-green-50 border border-green-100 px-4 py-3 text-green-800">
+            {{ session('success') }}
+        </div>
+        @endif
 
-            {{-- Card --}}
-            <div class="bg-white rounded-xl shadow p-6">
+        @if(session('error'))
+        <div class="rounded-md bg-red-50 border border-red-100 px-4 py-3 text-red-800">
+            {{ session('error') }}
+        </div>
+        @endif
 
-                <div class="mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">
-                        Daftar Laporan Peserta
-                    </h3>
-                    <p class="text-sm text-gray-500">
-                        Hanya laporan berstatus <span class="font-medium text-yellow-600">Pending</span> 
-                        yang dapat diverifikasi
-                    </p>
-                </div>
+        {{-- Table --}}
+        <div class="bg-white rounded-xl overflow-hidden shadow">
+            <table class="w-full text-sm table-auto">
+                <thead>
+                    <tr class="bg-abuabuMuda font-semibold border-b text-center">
+                        <th class="py-3 px-4">No</th>
+                        <th class="py-3 px-4">Nama Peserta</th>
+                        <th class="py-3 px-4">Kegiatan</th>
+                        <th class="py-3 px-4">Tanggal Upload</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">File</th>
+                        <th class="py-3 px-4">Aksi</th>
+                    </tr>
+                </thead>
 
-                <div class="border rounded-lg overflow-hidden">
-                    <table class="w-full text-sm table-fixed">
-                        <thead>
-                            <tr class="bg-gray-50 border-b text-center text-gray-600">
-                                <th class="py-3 px-4 w-14">No</th>
-                                <th class="py-3 px-4 w-56">Nama Peserta</th>
-                                <th class="py-3 px-4 w-56">Kegiatan</th>
-                                <th class="py-3 px-4 w-40">Tanggal Upload</th>
-                                <th class="py-3 px-4 w-28">Status</th>
-                                <th class="py-3 px-4 w-40">File</th>
-                                <th class="py-3 px-4 w-48">Aksi</th>
-                            </tr>
-                        </thead>
+                <tbody>
+                    @forelse($laporans as $index => $laporan)
+                    <tr class="border-b text-center hover:bg-abuabuCerah/30 table-row">
 
-                        <tbody>
-                            @forelse($laporans as $index => $laporan)
-                                <tr class="border-b hover:bg-gray-50">
-
-                                    {{-- Nomor --}}
-                                    <td class="py-3 px-4 text-center">
-                                        {{ $laporans->firstItem() 
+                        {{-- Nomor --}}
+                        <td class="py-3 px-4">
+                            {{ $laporans->firstItem() 
                                             ? $laporans->firstItem() + $index 
                                             : $index + 1 }}
-                                    </td>
+                        </td>
 
-                                    {{-- Nama Peserta --}}
-                                    <td class="py-3 px-4 font-medium text-gray-800">
-                                        {{ $laporan->pesertakegiatans->nama_peserta ?? '-' }}
-                                    </td>
+                        {{-- Nama Peserta --}}
+                        <td class="py-3 px-4 text-left font-semibold">
+                            {{ $laporan->pesertakegiatans->nama_peserta ?? '-' }}
+                        </td>
 
-                                    {{-- Nama Kegiatan --}}
-                                    <td class="py-3 px-4 text-gray-700">
-                                        {{ $laporan->pesertakegiatans->detaillaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
-                                    </td>
+                        {{-- Nama Kegiatan --}}
+                        <td class="py-3 px-4 text-left font-semibold">
+                            {{ $laporan->pesertakegiatans->detaillaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}
+                        </td>
 
-                                    {{-- Tanggal --}}
-                                    <td class="py-3 px-4 text-center text-gray-600">
-                                        {{ optional($laporan->created_at)->format('d M Y') }}
-                                    </td>
+                        {{-- Tanggal --}}
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{ optional($laporan->created_at)->format('d M Y') }}
+                        </td>
 
-                                    {{-- Status --}}
-                                    <td class="py-3 px-4 text-center">
-                                        @if($laporan->statuslaporan_pesertakegiatan === 'pending')
-                                            <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">
-                                                Pending
-                                            </span>
-                                        @elseif($laporan->statuslaporan_pesertakegiatan === 'approved')
-                                            <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
-                                                Approved
-                                            </span>
-                                        @else
-                                            <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium">
-                                                Rejected
-                                            </span>
-                                        @endif
-                                    </td>
+                        {{-- Status --}}
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            @if($laporan->statuslaporan_pesertakegiatan === 'pending')
+                            <span class="px-3 py-1 text-xs rounded-full bg-unguMuda text-unguSedang font-medium">
+                                Pending
+                            </span>
+                            @elseif($laporan->statuslaporan_pesertakegiatan === 'revisi')
+                            <span class="px-3 py-1 text-xs rounded-full bg-orangeBening text-orange font-medium">
+                                Revisi
+                            </span>
+                            @elseif($laporan->statuslaporan_pesertakegiatan === 'approved')
+                            <span class="px-3 py-1 text-xs rounded-full bg-hijauBening text-hijauTua font-medium">
+                                Approved
+                            </span>
+                            @else
+                            <span class="px-3 py-1 text-xs rounded-full bg-merahBening text-merahCabai font-medium">
+                                Rejected
+                            </span>
+                            @endif
+                        </td>
 
-                                    {{-- File --}}
-                                    <td class="py-3 px-4 text-center">
-                                        @if($laporan->filelaporan_pesertakegiatan)
-                                            <a href="{{ asset('storage/' . $laporan->filelaporan_pesertakegiatan) }}"
-                                               target="_blank"
-                                               class="text-blue-600 hover:underline text-sm">
-                                                Lihat File
-                                            </a>
-                                        @else
-                                            <span class="text-gray-400 text-sm">Tidak ada file</span>
-                                        @endif
-                                    </td>
+                        {{-- File --}}
+                        <td class="py-3 px-4 text-center">
+                            <a href="{{ route('superadmin.laporanpesertakegiatan.download', $laporan->id) }}"
+                                target="_blank"
+                                class="inline-block whitespace-nowrap px-4 py-2 text-xs font-semibold rounded-lg bg-blue-100 text-blue-600 hover:bg-hijauTua/60">
+                                Lihat File
+                            </a>
+                        </td>
 
-                                    {{-- Aksi --}}
-                                    <td class="py-3 px-4 text-center">
-                                        <div class="flex justify-center gap-2">
+                        {{-- Aksi --}}
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex justify-center gap-2">
 
-                                            @if($laporan->statuslaporan_pesertakegiatan === 'pending')
+                                @if($laporan->statuslaporan_pesertakegiatan === 'pending' || $laporan->statuslaporan_pesertakegiatan === 'revisi')
 
-                                                {{-- Approve --}}
-                                                <form method="POST"
-                                                      action="{{ route('superadmin.laporan.approve', $laporan->id) }}">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit"
-                                                        class="px-3 py-1.5 text-xs font-medium rounded-md bg-green-600 text-white hover:bg-green-700">
-                                                        Approve
-                                                    </button>
-                                                </form>
+                                {{-- Approve --}}
+                                <form method="POST"
+                                    action="{{ route('superadmin.laporan.approve', $laporan->id) }}"
+                                    onsubmit="return confirm('Apakah Anda yakin menyetujui laporan peserta ini?')">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button
+                                        type="button"
+                                        @click="openApproveModal({{ $laporan->id }})"
+                                        class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-hijauTua text-white hover:bg-hijauTua/60">
+                                        Approve
+                                    </button>
+                                </form>
 
-                                                {{-- Reject --}}
-                                                <form method="POST"
-                                                      action="{{ route('superadmin.laporan.reject', $laporan->id) }}">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit"
-                                                        class="px-3 py-1.5 text-xs font-medium rounded-md bg-red-600 text-white hover:bg-red-700">
-                                                        Reject
-                                                    </button>
-                                                </form>
+                                {{-- Reject --}}
+                                <form method="POST"
+                                    action="{{ route('superadmin.laporan.reject', $laporan->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button
+                                        type="button"
+                                        @click="openModal({{ $laporan->id }})"
+                                        class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-merahMaroon text-white hover:bg-merahMaroon/60">
+                                        Reject
+                                    </button>
 
-                                            @else
-                                                <button
-                                                    class="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-200 text-gray-400 cursor-not-allowed">
-                                                    Selesai
-                                                </button>
-                                            @endif
+                                </form>
 
-                                        </div>
-                                    </td>
+                                @else
+                                <button
+                                    class="px-3 py-1.5 text-xs font-medium rounded-md bg-gray-200 text-gray-400 cursor-not-allowed">
+                                    Selesai
+                                </button>
+                                @endif
 
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="py-6 text-center text-gray-500">
-                                        Tidak ada data laporan
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
 
-                {{-- Pagination --}}
-                @if($laporans->hasPages())
-                <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">
-                    <span>
-                        {{ $laporans->firstItem() }}–{{ $laporans->lastItem() }}
-                        dari {{ $laporans->total() }} data
-                    </span>
-                    <div>
-                        {{ $laporans->links() }}
+                            </div>
+                        </td>
+
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-6 text-abuabuMuda">
+                            Tidak ada data
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+
+                <div
+                    x-show="show"
+                    x-transition
+                    class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    style="display:none;">
+                    <div class="bg-white rounded-xl w-[400px] p-6">
+
+                        <h2 class="text-lg font-semibold mb-3 text-center">
+                            Alasan Laporan Peserta Ditolak
+                        </h2>
+
+                        <textarea
+                            x-model="catatan"
+                            placeholder="Tulis catatan..."
+                            class="w-full border rounded p-2 text-sm mb-4"
+                            rows="4"></textarea>
+
+                        <div class="flex justify-end gap-2">
+                            <button @click="closeModal()" class="px-4 py-2 text-sm bg-gray-300 rounded">
+                                Batal
+                            </button>
+
+                            <form :action="formAction" method="POST">
+                                @csrf
+                                @method('PATCH')
+
+                                <!-- 🔥 FIX NAMA -->
+                                <input type="hidden" name="catatanlaporan_pesertakegiatan" :value="catatan">
+
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 text-white rounded text-sm bg-green-600">
+                                    Submit
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-                @endif
 
-            </div>
-        </main>
+                <div
+                    x-show="showApprove"
+                    x-transition
+                    class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    style="display:none;">
+
+                    <div class="bg-white rounded-xl w-[420px] p-6">
+
+                        <h2 class="text-lg font-semibold text-center mb-3">
+                            Konfirmasi Persetujuan
+                        </h2>
+
+                        <p class="text-sm text-gray-600 text-center mb-6">
+                            Apakah Anda yakin ingin menyetujui laporan peserta ini?
+                        </p>
+
+                        <div class="flex justify-center gap-3">
+
+                            <button
+                                @click="closeApproveModal()"
+                                class="px-4 py-2 rounded-lg bg-gray-300 text-gray-700">
+                                Batal
+                            </button>
+
+                            <form :action="approveAction" method="POST">
+                                @csrf
+                                @method('PATCH')
+
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 rounded-lg bg-hijauTua text-white">
+                                    Ya, Setujui
+                                </button>
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+            </table>
+        </div>
+
+        {{-- Footer Pagination --}}
+        <div class="mt-4">
+            {{ $laporans->links() }}
+        </div>
+
+        <div id="emptyState" class="hidden text-center py-12 text-gray-500">
+            Tidak ada data yang sesuai dengan pencarian
+        </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ================================
+            // 🔍 SEARCH RESET HANDLER
+            // ================================
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim() === '') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('search');
+                        url.searchParams.delete('page'); // reset pagination
+                        window.location.href = url.toString();
+                    }
+                });
+            }
+
+            // ================================
+            // 🏢 SUBUNIT DROPDOWN HANDLER
+            // ================================
+            const select = document.querySelector('select[name="subunitkerja"]');
+
+            if (select) {
+
+                const updateSelectedText = () => {
+                    const selectedOption = select.options[select.selectedIndex];
+
+                    if (selectedOption && selectedOption.dataset.singkatan) {
+                        selectedOption.text = selectedOption.dataset.singkatan;
+                    }
+                };
+
+                // saat pertama load
+                updateSelectedText();
+
+                // saat user pilih
+                select.addEventListener('change', function() {
+                    updateSelectedText();
+                    this.form.submit();
+                });
+            }
+
+        });
+
+        function modalHandler() {
+            return {
+                show: false,
+                showApprove: false,
+
+                catatan: '',
+                formAction: '',
+                approveAction: '',
+
+                openModal(id) {
+                    this.catatan = '';
+                    this.formAction = `/superadmin/laporanpeserta/${id}/reject`;
+                    this.show = true;
+                },
+
+                closeModal() {
+                    this.show = false;
+                },
+
+                openApproveModal(id) {
+                    this.approveAction = `/superadmin/laporanpeserta/${id}/approve`;
+                    this.showApprove = true;
+                },
+
+                closeApproveModal() {
+                    this.showApprove = false;
+                },
+            }
+        }
+    </script>
 </x-app-layout>

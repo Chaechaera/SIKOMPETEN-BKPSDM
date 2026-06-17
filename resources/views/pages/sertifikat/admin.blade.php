@@ -1,92 +1,111 @@
 <x-app-layout>
-    {{-- Alpine JS --}}
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
+    <div class="space-y-4 px-6 py-4">
 
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+        {{-- Card Informasi --}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">
+                Sertifikat Kegiatan Pengembangan Kompetensi ASN
+            </h1>
+            <p class="text-sm text-abuabuCerah max-w-4xl">
+                Berikut adalah daftar sertifikat kegiatan pengembangan kompetensi ASN milik peserta yang dimuat dalam bentuk file ZIP.
+            </p>
+        </div>
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
+        {{-- Filters --}}
+        <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
 
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+            {{-- Search --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
+                <form method="GET">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search ....."
+                        class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-abuabuGelap">
+                        <i data-lucide="search"></i>
+                    </span>
+                </form>
+            </div>
 
-            {{-- Header --}}
-            @include('layouts.navigation')
+            {{-- Tahun --}}
+            <form method="GET">
+                <select
+                    name="tahun"
+                    onchange="this.form.submit()"
+                    class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
+                    <option value="">Tahun Anggaran</option>
 
-            <div class="min-h-screen bg-gray-50 py-8">
-                <div class="max-w-7xl mx-auto px-4 space-y-6">
+                    @foreach ($tahuns as $tahun)
+                    <option
+                        value="{{ $tahun }}"
+                        class="text-black"
+                        {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                        {{ $tahun }}
+                    </option>
+                    @endforeach
+                </select>
+            </form>
 
-                    {{-- Header --}}
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <h2 class="text-2xl font-semibold text-[#2B3674]">Daftar Sertifikat</h2>
-                            <p class="text-sm text-gray-500">
-                                Upload dan Kelola Template Sertifikat Kegiatan Pengembangan Kompetensi
-                            </p>
-                        </div>
-                    </div>
+        </div>
 
-                    {{-- Table --}}
-                    <div class="bg-white rounded-xl shadow">
-                        <div class="p-6 border-b">
-                            <h3 class="text-lg font-medium text-gray-900">Daftar Usulan (6)</h3>
-                        </div>
+        {{-- Table --}}
+        <div class="bg-white rounded-xl overflow-hidden shadow">
+            <table class="w-full text-sm table-auto">
 
-                        <div class="border rounded-lg overflow-hidden">
-                            <table class="w-full text-sm table-fixed">
-                                <thead>
-                                    <tr class="bg-gray-50 border-b text-center text-gray-600">
-                                        <th class="py-3 px-4 w-14">No</th>
-                                        <th class="py-3 px-4 w-72">Nama Kegiatan</th>
-                                        <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
-                                        <th class="py-3 px-4 w-32">Jumlah Peserta</th>
-                                        <th class="py-3 px-4 w-32">Sertifikat Peserta (ZIP)</th>
-                                    </tr>
-                                </thead>
+                <thead>
+                    <tr class="bg-abuabuMuda font-semibold border-b text-center">
+                        <th class="py-3 px-4">No</th>
+                        <th class="py-3 px-4">Nama Kegiatan</th>
+                        <th class="py-3 px-4">Tanggal Pelaksanaan</th>
+                        <th class="py-3 px-4">Jumlah Peserta</th>
+                        <th class="py-3 px-4">Sertifikat Peserta (ZIP)</th>
+                    </tr>
+                </thead>
 
-                                <tbody>
-                                    @foreach ($usulankegiatans as $index => $u)
-                                    <tr class="border-b hover:bg-gray-50">
+                <tbody>
+                    @forelse ($usulankegiatans as $index => $u)
+                    <tr class="border-b text-center text-sm font-normal hover:bg-abuabuCerah/30">
 
-                                        <td class="py-3 px-4 text-center">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
+                        {{-- No --}}
+                        <td class="py-3 px-4">
+                            {{ $usulankegiatans->firstItem()
+                                            ? $usulankegiatans->firstItem() + $index
+                                            : $index + 1 }}
+                        </td>
 
-                                        <!-- Nama Kegiatan -->
-                                        <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
+                        {{-- Nama --}}
+                        <td class="py-3 px-4 text-left font-semibold">
+                            {{ $u->inputusulankegiatans->nama_kegiatan }}
+                        </td>
 
-                                        <!-- Tanggal Pelaksanaan Kegiatan -->
-                                        <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                            {{$u->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan && $u->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
-                                        ? \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' - ' .
-                                        \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}
-                                        </td>
+                        {{-- Tanggal --}}
+                        <td class="py-3 px-4">
+                            {{
+                                            $u->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan &&
+                                            $u->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
+                                                ? \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->format('d F Y')
+                                                  . ' - ' .
+                                                  \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->format('d F Y')
+                                                : '-'
+                                        }}
+                        </td>
 
-                                        <!-- Jumlah Peserta -->
-                                        <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                            {{ $u->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->pesertakegiatans?->count() ?? 0 }} Peserta
-                                        </td>
+                        {{-- Jumlah Peserta --}}
+                        <td class="py-3 px-4">
+                            {{ $u->inputlaporankegiatans?->laporankegiatans?->detaillaporankegiatans?->pesertakegiatans?->count() ?? 0 }}
+                            Peserta
+                        </td>
 
                                         <!-- Sertifikat -->
                                         <td class="py-3 px-4 text-center">
-                                            @php
-    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
-@endphp
-
-@if($laporanId)
-    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
-        target="_blank"
-        class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
-        Download Sertifikat
-    </a>
-@else
-    <span class="block px-3 py-2 text-xs rounded-lg bg-gray-200 text-gray-400">
-        Tidak tersedia
-    </span>
-@endif
+                                            <a href="{{ route('admin.sertifikat.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
+                                                Download Sertifikat
+                                            </a>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -95,6 +114,27 @@
                         </div>
                     </div>
 
-                </div>
-            </div>
+        {{-- Empty State --}}
+        <div id="emptyState" class="hidden text-center py-12 text-gray-500">
+            Tidak ada data yang sesuai dengan pencarian
+        </div>
+    </div>
+
+    {{-- Script --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function() {
+                if (this.value.trim() === '') {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('search');
+                    url.searchParams.delete('page');
+                    window.location.href = url.toString();
+                }
+            });
+        });
+    </script>
 </x-app-layout>

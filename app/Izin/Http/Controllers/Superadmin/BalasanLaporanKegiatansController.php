@@ -6,6 +6,7 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
 use App\Izin\Models\Izin_Kirimbalasanlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Stempelunitkerjas;
@@ -14,6 +15,7 @@ use App\Izin\Services\IdentitasSuratsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 
 class BalasanLaporanKegiatansController extends Controller
@@ -90,53 +92,38 @@ class BalasanLaporanKegiatansController extends Controller
      * Download Surat Balasan Laporan Hasil Kegiatan Final
      */
     public function download($id)
-{
-    $user = Auth::user();
+    {
+        // Ambil user yang sedang login saat ini
+        $user = Auth::user();
 
-    // 1. Ambil balasan + relasi utama
-    $balasan = Izin_Balasanlaporankegiatans::with([
-        'laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans',
-        'laporankegiatans.inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
-        'sertifikats',
-    ])->findOrFail($id);
+        // Eager load relasi dari model dan temukan balasanlaporankegiatan berdasarkan id
+        $balasanlaporankegiatans = Izin_Balasanlaporankegiatans::with([
+            'laporankegiatans',
+            'laporankegiatans.inputlaporankegiatans',
+            'laporankegiatans.inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
+            'sertifikats',
+        ])->findOrFail($id);
 
-    $laporan = $balasan->laporankegiatans;
+        // Ambil kop, ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
+        $kop = $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
-    // 2. Kop (aman dari null)
-    $kop = optional(
-        $laporan->inputlaporankegiatans
-            ->inputusulankegiatans
-            ->first()
-    )->kopunitkerjas;
+        // Ambil gambar logo surakarta sebagai kop surat dari asset
+        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
+        if (!file_exists($kop_path)) {
+            $kop_path = null; // fallback kalau tidak ada file kop
+        }
 
-    // 3. TTD & Stempel
-    $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-
-    $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-
-    // 4. Kop file (logo)
-    $kop_path = public_path('build/assets/kop_surat.png');
-    if (!file_exists($kop_path)) {
-        $kop_path = null;
-    }
-
-    // 5. IDENTITAS (ini FIX penting)
-    $kirimBalasan = \App\Izin\Models\Izin_Kirimbalasanlaporankegiatans::with('identitassurats')
-    ->where('inputlaporankegiatan_id', $balasan->inputlaporankegiatan_id)
-    ->first();
-
-$identitas = $kirimBalasan?->identitassurats;
-
-    // 6. PDF render
-    $pdf = PDF::loadView('pages.generatepdf.balasan_laporan_kegiatan', [
-        'balasanlaporankegiatans' => $balasan,
-        'kop_path' => $kop_path,
-        'kop' => $kop,
-        'ttd' => $ttd,
-        'stempel' => $stempel,
-        'user' => $user,
-        'identitas' => $identitas,
-    ])->setPaper('A4', 'portrait');
+        // Load view PDF
+        $pdf = PDF::loadView('pages.generatepdf.balasan_laporan_kegiatan', [
+            'balasanlaporankegiatans' => $balasanlaporankegiatans,
+            'kop_path' => $kop_path,
+            'kop' => $kop,
+            'ttd' => $ttd,
+            'stempel' => $stempel,
+            'user'   => $user,
+        ])->setPaper('A4', 'portrait');
 
     // 7. Nama file aman dari null
     $namaKegiatan = optional(

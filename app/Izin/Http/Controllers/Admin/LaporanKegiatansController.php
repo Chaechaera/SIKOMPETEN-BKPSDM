@@ -5,6 +5,7 @@ namespace App\Izin\Http\Controllers\Admin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Detaillaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_RefCarapelatihans;
 use App\Izin\Models\Izin_RefMetodepelatihans;
@@ -14,6 +15,7 @@ use App\Izin\Models\Izin_Usulankegiatans;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
 
@@ -27,143 +29,26 @@ class LaporanKegiatansController extends Controller
 {
     $user = Auth::user();
 
-    $query = Izin_Usulankegiatans::with([
+        // Eager load relasi dari model
+        $usulankegiatans = Izin_Usulankegiatans::with([
         'inputusulankegiatans',
         'inputusulankegiatans.pelaksanaankegiatans',
         'inputlaporankegiatans.laporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
-        'inputlaporankegiatans.laporankegiatans.sertifikats',
-        'inputlaporankegiatans.laporankegiatans.balasanlaporankegiatans',
-    ])
-    ->whereHas('inputusulankegiatans.pelaksanaankegiatans')
-    ->whereHas('inputlaporankegiatans.laporankegiatans')
+        ])->whereHas('inputusulankegiatans.pelaksanaankegiatans')->orderByDesc('created_at');
 
-    // JOIN untuk sorting
-    ->leftJoin('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
-    ->leftJoin('izin_laporankegiatans', 'izin_laporankegiatans.id', '=', 'izin_inputlaporankegiatans.laporankegiatan_id')
+        if ($user->role == 'admin') {
+            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        }
 
-    ->select('izin_usulankegiatans.*');
+        if ($user->role == 'user') {
+            $usulankegiatans->where('dibuat_oleh', $user->id);
+        }
 
-    // 🔥 SORTING (default terbaru)
-    $sort = $request->get('sort', 'desc');
+        $usulankegiatans = $usulankegiatans->paginate(20);
 
-    $query->orderByRaw("
-        izin_laporankegiatans.tanggalmulai_kegiatan IS NULL,
-        izin_laporankegiatans.tanggalmulai_kegiatan {$sort}
-    ");
-
-    // 🔍 SEARCH
-    if ($request->filled('search')) {
-        $search = $request->search;
-
-        $query->where(function ($q) use ($search) {
-
-            // Nama kegiatan
-            $q->whereHas('inputusulankegiatans', function ($q1) use ($search) {
-                $q1->where('nama_kegiatan', 'like', "%{$search}%");
-            })
-
-            // Tanggal kegiatan
-            ->orWhereHas('inputlaporankegiatans.laporankegiatans', function ($q2) use ($search) {
-                $q2->where('tanggalmulai_kegiatan', 'like', "%{$search}%")
-                   ->orWhere('tanggalselesai_kegiatan', 'like', "%{$search}%");
-            });
-
-        });
+        // Redirect ke halaman daftar pengajuan usulan kegiatan
+        return view('pages.laporankegiatan.list_laporan_kegiatan', compact('usulankegiatans'));
     }
-
-    // 🔐 FILTER ROLE
-    if ($user->role == 'admin') {
-        $query->where('izin_usulankegiatans.subunitkerja_id', $user->subunitkerja_id);
-    }
-
-    if ($user->role == 'user') {
-        $query->where('izin_usulankegiatans.dibuat_oleh', $user->id);
-    }
-
-    // 🔥 FILTER TAHUN
-    if ($request->filled('tahun')) {
-        $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) use ($request) {
-            $q->whereYear('tanggalmulai_kegiatan', $request->tahun);
-        });
-    }
-
-    //ARCHIVE
-    $query->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
-    $q->where('is_archived', 0);
-    });
-
-    // 🔥 AMBIL DATA
-    $data = $query->get();
-
-    // 🔥 FILTER STATUS (collection)
-    if ($request->filled('status')) {
-        $status = $request->status;
-
-        $data = $data->filter(function ($item) use ($status) {
-            return optional($item->inputlaporankegiatans?->laporankegiatans)->status_laporan_ui === $status;
-        });
-    }
-
-    // 🔥 PAGINATION MANUAL
-    $perPage = 20;
-    $currentPage = request()->get('page', 1);
-
-    $usulankegiatans = new \Illuminate\Pagination\LengthAwarePaginator(
-        $data->forPage($currentPage, $perPage),
-        $data->count(),
-        $perPage,
-        $currentPage,
-        [
-            'path' => request()->url(),
-            'query' => request()->query()
-        ]
-    );
-
-    $all = Izin_Laporankegiatans::with([
-    'verifikasilaporankegiatanterakhir',
-    'sertifikats',
-    'balasanlaporankegiatans'
-])->get();
-
-/* ================= CARD FIX ================= */
-
-$total = $all->count();
-
-$disetujui = $all->filter(fn($item) =>
-    $item->status_laporan_ui === 'accepted' ||
-    $item->status_laporan_ui === 'finish'
-)->count();
-
-$menunggu = $all->filter(fn($item) =>
-    in_array($item->status_laporan_ui, ['need_review'])
-)->count();
-
-/* ================= CARD FIX ================= */
-$counts = [
-    'pending'     => $all->where('status_laporan_ui', 'pending')->count(),
-    'draft'   => $all->where('status_laporan_ui', 'draft')->count(),
-    'need_review' => $all->where('status_laporan_ui', 'need_review')->count(),
-    'accepted'    => $all->where('status_laporan_ui', 'accepted')->count(),
-    'rejected'    => $all->where('status_laporan_ui', 'rejected')->count(),
-    'finish'      => $all->where('status_laporan_ui', 'finish')->count(),
-];
-$colors = [
-    'pending'     => 'bg-[#FFE6EB]',
-    'draft'   => 'bg-[#E3EEFF]',
-    'need_review' => 'bg-[#F2E9FF]',
-    'accepted'    => 'bg-[#E6FFF0]',
-    'rejected'    => 'bg-[#FFE6E6]',
-    'finish'      => 'bg-[#FFF7E6]',
-];
-
-/* ================= VIEW ================= */
-return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
-    'usulankegiatans',
-    'counts',
-    'colors'
-));
-}
 
     /**
      * Tampilkan Form Ajukan Laporan Hasil Kegiatan Pengembangan Kompetensi ASN
@@ -304,7 +189,7 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
         // Ambil dari USULAN, bukan langsung laporan
@@ -323,7 +208,7 @@ if (!$laporankegiatans) {
 }
 
         // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans?->kopunitkerjas ?? null;
+        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
         $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
         $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
@@ -419,7 +304,6 @@ $peserta_laporan = [];
             'ttd' => $ttd,
             'stempel' => $stempel,
             'user'   => $user,
-            'identitas' => $identitas,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF

@@ -5,6 +5,7 @@ namespace App\Izin\Http\Controllers\Superadmin;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Inputusulankegiatans;
 use App\Izin\Models\Izin_Kirimbalasanusulankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
@@ -12,6 +13,7 @@ use App\Izin\Services\IdentitasSuratsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
 
 class BalasanUsulanKegiatansController extends Controller
@@ -22,21 +24,50 @@ class BalasanUsulanKegiatansController extends Controller
     public function downloadBalasan($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
         // Eager load relasi dari model dan temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
             'inputusulankegiatans.kopunitkerjas',
             'inputusulankegiatans.kirimusulankegiatans.identitassurats',
+            'inputusulankegiatans.kirimbalasanusulankegiatans.identitassurats',
             'balasanusulankegiatans',
             'detailusulankegiatans'
         ])->findOrFail($id);
 
+        $kirimBalasan = $usulankegiatans->balasanusulankegiatans;
+        $admin = User::where(
+    'nip',
+    $kirimBalasan->nipadmin_kirimbalasanusulankegiatan
+)->first();
+
+$kop = Izin_Kopunitkerjas::where(
+    'subunitkerja_id',
+    $admin->subunitkerja_id
+)->latest()->first();
+
+$ttd = Izin_Ttdunitkerjas::where(
+    'subunitkerja_id',
+    $admin->subunitkerja_id
+)->latest()->first();
+
+$stempel = Izin_Stempelunitkerjas::where(
+    'subunitkerja_id',
+    $admin->subunitkerja_id
+)->latest()->first();
+
+$ttdPengusul = Izin_Ttdunitkerjas::where(
+    'subunitkerja_id',
+    $usulankegiatans?->subunitkerja_id
+)->latest()->first();
         // Ambil kop, ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        //$kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        //$kop = $usulankegiatans->inputusulankegiatans->balasanusulankegiatans?->kopunitkerjas;
+        //$ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        //$stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        //$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png');
@@ -51,7 +82,8 @@ class BalasanUsulanKegiatansController extends Controller
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user'   => $user,
+            'ttdPengusul' => $ttdPengusul,
+            //'user'   => $user,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF
