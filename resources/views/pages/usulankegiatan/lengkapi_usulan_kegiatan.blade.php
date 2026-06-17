@@ -30,6 +30,9 @@
                 {{-- ===================================================== --}}
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
                     <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Lengkapi Data Utama Usulan Kegiatan</h2>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Kolom dengan tanda <span class="text-red-500 font-semibold">*</span> wajib diisi.
+                    </p>
 
                     <!-- 🔻 DIVIDER -->
                     <div class="my-4 border-t-2 border-gray-200"></div>
@@ -74,7 +77,7 @@
 
                         {{-- Lokasi Kegiatan --}}
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lokasi Kegiatan akan Dilaksanakan</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lokasi Kegiatan akan Dilaksanakan <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="text" name="lokasi_kegiatan" placeholder="Hotel Alila Surakarta"
                                     value="{{ old('lokasi_kegiatan', $usulan->lokasi_kegiatan) }}" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
@@ -86,7 +89,7 @@
 
                         {{-- Cara Pelatihan --}}
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan yang Digunakan</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Cara Pelatihan yang Digunakan <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <select name="carapelatihan_id" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                                     <option value="">-- Pilih Cara Pelatihan --</option>
@@ -102,7 +105,7 @@
 
                         {{-- Tanggal Mulai --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan akan Dimulai</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan akan Dimulai <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="date" name="tanggalmulai_kegiatan" value="{{ old('tanggalmulai_kegiatan', $usulan->tanggalmulai_kegiatan) }}"
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
@@ -114,7 +117,7 @@
 
                         {{-- Tanggal Selesai --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan akan Berakhir</label>
+                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Kegiatan akan Berakhir <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <input type="date" name="tanggalselesai_kegiatan" value="{{ old('tanggalselesai_kegiatan', $usulan->tanggalselesai_kegiatan) }}"
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
@@ -127,7 +130,7 @@
                         {{-- Waktu Mulai --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                                Waktu Kegiatan akan Dimulai
+                                Waktu Kegiatan akan Dimulai <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -146,7 +149,7 @@
                         {{-- Waktu Selesai --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                                Waktu Kegiatan akan Selesai
+                                Waktu Kegiatan akan Selesai <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -178,13 +181,16 @@
                 {{-- ====================================================== --}}
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">Lengkapi Data Tambahan Usulan Kegiatan</h2>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Kolom dengan tanda <span class="text-red-500 font-semibold">*</span> wajib diisi.
+                    </p>
 
                     <!-- 🔻 DIVIDER -->
                     <div class="my-4 border-t-2 border-gray-200"></div>
 
                     {{-- Kop Surat --}}
                     <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Pilih Jenis Kop yang Digunakan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Pilih Jenis Kop yang Digunakan <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <label class="cursor-pointer items-center gap-6 block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 <input type="radio"
@@ -280,6 +286,7 @@
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                                 {{ $field['label'] }}
+                                <span class="text-red-500">*</span>
                             </label>
                         </div>
                         <div class="relative">
@@ -293,6 +300,7 @@
                                 name="{{ $name }}"
                                 placeholder="{!! $field['placeholder'] !!}"
                                 data-numbering="{{ $field['numbering'] ? 'true' : 'false' }}"
+                                required
                                 class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2 resize-none">{{ old($name, $detail->$name ?? '') }}</textarea>
                             @error($name)
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -303,10 +311,23 @@
 
                     {{-- Alokasi Anggaran --}}
                     <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Alokasi Anggaran Kegiatan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Alokasi Anggaran Kegiatan <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <input type="text" name="alokasianggaran_kegiatan" placeholder="2000000" value="{{ old('alokasianggaran_kegiatan', $detail->alokasianggaran_kegiatan) }}"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2">
+                            {{-- Input yang dilihat user --}}
+                            <input
+                                type="text"
+                                id="alokasianggaran_display"
+                                placeholder="Masukkan alokasi anggaran"
+                                required
+                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2">
+
+                            {{-- Input yang dikirim ke database --}}
+                            <input
+                                type="hidden"
+                                id="alokasianggaran_kegiatan"
+                                name="alokasianggaran_kegiatan"
+                                value="{{ old('alokasianggaran_kegiatan', $detail->alokasianggaran_kegiatan ?? '') }}">
+                        </div>
                             @error('alokasianggaran_kegiatan')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -315,7 +336,7 @@
 
                     {{-- Metode Pelatihan --}}
                     <div class="mt-4">
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Metode Pelatihan yang Digunakan</label>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Metode Pelatihan yang Digunakan <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <select name="metodepelatihan_id" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
                                 <option value="">-- Pilih Metode Pelatihan Kegiatan --</option>
@@ -334,6 +355,7 @@
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                             Unggah Jadwal Pelaksanaan Kegiatan
                             <span class="text-gray-400 text-sm">(Excel)</span>
+                            <span class="text-red-500">*</span>
                         </label>
                         <p class="text-xs text-gray-500 mt-1">Format: .xls / .xlsx</p>
                         <p class="text-xs text-gray-500">Contoh nama file: jadwal_pelaksanaan_kegiatan.xlsx</p>
@@ -363,12 +385,8 @@
                     {{-- ===================================================== --}}
                     <div class="mt-6 flex justify-end gap-3">
                         <button type="submit"
-                            class="w-2/12 text-center py-2.5 rounded-lg  bg-gray-300 text-gray-700 font-semibold hover:bg-gray-200 transition">
-                            Simpan Draft
-                        </button>
-                        <button type="submit"
                             class="w-2/12 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
-                            Submit Usulan
+                            Simpan Usulan
                         </button>
                     </div>
             </form>
@@ -428,6 +446,33 @@
                 .getElementById('sample-' + name)
                 .classList
                 .toggle('hidden');
+        }
+
+        // Format Rupiah Alokasi Anggaran
+        const displayInput = document.getElementById('alokasianggaran_display');
+        const hiddenInput = document.getElementById('alokasianggaran_kegiatan');
+
+        if (displayInput && hiddenInput) {
+
+            // Saat edit data lama
+            if (hiddenInput.value) {
+                displayInput.value = new Intl.NumberFormat('id-ID')
+                    .format(hiddenInput.value);
+            }
+
+            displayInput.addEventListener('input', function () {
+
+                // Ambil angka saja
+                let angka = this.value.replace(/\D/g, '');
+
+                // Simpan angka asli ke hidden input
+                hiddenInput.value = angka;
+
+                // Tampilkan format ribuan
+                this.value = angka
+                    ? new Intl.NumberFormat('id-ID').format(angka)
+                    : '';
+            });
         }
     </script>
 </x-app-layout>
