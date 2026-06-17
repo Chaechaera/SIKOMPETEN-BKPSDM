@@ -143,12 +143,41 @@ Route::middleware('auth')->group(function () {
         // Download Surat Permohonan dan Laporan Hasil Kegiatan
         Route::get('/admin/laporankegiatan/{id}/download', [LaporanKegiatansController::class, 'download'])->name('admin.laporankegiatan.download');
 
-        // Cetak Surat Permohonan dan Laporan Hasil Kegiatan
-        Route::match(['get', 'post'], '/admin/laporankegiatan/{id}/cetak', [CetakLaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.cetak');
+        // HALAMAN CETAK (form + preview + input identitas)
+Route::get(
+    '/admin/laporankegiatan/{id}/cetak',
+    [CetakLaporanKegiatansController::class, 'create']
+)->name('admin.laporankegiatan.cetak.form');
+
+
+// PREVIEW (GET/POST bebas)
+Route::post(
+    '/admin/laporankegiatan/{id}/preview',
+    [LaporankegiatansController::class, 'preview']
+)->name('admin.laporankegiatan.preview');
+
+// CETAK (FINAL SAVE)
+Route::post(
+    '/admin/laporankegiatan/{id}/cetak/download',
+    [CetakLaporanKegiatansController::class, 'download']
+)->name('admin.laporankegiatan.cetak.download');
+
+Route::get(
+    '/admin/laporankegiatan/{id}/cetak',
+    [CetakLaporanKegiatansController::class, 'create']
+)->name('admin.laporankegiatan.cetak');
+
+
+Route::post('/admin/laporankegiatan/check-nomor-surat', [LaporankegiatansController::class, 'checkNomorSurat']);
 
         // Kirim Surat Permohonan dan Laporan Hasil Kegiatan
-        Route::get('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'create'])->name('admin.laporankegiatan.kirim');
-        Route::post('/admin/laporankegiatan/{id}/kirim', [KirimLaporanKegiatansController::class, 'store'])->name('admin.laporankegiatan.kirim');
+       Route::get('/admin/laporankegiatan/{id}/kirim',
+    [KirimLaporanKegiatansController::class, 'create']
+)->name('admin.laporankegiatan.kirim.form');
+
+Route::post('/admin/laporankegiatan/{id}/kirim',
+    [KirimLaporanKegiatansController::class, 'store']
+)->name('admin.laporankegiatan.kirim.store');
 
         // Delete Laporan Kegiatan
         Route::delete('/admin/laporankegiatan/{id}', [LaporanKegiatansController::class, 'destroy'])
@@ -175,16 +204,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/superadmin/manajemenuser', [UserManagementController::class, 'index'])->name('superadmin.manajemenuser');
 
         Route::get('/superadmin/laporanpeserta', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'index'])
-    ->name('superadmin.laporanpeserta.index');
+        [ValidasiLaporanPesertaKegiatansController::class, 'index'])
+        ->name('superadmin.laporanpeserta.index');
 
-Route::patch('/superadmin/laporanpeserta/{id}/approve', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'approve'])
-    ->name('superadmin.laporan.approve');
+        Route::patch('/superadmin/laporanpeserta/{id}/approve', 
+        [ValidasiLaporanPesertaKegiatansController::class, 'approve'])
+        ->name('superadmin.laporan.approve');
 
-Route::patch('/superadmin/laporanpeserta/{id}/reject', 
-    [ValidasiLaporanPesertaKegiatansController::class, 'reject'])
-    ->name('superadmin.laporan.reject');
+        Route::patch('/superadmin/laporanpeserta/{id}/reject', 
+            [ValidasiLaporanPesertaKegiatansController::class, 'reject'])
+            ->name('superadmin.laporan.reject');
 
         // Informasi Mengenai Pengembangan Kompetensi ASN
         Route::get('/superadmin/informasi', function () {
@@ -230,11 +259,23 @@ Route::patch('/superadmin/laporanpeserta/{id}/reject',
         Route::get('/superadmin/balasanlaporankegiatan/{id}', [BalasanLaporanKegiatansController::class, 'create'])->name('superadmin.balasanlaporankegiatan.create');
         Route::post('/superadmin/balasanlaporankegiatan/{id}', [BalasanLaporanKegiatansController::class, 'store'])->name('superadmin.balasanlaporankegiatan.store');
 
-        // Download Surat Balasan Laporan Hasil Kegiatan
-        Route::get('/superadmin/balasanlaporankegiatan/{id}/download', [BalasanLaporanKegiatansController::class, 'download'])->name('superadmin.balasanlaporankegiatan.download');
+        // CETAK BALASAN 
+        Route::get(
+            '/superadmin/balasanlaporankegiatan/{id}/cetak',
+            [CetakBalasanLaporanKegiatansController::class, 'preview']
+        )->name('superadmin.balasanlaporankegiatan.cetak');
 
-        // Cetak Surat Balasan Laporan Hasil Kegiatan
-        Route::post('/superadmin/balasanlaporankegiatan/{id}/cetak', [CetakBalasanLaporanKegiatansController::class, 'store'])->name('superadmin.balasanlaporankegiatan.cetak');
+        // STORE IDENTITAS
+        Route::post(
+            '/superadmin/balasanlaporankegiatan/{id}/cetak',
+            [BalasanLaporanKegiatansController::class, 'storeIdentitas']
+        )->name('superadmin.balasanlaporankegiatan.cetak.store');
+
+        // PREVIEW BALASAN LAPORAN
+        Route::post(
+            '/balasan-laporan/{id}/preview',
+            [BalasanLaporanKegiatansController::class, 'preview']
+        )->name('superadmin.balasanlaporankegiatan.preview');
 
         // Kirim Surat Balasan Laporan Hasil Kegiatan
         Route::get('/superadmin/balasanlaporankegiatan/{id}/kirim', [BalasanLaporanKegiatansController::class, 'kirim'])->name('superadmin.balasanlaporankegiatan.kirim');

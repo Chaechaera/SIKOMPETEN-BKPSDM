@@ -11,6 +11,7 @@ use App\Izin\Models\Izin_RefMetodepelatihans;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
+use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -141,7 +142,7 @@ $menunggu = $all->filter(fn($item) =>
 /* ================= CARD FIX ================= */
 $counts = [
     'pending'     => $all->where('status_laporan_ui', 'pending')->count(),
-    'completed'   => $all->where('status_laporan_ui', 'completed')->count(),
+    'draft'   => $all->where('status_laporan_ui', 'draft')->count(),
     'need_review' => $all->where('status_laporan_ui', 'need_review')->count(),
     'accepted'    => $all->where('status_laporan_ui', 'accepted')->count(),
     'rejected'    => $all->where('status_laporan_ui', 'rejected')->count(),
@@ -149,7 +150,7 @@ $counts = [
 ];
 $colors = [
     'pending'     => 'bg-[#FFE6EB]',
-    'completed'   => 'bg-[#E3EEFF]',
+    'draft'   => 'bg-[#E3EEFF]',
     'need_review' => 'bg-[#F2E9FF]',
     'accepted'    => 'bg-[#E6FFF0]',
     'rejected'    => 'bg-[#FFE6E6]',
@@ -213,7 +214,7 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            'statuslaporan_kegiatan' => 'completed'
+            'statuslaporan_kegiatan' => 'draft'
         ]);
 
         // Simpan data inputlaporankegiatan
@@ -242,8 +243,8 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
         $inputlaporankegiatans = $usulankegiatans->inputlaporankegiatans;
         $laporankegiatans = $inputlaporankegiatans->laporankegiatans;
 
-        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
-        if (!in_array($laporankegiatans->status_laporan_ui, ['completed', 'rejected'])) {
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan draft
+        if (!in_array($laporankegiatans->status_laporan_ui, ['draft', 'rejected'])) {
     abort(403, 'Usulan sudah tidak dapat diubah.');
 }
 
@@ -276,8 +277,8 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
         $inputlaporan = $usulankegiatans->inputlaporankegiatans;
         $laporankegiatans = $inputlaporan->laporankegiatans;
 
-        // Verifikasi bahwa status laporankegiatan tidak sama dengan completed
-        if (!in_array($laporankegiatans->status_laporan_ui, ['completed', 'rejected'])) {
+        // Verifikasi bahwa status laporankegiatan tidak sama dengan draft
+        if (!in_array($laporankegiatans->status_laporan_ui, ['draft', 'rejected'])) {
     abort(403, 'Laporan tidak bisa diedit.');
 }
 
@@ -289,7 +290,7 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
-            'statuslaporan_kegiatan' => 'completed'
+            'statuslaporan_kegiatan' => 'draft'
         ]);
         $laporankegiatans->verifikasilaporankegiatans()->delete();
 
@@ -372,8 +373,9 @@ if (!$laporankegiatans) {
             }
         }
 
-        // Baca file gambar dokumentasi laporan kegiatan kalau ada
-        $gambardokumentasi_laporan = [];
+        
+
+       $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
             $files_gambardokumentasi = $laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan ?? [];
             foreach ($files_gambardokumentasi as $file) {
@@ -393,6 +395,17 @@ if (!$laporankegiatans) {
         // Ambil atribut khusus untuk laporan kegiatan
         $atribut_khusus = $laporankegiatans->detaillaporankegiatans->atribut_khusus ?? [];
 
+       $identitas = optional(
+    optional(
+        $laporankegiatans
+            ->inputlaporankegiatans
+            ->cetaklaporankegiatans
+    )->identitassurats
+);
+
+$rundown_laporan = [];
+$peserta_laporan = [];
+
         // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.laporan_hasil_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
@@ -406,6 +419,7 @@ if (!$laporankegiatans) {
             'ttd' => $ttd,
             'stempel' => $stempel,
             'user'   => $user,
+            'identitas' => $identitas,
         ])->setPaper('A4', 'portrait');
 
         // Redirect dan simpan file PDF
@@ -520,20 +534,59 @@ if (!$laporankegiatans) {
     return view('pages.laporankegiatan.arsip_laporan_kegiatan', compact('usulankegiatans'));
 }
 
-    public function archive($id)
+public function preview(Request $request, $id)
 {
-    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
-        ->findOrFail($id);
+    $usulan = Izin_Usulankegiatans::with([
+        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+    ])->findOrFail($id);
 
-    $laporan = $input->laporankegiatans;
+    $laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
 
-    if ($laporan) {
-        $laporan->update([
-            'is_archived' => 1
-        ]);
+    $identitas = (object)[
+        'nomor_surat'   => $request->nomor_surat,
+        'tanggal_surat' => $request->tanggal_surat,
+        'sifat_surat'   => $request->sifat_surat,
+        'lampiran_surat'=> '1 Bendel',
+        'perihal_surat' => $request->perihal_surat,
+    ];
+
+    $gambardokumentasi_laporan = [];
+
+    if ($laporankegiatans?->detaillaporankegiatans?->gambardokumentasi_laporan) {
+
+        foreach ($laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan as $file) {
+
+            $path = storage_path('app/public/' . $file);
+
+            if (file_exists($path)) {
+                $gambardokumentasi_laporan[] = $path;
+            }
+        }
     }
 
-    return redirect()->back()->with('success', 'Laporan berhasil diarsipkan');
+    $pdf = PDF::loadView(
+        'pages.generatepdf.laporan_hasil_kegiatan',
+        compact(
+            'usulan',
+            'laporankegiatans',
+            'identitas',
+            'gambardokumentasi_laporan'
+        )
+    );
+
+    return response($pdf->output(), 200)
+        ->header('Content-Type', 'application/pdf');
+}
+
+public function checkNomorSurat(Request $request)
+{
+    $exists = \DB::table('izin_identitassurats')
+        ->where('nomor_surat', $request->nomor_surat)
+        ->exists();
+
+    return response()->json([
+        'exists' => $exists
+    ]);
 }
 
 public function unarchive($id)

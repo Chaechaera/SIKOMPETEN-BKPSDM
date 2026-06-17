@@ -25,9 +25,9 @@ class Izin_Laporankegiatans extends Model
     /* ========== RELATIONS ========== */
 
     public function inputlaporankegiatans()
-    {
-        return $this->hasOne(Izin_Inputlaporankegiatans::class, 'laporankegiatan_id');
-    }
+{
+    return $this->hasOne(Izin_Inputlaporankegiatans::class, 'laporankegiatan_id');
+}
 
     public function metodepelatihans()
     {
@@ -45,14 +45,23 @@ class Izin_Laporankegiatans extends Model
     }
 
     public function cetaklaporankegiatans()
-    {
-        return $this->hasOne(Izin_Cetaklaporankegiatans::class, 'inputlaporankegiatan_id');
-    }
+{
+    return $this->hasOne(Izin_Cetaklaporankegiatans::class, 'inputlaporankegiatan_id');
+}
+
+    public function getIdentitassuratsAttribute()
+{
+    return $this->cetaklaporankegiatans?->identitassurats;
+}
 
     public function balasanlaporankegiatans()
-    {
-        return $this->hasOne(Izin_Kirimbalasanlaporankegiatans::class, 'inputlaporankegiatan_id');
-    }
+{
+    return $this->hasOne(
+        Izin_Kirimbalasanlaporankegiatans::class,
+        'inputlaporankegiatan_id',
+        'id'
+    );
+}
 
     public function verifikasilaporankegiatans()
     {
@@ -62,61 +71,60 @@ class Izin_Laporankegiatans extends Model
     public function verifikasilaporankegiatanterakhir()
 {
     return $this->hasOne(Izin_Verifikasilaporankegiatans::class, 'laporankegiatan_id')
-        ->orderByDesc('id');
+    ->latestOfMany('created_at');
 }
 
     /* ======================= ASSESSOR STATUS UI LAPORAN KEGIATAN ======================= */
 
     public function getStatusLaporanUiAttribute()
-    {
-        $verif = $this->verifikasilaporankegiatanterakhir;
-
-    // 🔥 kalau tidak ada verifikasi
-    if (!$verif) {
-        return $this->statuslaporan_kegiatan; 
-        // jadi 'completed' tetap 'completed'
+{
+    // 1. FINISH PALING PRIORITAS
+    if (
+        $this->sertifikats &&
+        $this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan
+    ) {
+        return 'finish';
     }
 
-        // Jika telah sampai tahap sertifikat dan balasan laporan kegiatan telah dibuat 
-        if ($this->sertifikats && $this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan) {
-            return 'finish';
-        }
+    // 2. ACCEPTED (HARUS ADA INI)
+    if (
+    $this->verifikasilaporankegiatanterakhir &&
+    $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'accepted' &&
+    $this->statuslaporan_kegiatan === 'need_review'
+) {
+    return 'accepted';
+}
 
-         // Jika verifikasi laporan kegiatan "Rejected"
-        if ($this->verifikasilaporankegiatanterakhir && $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'rejected') {
-            return 'rejected';
-        }
-
-        // Jika verifikasi laporan kegiatan "Accepted"
-        if ($this->verifikasilaporankegiatanterakhir && $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'accepted') {
-            return 'accepted';
-        }
-
-        // Jika sudah mengirim laporan kegiatan
-        if ($this->statuslaporan_kegiatan === 'need_review') {
-            return 'need_review';
-        }
-
-        // Jika sudah cetak tapi belum kirim laporan kegiatan
-        if ($this->statuslaporan_kegiatan === 'pending') {
-            return 'pending';
-        }
-
-        // Jika status laporan kegiatan "Completed" dan belum cetak laporan kegiatan
-        if ($this->statuslaporan_kegiatan === 'completed' && !$this->cetaklaporankegiatans) {
-            return 'completed';
-        }
-
-        // Jika tidak memenuhi semua ketentuan
-        return 'unknown';
+    // 3. REJECTED
+    if (
+        $this->verifikasilaporankegiatanterakhir &&
+        $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'rejected'
+        && $this->statuslaporan_kegiatan === 'rejected'
+    ) {
+        return 'rejected';
     }
 
+    // 4. FLOW STATUS UTAMA (INI YANG PALING AMAN)
+    if ($this->statuslaporan_kegiatan === 'pending') {
+        return 'pending';
+    }
+
+    if ($this->statuslaporan_kegiatan === 'need_review') {
+        return 'need_review';
+    }
+
+    if ($this->statuslaporan_kegiatan === 'draft') {
+        return 'draft';
+    }
+
+    return 'unknown';
+}
     /* ======================= ASSESSOR ATRIBUT STATUS UI LAPORAN KEGIATAN ======================= */
 
     public function getStatusLaporanUiClassAttribute()
     {
         return match ($this->status_laporan_ui) {
-            'completed' => 'px-3 py-1 text-xs rounded-full bg-purple-100 text-gray-500 font-medium',
+            'draft' => 'px-3 py-1 text-xs rounded-full bg-purple-100 text-gray-500 font-medium',
             'pending'     => 'px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 font-medium',
             'need_review' => 'px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-600 font-medium',
             'revisi'      => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
@@ -131,12 +139,12 @@ class Izin_Laporankegiatans extends Model
 
     public function canEditLaporan()
     {
-        return in_array($this->status_laporan_ui, ['completed', 'rejected']);
+        return in_array($this->status_laporan_ui, ['draft', 'rejected']);
     }
 
     public function canCetakLaporan()
     {
-        return in_array($this->status_laporan_ui, ['completed', 'rejected']) && !$this->cetaklaporankegiatans;
+        return in_array($this->status_laporan_ui, ['draft', 'rejected']) && !$this->cetaklaporankegiatans;
     }
 
     public function canKirimLaporan()
@@ -161,16 +169,15 @@ class Izin_Laporankegiatans extends Model
 
     public function getBolehKirimLaporanAttribute()
 {
-    return $this->status_laporan_ui === 'completed'
+    return $this->status_laporan_ui === 'draft'
         && $this->sudah_cetakLaporan
         && !$this->sudah_kirimLaporan;
 }
 
 public function getBolehKirimBalasanAttribute()
 {
-    return $this->balasanlaporankegiatans
-        && $this->balasanlaporankegiatans->tanggalcetak_balasanlaporankegiatan
-        && !$this->balasanlaporankegiatans->tanggalkirim_balasanlaporankegiatan;
+    return $this->status_laporan_ui === 'pending'
+        && !$this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan;
 }
     /* ======================= ASSESSOR ATRIBUT UNTUK KOP SURAT ======================= */
 

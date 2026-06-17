@@ -270,7 +270,7 @@ $query->leftJoin(
             // Update status laporan kegiatan jika itu "Rejected"
             if ($request->actionlaporan_kegiatan === 'rejected') {
                 $laporankegiatans->update([
-                    'statuslaporan_kegiatan' => 'revisi',
+                    'statuslaporan_kegiatan' => 'rejected',
                 ]);
             }
 

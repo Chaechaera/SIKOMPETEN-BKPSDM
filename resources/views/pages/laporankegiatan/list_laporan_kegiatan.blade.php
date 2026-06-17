@@ -26,14 +26,15 @@
     $bg = $colors[$status] ?? 'bg-gray-100';
 @endphp
 
-<div class="p-5 sm:p-6 rounded-xl {{ $bg }} shadow-sm">
+<a href="{{ request()->fullUrlWithQuery(['status' => $status]) }}"
+   class="block p-5 sm:p-6 rounded-xl {{ $bg }} shadow-sm hover:scale-[1.02] transition">
     <h2 class="text-gray-700 text-sm font-medium">
         {{ str_replace('_', ' ', ucfirst($status)) }}
     </h2>
     <p class="text-2xl font-bold text-[#2B3674] mt-2">
         {{ $value }}
     </p>
-</div>
+</a>
 
 @endforeach
 
@@ -84,8 +85,8 @@
             need review
         </option>
 
-        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
-            completed
+        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>
+            draft
         </option>
 
         <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>
@@ -155,7 +156,14 @@
                                 <td class="py-3 px-4 text-center">{{ $usulankegiatans->firstItem() ? $usulankegiatans->firstItem() + $index : $index + 1 }}</td>
 
                                 <!-- Nama Kegiatan -->
-                                <td class="py-3 px-4 font-medium text-gray-800">{{ $u->inputusulankegiatans->nama_kegiatan }}</td>
+                                <td class="py-3 px-4 font-medium text-gray-800">
+                                    <button
+                                        type="button"
+                                        @click="$dispatch('show-catatan-' + {{ $index }})"
+                                        class="hover:underline text-left">
+                                        {{ $u->inputusulankegiatans->nama_kegiatan }}
+                                    </button>
+                                </td>
 
                                 <!-- Tanggal Pelaksanaan Kegiatan -->
                                 <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
@@ -174,28 +182,32 @@
 
                                 <!-- Update Progress -->
                                 <td class="py-3 px-4 text-center"
-    x-data="{ openModal: false }">
+                                    x-data="{ openModal: false }">
                                     <div class="flex justify-center gap-2">
-                                        {{-- ===================== CETAK DOKUMEN ===================== --}}
-                                        @if (
-                                        isset($u->inputlaporankegiatans) &&
-                                        isset($u->inputlaporankegiatans->laporankegiatans) &&
-                                        in_array($u->inputlaporankegiatans->laporankegiatans->status_laporan_ui, ['completed', 'rejected']) &&
-                                        is_null($u->inputlaporankegiatans->laporankegiatans->cetakusulankegiatans))
-                                        <button onclick="openCetakModal('{{ $u->id }}', 'laporankegiatans')"
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
-                                            Cetak
-                                        </button>
-                                        @else
-                                        <button
-                                            class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-                                            Cetak
-                                        </button>
-                                        @endif
+                                        @php
+    $laporan = $u->inputlaporankegiatans?->laporankegiatans;
+@endphp
+
+{{-- ===================== CETAK DOKUMEN ===================== --}}
+@if (
+    $laporan &&
+    in_array($laporan->status_laporan_ui, ['draft', 'rejected']) &&
+    is_null($laporan->cetakusulankegiatans)
+)
+    <a href="{{ route('admin.laporankegiatan.cetak', $u->id) }}"
+       class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition text-center block">
+        Cetak
+    </a>
+@else
+    <button
+        class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+        Cetak
+    </button>
+@endif
 
                                         {{-- ===================== KIRIM DOKUMEN ===================== --}}
                                         @if($u->isPendingLaporan())
-                                        <a href="{{ route('admin.laporankegiatan.kirim', $u->id) }}"
+                                        <a href="{{ route('admin.laporankegiatan.kirim.form', $u->id) }}"
                                             class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
                                             Kirim
                                         </a>
@@ -265,34 +277,49 @@
             @endif
 
             {{-- BALASAN --}}
-            @if($u->inputlaporankegiatans?->laporankegiatans?->balasanlaporankegiatans ?? false)
-                <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
-                   target="_blank"
-                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
-                    Lihat Surat Balasan
-                </a>
-            @else
-                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Lihat Surat Balasan
-                </div>
-            @endif
+           @php
+$laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
 
-            {{-- SERTIFIKAT --}}
-                                            @php
-    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
+$balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
+    'inputlaporankegiatan_id',
+    $laporanId
+)->first();
 @endphp
 
-@if($laporanId)
-    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
-        target="_blank"
-       class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#defff8] text-[#136769] font-medium hover:brightness-95 transition">
-                    Download Sertifikat
+@if($balasan)
+@php
+$laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
 
+$balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
+    'inputlaporankegiatan_id',
+    $laporanId
+)->first();
+@endphp
+<a href="{{ route('admin.balasanlaporankegiatan.download', $balasan->id) }}"
+   target="_blank"
+   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
+    Lihat Surat Balasan
+</a>
+@else
+    <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
+        Lihat Surat Balasan
+    </div>
+@endif
+            {{-- SERTIFIKAT --}}
+@php
+    $laporan = $u->inputlaporankegiatans?->laporankegiatans;
+    $sertifikat = $laporan?->sertifikats;
+@endphp
+
+@if($laporan?->status_laporan_ui === 'finish' && $sertifikat)
+    <a href="{{ route('admin.sertifikat.download', $laporan->id) }}"
+       target="_blank"
+       class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#defff8] text-[#136769] font-medium hover:brightness-95 transition">
+        Download Sertifikat
     </a>
 @else
-    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Sertifikat belum tersedia
-
+    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
+        Sertifikat belum tersedia
     </span>
 @endif
 
@@ -344,22 +371,6 @@
         Arsipkan
     </span>
 @endif
-
-                <span class="text-gray-300">|</span>
-
-                {{-- HAPUS --}}
-                <form action="{{ route('admin.laporankegiatan.destroy', $u->inputlaporankegiatans->id) }}"
-                      method="POST"
-                      onsubmit="return confirm('Yakin hapus laporan ini?')">
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit"
-                            class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
-                        Hapus
-                    </button>
-                </form>
-
             </div>
         </div>
     @endif
@@ -372,30 +383,63 @@
 {{-- ================= CATATAN REVIEW ================= --}}
 @php
     $verif = $u->inputlaporankegiatans?->laporankegiatans?->verifikasilaporankegiatanterakhir;
+    $catatan = $verif?->catatan_verifikasilaporankegiatan;
 @endphp
 
-@if($verif && $verif->catatan_verifikasilaporankegiatan)
-<tr>
+@if(!empty($catatan))
+
+<tr
+    x-data="{
+        key: 'catatan-{{ $u->id }}',
+        showCatatan: true,
+
+        init() {
+            this.showCatatan = localStorage.getItem(this.key) !== 'closed';
+
+            window.addEventListener('show-catatan-{{ $index }}', () => {
+                this.showCatatan = true;
+                localStorage.removeItem(this.key);
+            });
+        },
+
+        closeCatatan() {
+            this.showCatatan = false;
+            localStorage.setItem(this.key,'closed');
+        }
+    }"
+
+    x-init="init()"
+
+    x-show="showCatatan"
+    x-transition
+>
     <td colspan="6" class="bg-blue-50 px-6 py-3 border-b">
 
-        <div x-data="{ show: true }" x-show="show"
-            class="flex justify-between items-start bg-blue-100 border-l-4 border-blue-500 rounded-lg p-4">
+        <div class="flex justify-between items-start bg-blue-100 border-l-4 border-blue-500 rounded-lg p-4">
 
             <div>
+
                 <div class="font-semibold text-blue-800">
                     📢 Catatan Review Laporan Kegiatan
                 </div>
 
                 <div class="mt-1 text-gray-700 text-sm">
-                    {{ $verif->catatan_verifikasilaporankegiatan }}
+                    {{ $verif->status_verifikasilaporankegiatan }}
+                </div>
+
+                <div class="mt-1 text-gray-700 text-sm">
+                    {{ $catatan }}
                 </div>
 
                 <div class="mt-2 text-xs text-gray-500">
                     {{ \Carbon\Carbon::parse($verif->tanggalverifikasi_inputlaporankegiatan)->format('d/m/Y') }}
                 </div>
+
             </div>
 
-            <button @click="show = false"
+            <button
+                type="button"
+                @click="closeCatatan()"
                 class="ml-4 text-gray-500 hover:text-red-600 font-bold text-lg">
                 ✕
             </button>
@@ -404,6 +448,7 @@
 
     </td>
 </tr>
+
 @endif
                             @empty
                             <tr>
@@ -431,43 +476,6 @@
         </main>
     </div>
 
-    <!-- Modal Container -->
-    <div id="cetakModalContainer"></div>
-
-    <script>
-        async function openCetakModal(id, type) {
-            const container = document.getElementById('cetakModalContainer');
-            container.innerHTML = `
-                <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
-                    <div class="animate-pulse text-lg">Memuat pop-up cetak...</div>
-                </div>
-            `;
-
-            // Tentukan endpoint berdasarkan tipe
-            let url = '';
-
-            if (type === 'laporankegiatans') {
-                url = `/admin/laporankegiatan/${id}/cetak`;
-            } else {
-                url = `/admin/usulankegiatan/${id}/cetak`;
-            }
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Gagal memuat pop-up cetak.');
-                const html = await response.text();
-                container.innerHTML = html;
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 text-white">
-                        <div class="bg-red-700 p-4 rounded shadow">
-                            ${error.message}
-                        </div>
-                    </div>
-                `;
-            }
-        }
-    </script>
 
 </x-app-layout>
 

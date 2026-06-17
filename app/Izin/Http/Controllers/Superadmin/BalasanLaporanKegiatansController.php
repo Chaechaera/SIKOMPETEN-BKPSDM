@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Izin\Http\Controllers\Superadmin;
-
+use App\Izin\Models\Izin_Identitassurats;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use App\Izin\Models\Izin_Inputlaporankegiatans;
@@ -90,42 +90,64 @@ class BalasanLaporanKegiatansController extends Controller
      * Download Surat Balasan Laporan Hasil Kegiatan Final
      */
     public function download($id)
-    {
-        // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+{
+    $user = Auth::user();
 
-        // Eager load relasi dari model dan temukan balasanlaporankegiatan berdasarkan id
-        $balasanlaporankegiatans = Izin_Balasanlaporankegiatans::with([
-            'laporankegiatans',
-            'laporankegiatans.inputlaporankegiatans',
-            'laporankegiatans.inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
-            'sertifikats',
-        ])->findOrFail($id);
+    // 1. Ambil balasan + relasi utama
+    $balasan = Izin_Balasanlaporankegiatans::with([
+        'laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans',
+        'laporankegiatans.inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
+        'sertifikats',
+    ])->findOrFail($id);
 
-        // Ambil kop, ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+    $laporan = $balasan->laporankegiatans;
 
-        // Ambil gambar logo surakarta sebagai kop surat dari asset
-        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
-        if (!file_exists($kop_path)) {
-            $kop_path = null; // fallback kalau tidak ada file kop
-        }
+    // 2. Kop (aman dari null)
+    $kop = optional(
+        $laporan->inputlaporankegiatans
+            ->inputusulankegiatans
+            ->first()
+    )->kopunitkerjas;
 
-        // Load view PDF
-        $pdf = PDF::loadView('pages.generatepdf.balasan_laporan_kegiatan', [
-            'balasanlaporankegiatans' => $balasanlaporankegiatans,
-            'kop_path' => $kop_path,
-            'kop' => $kop,
-            'ttd' => $ttd,
-            'stempel' => $stempel,
-            'user'   => $user,
-        ])->setPaper('A4', 'portrait');
+    // 3. TTD & Stempel
+    $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
 
-        // Redirect dan simpan file PDF
-        return $pdf->stream('Balasan_Laporan_Kegiatan' . $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
+    $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+
+    // 4. Kop file (logo)
+    $kop_path = public_path('build/assets/kop_surat.png');
+    if (!file_exists($kop_path)) {
+        $kop_path = null;
     }
+
+    // 5. IDENTITAS (ini FIX penting)
+    $kirimBalasan = \App\Izin\Models\Izin_Kirimbalasanlaporankegiatans::with('identitassurats')
+    ->where('inputlaporankegiatan_id', $balasan->inputlaporankegiatan_id)
+    ->first();
+
+$identitas = $kirimBalasan?->identitassurats;
+
+    // 6. PDF render
+    $pdf = PDF::loadView('pages.generatepdf.balasan_laporan_kegiatan', [
+        'balasanlaporankegiatans' => $balasan,
+        'kop_path' => $kop_path,
+        'kop' => $kop,
+        'ttd' => $ttd,
+        'stempel' => $stempel,
+        'user' => $user,
+        'identitas' => $identitas,
+    ])->setPaper('A4', 'portrait');
+
+    // 7. Nama file aman dari null
+    $namaKegiatan = optional(
+        $laporan->inputlaporankegiatans
+            ->inputusulankegiatans
+            ->first()
+            ?->usulankegiatans
+    )->nama_kegiatan ?? 'tanpa-nama';
+
+    return $pdf->stream('Balasan Laporan Kegiatan ' . $namaKegiatan . '.pdf');
+}
 
     /**
      * Tampilkan Form Kirim Balasan Laporan Hasil Kegiatan Final
@@ -167,110 +189,175 @@ $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
     );
 }
 
+public function cetakStore(Request $request, $id)
+{
+    $user = Auth::user();
+
+    $laporan = Izin_Laporankegiatans::with([
+        'inputlaporankegiatans'
+    ])->findOrFail($id);
+
+    DB::transaction(function () use ($request, $laporan, $user) {
+
+        // 1. SIMPAN IDENTITAS SURAT BALASAN
+        $identitas = Izin_Identitassurats::create([
+            'nomor_surat' => $request->nomor_surat,
+            'tanggal_surat' => $request->tanggal_surat,
+            'perihal_surat' => $request->perihal_surat,
+            'sifat_surat' => $request->sifat_surat,
+        ]);
+
+        // 2. SIMPAN / UPDATE BALASAN
+        $balasan = Izin_Balasanlaporankegiatans::updateOrCreate([
+            'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
+        ], [
+            'identitassurat_id' => $identitas->id,
+        ]);
+    });
+
+    // 3. GENERATE PDF
+    $balasan = Izin_Balasanlaporankegiatans::with([
+        'laporankegiatans.inputlaporankegiatans.kirimlaporankegiatans.identitassurats'
+    ])->where('inputlaporankegiatan_id', $laporan->inputlaporankegiatans->id)
+      ->first();
+
+    $pdf = PDF::loadView('pages.generatepdf.balasan_laporan_kegiatan', [
+        'balasanlaporankegiatans' => $balasan,
+    ])->setPaper('A4');
+
+    return $pdf->stream('surat-balasan.pdf');
+}
+
+public function storeIdentitas(Request $request, $id)
+{
+    $laporan = Izin_Laporankegiatans::with('inputlaporankegiatans')->findOrFail($id);
+
+    $identitas = Izin_Identitassurats::create([
+    'nomor_surat' => $request->nomor_surat,
+    'tanggal_surat' => $request->tanggal_surat,
+    'perihal_surat' => $request->perihal_surat,
+    'sifat_surat' => $request->sifat_surat,
+    'lampiran_surat' => $request->lampiran_surat,
+]);
+
+Izin_Balasanlaporankegiatans::updateOrCreate(
+    [
+        'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
+    ],
+    [
+        'identitassurat_id' => $identitas->id,
+    ]
+);
+
+$user = Auth::user();
+
+Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
+    [
+        'inputlaporankegiatan_id' => $laporan->inputlaporankegiatans->id,
+    ],
+    [
+        'identitassurat_id' => $identitas->id,
+        'nipadmin_cetakbalasanlaporankegiatan' => $user->nip,
+        'tanggalcetak_balasanlaporankegiatan' => now(),
+    ]
+);
+
+
+    $laporan->update([
+    'statuslaporan_kegiatan' => 'pending'
+]);
+
+    $laporan->refresh();
+
+    $laporankegiatans = Izin_Laporankegiatans::with([
+    'inputlaporankegiatans.kirimbalasanlaporankegiatans.identitassurats'
+    ])->findOrFail($request->laporankegiatan_id);
+
+    $balasanlaporankegiatans = Izin_Balasanlaporankegiatans::with([
+        'laporankegiatans.inputlaporankegiatans.kirimbalasanlaporankegiatans.identitassurats'
+    ])->where('inputlaporankegiatan_id', $request->laporankegiatan_id)->first();
+
+    $kop_path = public_path('build/assets/kop_surat.png');
+
+if (!file_exists($kop_path)) {
+    $kop_path = null;
+}
+
+    $pdf = Pdf::loadView(
+    'pages.generatepdf.balasan_laporan_kegiatan',
+    [
+        'laporan' => $laporankegiatans,
+        'balasanlaporankegiatans' => $balasanlaporankegiatans,
+        'identitas' => $identitas,
+        'kop_path' => $kop_path,
+    ]
+);
+
+    return $pdf->download('Balasan Laporan Kegiatan' . $balasanlaporankegiatans->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
+    }
+
     /**
      * Simpan File Balasan Laporan Hasil Kegiatan Final
      */
 
-        public function storeFinal(Request $request, IdentitasSuratsService $identitassuratservice)
+        public function storeFinal(Request $request)
 {
     $user = Auth::user();
 
-    // ✅ VALIDASI DULU
     $request->validate([
-        'tanggal_surat' => 'required|date',
-        'filekirim_balasanlaporankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
+        'filekirim_balasanlaporankegiatan' =>
+            'required|file|mimes:pdf,doc,docx|max:10240',
         'laporankegiatan_id' => 'required',
     ]);
 
-    DB::transaction(function () use ($request, $identitassuratservice, $user) {
+    DB::transaction(function () use ($request, $user) {
 
-        // ✅ Ambil data SEKALI SAJA
-        $laporankegiatan = Izin_Laporankegiatans::with([
-            'inputlaporankegiatans',
-            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans.carapelatihans'
-        ])->findOrFail($request->route('id'));
+        $laporan = Izin_Laporankegiatans::with([
+            'inputlaporankegiatans'
+        ])->findOrFail($request->laporankegiatan_id);
 
-        // =============================
-        // 🔥 GENERATE NOMOR SURAT
-        // =============================
+        $filePath = $request
+            ->file('filekirim_balasanlaporankegiatan')
+            ->storeAs(
+                'izin/filekirim_balasanlaporankegiatan',
+                time().'_'.$request
+                    ->file('filekirim_balasanlaporankegiatan')
+                    ->getClientOriginalName(),
+                'public'
+            );
 
-        // 🔹 URUTAN
-        $urutan = optional($laporankegiatan->inputlaporankegiatans)->id ?? 0;
-        $urutan = str_pad($urutan, 3, '0', STR_PAD_LEFT);
-
-        // 🔹 BULAN ROMAWI
-        $bulan = date('n', strtotime($request->tanggal_surat));
-        $bulanRomawi = $this->bulanRomawi($bulan);
-
-        // 🔹 CARA PELATIHAN
-        $cara = optional(
-            $laporankegiatan->inputlaporankegiatans
-                ?->inputusulankegiatans
-                ?->usulankegiatans
-                ?->carapelatihans
-        )->cara_pelatihan ?? 'UMUM';
-
-        // 🔹 FINAL FORMAT
-        $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}";
-
-        // Inject ke request
-        $request->merge([
-            'nomor_surat' => $nomorSurat
-        ]);
-
-        // =============================
-        // 🔥 SIMPAN IDENTITAS SURAT
-        // =============================
-        $identitassurats = $identitassuratservice->create(
-            $request->only([
-                'nomor_surat',
-                'tanggal_surat',
-                'perihal_surat',
-                'sifat_surat',
-                'lampiran_surat',
-            ])
-        );
-
-        // =============================
-        // 🔥 FILE UPLOAD
-        // =============================
-        $filePath = null;
-
-        if ($request->hasFile('filekirim_balasanlaporankegiatan')) {
-            $filePath = $request->file('filekirim_balasanlaporankegiatan')
-                ->storeAs(
-                    'izin/filekirim_balasanlaporankegiatan',
-                    time() . '_' . $request->file('filekirim_balasanlaporankegiatan')->getClientOriginalName(),
-                    'public'
-                );
-        }
-
-        $inputlaporankegiatan_id = optional($laporankegiatan->inputlaporankegiatans)->id;
-
-        // =============================
-        // 🔥 SIMPAN DATA
-        // =============================
-        $kirimbalasanlaporan = Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
+        $kirim = Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
             [
-                'inputlaporankegiatan_id' => $inputlaporankegiatan_id
+                'inputlaporankegiatan_id' =>
+                    $laporan->inputlaporankegiatans->id
             ],
             [
-                'identitassurat_id' => $identitassurats->id,
+                'identitassurat_id' =>
+                    optional(
+                        $laporan->inputlaporankegiatans
+                            ->kirimbalasanlaporankegiatans
+                    )->identitassurat_id,
+
                 'filekirim_balasanlaporankegiatan' => $filePath,
+
                 'tanggalkirim_balasanlaporankegiatan' => now(),
+
                 'nipadmin_kirimbalasanlaporankegiatan' => $user->nip,
             ]
         );
 
-        // Update FK
-        Izin_Inputlaporankegiatans::where('id', $inputlaporankegiatan_id)
-            ->update([
-                'kirimbalasanlaporankegiatan_id' => $kirimbalasanlaporan->id
-            ]);
+        $laporan->inputlaporankegiatans->update([
+            'kirimbalasanlaporankegiatan_id' => $kirim->id
+        ]);
+
+        $laporan->update([
+        'statuslaporan_kegiatan' => 'finish'
+        ]);
     });
 
-    return redirect()->route('superadmin.laporankegiatan.pending')
-        ->with('success', 'Laporan kegiatan berhasil dikirim!');
+    return redirect()
+        ->route('superadmin.laporankegiatan.pending')
+        ->with('success', 'Balasan laporan berhasil dikirim.');
 }
     private function bulanRomawi($bulan)
 {
@@ -282,4 +369,52 @@ $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
 
     return $romawi[(int)$bulan] ?? '-';
 }
+
+public function preview(Request $request, $id)
+{
+    $user = Auth::user();
+
+    $laporan = Izin_Laporankegiatans::with([
+        'inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
+        'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        'sertifikats'
+    ])->findOrFail($id);
+
+    $identitas = (object) [
+        'nomor_surat'    => $request->nomor_surat,
+        'tanggal_surat'  => $request->tanggal_surat,
+        'lampiran_surat' => $request->lampiran_surat,
+        'sifat_surat'    => $request->sifat_surat,
+        'perihal_surat'  => $request->perihal_surat,
+    ];
+
+    // object dummy agar view tidak error
+    $balasanlaporankegiatans = (object) [
+        'laporankegiatans' => $laporan,
+        'totalcapaianjp_kegiatan' => '-'
+    ];
+
+    $kop_path = public_path('build/assets/kop_surat.png');
+
+    if (!file_exists($kop_path)) {
+        $kop_path = null;
+    }
+
+    $pdf = Pdf::loadView(
+        'pages.generatepdf.balasan_laporan_kegiatan',
+        [
+            'laporan' => $laporan,
+            'identitas' => $identitas,
+            'balasanlaporankegiatans' => $balasanlaporankegiatans,
+            'kop_path' => $kop_path,
+            'user' => $user,
+            'ttd' => null,
+            'stempel' => null,
+            'usulankegiatans' => null,
+        ]
+    );
+
+    return $pdf->stream('preview.pdf');
+}
+
 }

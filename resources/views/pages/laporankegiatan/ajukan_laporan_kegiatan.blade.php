@@ -176,7 +176,7 @@
     </div>
 
     {{-- Kanan --}}
-    <button type="submit" name="statuslaporan_kegiatan" value="completed"
+    <button type="submit" name="statuslaporan_kegiatan" value="draft"
         class="w-40 text-center py-2.5 bg-[#FFA41B] text-white 
         rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
         Ajukan Laporan

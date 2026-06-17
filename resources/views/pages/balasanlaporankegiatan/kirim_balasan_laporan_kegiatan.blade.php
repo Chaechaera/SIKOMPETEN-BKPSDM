@@ -29,73 +29,6 @@
                 {{-- ================================================== --}}
                 <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                        {{-- Nomor Surat --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Surat</label>
-                            <div class="required">
-                                <input type="text" name="nomor_surat"
-                                    value="{{ $nomorSurat }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
-                            </div>
-                        </div>
-
-                        {{-- Tanggal Surat --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
-                            <div class="relative">
-                                <input type="text"
-    id="tanggal_surat"
-    name="tanggal_surat"
-    value="{{ old('tanggal_surat') }}"
-    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="dd-mm-yyyy"
-    required>
-                                @error('tanggal_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Lampiran Surat --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lampiran Surat</label>
-                            <div class="relative">
-                                <input type="text" name="lampiran_surat" value="1 Bendel"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-100 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
-                                @error('lampiran_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Sifat Surat --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sifat Surat</label>
-                            <div class="relative">
-                                <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
-                                    <option value="" disabled selected>-- Pilih sifat surat --</option>
-                                    <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                                    <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                                </select>
-                                @error('sifat_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Perihal Surat --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perihal Surat</label>
-                            <div class="relative">
-                                <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                                    class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
-                                @error('perihal_surat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
                         {{-- ====================================================== --}}
                         {{-- === BAGIAN 2: UPLOAD FILE BALASAN LAPORAN KEGIATAN === --}}
                         {{-- ====================================================== --}}
@@ -122,10 +55,6 @@
                     {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
                     {{-- =========================================== --}}
                     <div class="mt-6 flex justify-end gap-3">
-                        <button href="{{ route('superadmin.laporankegiatan.pending') }}"
-                            class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
-                            Batal Kirim
-                        </button>
                         <button type="submit"
                             class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
                             Kirim Balasan

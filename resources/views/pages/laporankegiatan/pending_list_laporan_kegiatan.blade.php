@@ -73,7 +73,7 @@
                     <option value="">Semua Status</option>
                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>pending</option>
                     <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>need review</option>
-                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>completed</option>
+                    <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>draft</option>
                     <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>accepted</option>
                     <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
                     <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>finish</option>
@@ -122,7 +122,7 @@
                                 <th class="py-3 px-4 w-48">Nama Kegiatan</th>
                                 <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
                                 <th class="py-3 px-4 w-28">Status Usulan</th>
-                                <th class="py-3 px-4 w-52">Update Progress</th>
+                                <th class="py-3 px-4 w-[450px]">Update Progress</th>
                             </tr>
                         </thead>
 
@@ -132,9 +132,9 @@
                             x-data="{ openDokumen: false }">
 
                                 <!-- Nomor Surat -->
-                                <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                    {{ $u->inputlaporankegiatans->kirimlaporankegiatans->identitassurats->nomor_surat ?? '-' }}
-                                </td>
+                                <td class="py-3 px-4 text-gray-600 text-center break-words">
+    {{ $u->inputlaporankegiatans->cetaklaporankegiatans->identitassurats->nomor_surat ?? '-' }}
+</td>
 
                                 <!-- OPD -->
                                 <td class="py-3 px-4 text-center font-medium text-gray-800">{{ $u->subunitkerjas->singkatan ?? '-' }}</td>
@@ -161,22 +161,26 @@
     <div class="flex justify-center items-center gap-2">
 
         {{-- CETAK --}}
-        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
-            <form method="POST"
-                action="{{ route('superadmin.balasanlaporankegiatan.cetak', $u->inputlaporankegiatans->laporankegiatans->id) }}"
-                onsubmit="return confirm('Yakin cetak?')">
-                @csrf
-                <button type="submit"
-                    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#4361EE] text-white hover:bg-[#3651d4] transition">
-                    Cetak
-                </button>
-            </form>
-        @else
-            <button
-                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-                Cetak
-            </button>
-        @endif
+@if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
+
+   <a href="{{ route(
+    'superadmin.balasanlaporankegiatan.cetak',
+    $u->inputlaporankegiatans->laporankegiatans->id
+    ) }}"
+    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md
+    bg-[#4361EE] text-white hover:bg-[#3651d4] transition
+    inline-flex items-center justify-center">
+        Cetak
+    </a>
+
+@else
+
+    <button
+        class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+        Cetak
+    </button>
+
+@endif
 
         {{-- KIRIM --}}
         @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
