@@ -1,20 +1,26 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
+        {{-- 📝 FORM KIRIM USULAN KEGIATAN --}}
+        <form method="POST" action="{{ route('admin.usulankegiatan.kirim', $usulankegiatan->id) }}" enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="usulankegiatan_id" value="{{ $usulankegiatan->id }}">
+            <input type="hidden" name="next_route" value="admin.usulankegiatan.kirim">
 
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+            <div class="bg-white rounded-xl shadow p-6 mb-4">
+                <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR KIRIM PENGAJUAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                <p class="text-sm text-gray-500 max-w-4xl">
+                    Silahkan lengkapi data kirim usulan kegiatan pada form ini dan pastikan data yang diisikan telah sesuai sebelum dikirim.
+                </p>
+            </div>
 
-            {{-- Header --}}
-            @include('layouts.navigation')
+            {{-- Step Progress --}}
+            <x-step-progress :usulan="$usulankegiatan" :is-laporan="false" />
 
-            {{-- 📝 FORM KIRIM USULAN KEGIATAN --}}
-            <form method="POST" action="{{ route('admin.usulankegiatan.kirim', $usulankegiatan->id) }}" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="usulankegiatan_id" value="{{ $usulankegiatan->id }}">
-                <input type="hidden" name="next_route" value="admin.usulankegiatan.kirim">
+            {{-- ================================================== --}}
+            {{-- ======== BAGIAN 1: UPLOAD IDENTITAS SURAT ======== --}}
+            {{-- ================================================== --}}
+            <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
                 <div class="bg-white rounded-xl shadow p-6 mb-4">
                     <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR KIRIM PENGAJUAN USULAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
@@ -43,6 +49,7 @@
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
+                    </div>
 
                         {{-- Tanggal Surat (Read Only) --}}
                         <div>
@@ -52,6 +59,7 @@
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
+                    </div>
 
                         {{-- Lampiran Surat (Read Only) --}}
                         <div>
@@ -61,6 +69,7 @@
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
+                    </div>
 
                         {{-- Sifat Surat (Read Only) --}}
                         <div>
@@ -70,6 +79,7 @@
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
+                    </div>
 
                         {{-- Perihal Surat (Read Only) --}}
                         <div class="md:col-span-2">
@@ -79,19 +89,20 @@
                                     class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
                             </div>
                         </div>
+                    </div>
 
-                        {{-- ===================================================== --}}
-                        {{-- ======= BAGIAN 2: UPLOAD FILE USULAN KEGIATAN ======= --}}
-                        {{-- ===================================================== --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                                Upload File Usulan Kegiatan Final
-                                <span class="text-gray-400 text-sm">(PDF/DOC/DOCX)</span>
-                            </label>
-                            <p class="text-xs text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
-                            <p class="text-xs text-gray-500">Contoh nama file: file_usulan_kegiatan.pdf</p>
-                            <div class="relative mb-3 mt-2">
-                                <input type="file" name="filekirim_inputusulankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
+                    {{-- ===================================================== --}}
+                    {{-- ======= BAGIAN 2: UPLOAD FILE USULAN KEGIATAN ======= --}}
+                    {{-- ===================================================== --}}
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Upload File Usulan Kegiatan Final
+                            <span class="text-gray-400 text-sm">(PDF/DOC/DOCX)</span>
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">Format: .pdf / .doc / .docx</p>
+                        <p class="text-xs text-gray-500">Contoh nama file: file_usulan_kegiatan.pdf</p>
+                        <div class="relative mb-3 mt-2">
+                            <input type="file" name="filekirim_inputusulankegiatan" accept=".pdf,.doc,.docx" class="block w-full text-sm text-gray-700 
                                   border border-[#E0E7FF] rounded-lg cursor-pointer
                                   bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
                                   focus:outline-none p-2" {{ $usulankegiatan && $usulankegiatan?->inputusulankegiatans?->kirimusulankegiatans?->filekirim_inputusulankegiatan ? '' : 'required' }}>
@@ -108,24 +119,28 @@
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                            @endif
+                            @error('filekirim_inputusulankegiatan')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
-
-                    {{-- =========================================== --}}
-                    {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
-                    {{-- =========================================== --}}
-                    <div class="mt-6 flex justify-end gap-3">
-                        <a href="{{ route('admin.usulankegiatan.index') }}"
-                            class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
-                            Batal Kirim
-                        </a>
-                        <button type="submit"
-                            class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
-                            Kirim Usulan
-                        </button>
-                    </div>
                 </div>
-            </form>
-        </main>
+
+                {{-- =========================================== --}}
+                {{-- ========== BAGIAN 3: TOMBOL AKSI ========== --}}
+                {{-- =========================================== --}}
+                <div class="mt-6 flex justify-end gap-3">
+                    <a href="{{ route('admin.usulankegiatan.index') }}"
+                        class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
+                        Batal Kirim
+                    </a>
+                    <button type="submit"
+                        class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
+                        Kirim Usulan
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </x-app-layout>

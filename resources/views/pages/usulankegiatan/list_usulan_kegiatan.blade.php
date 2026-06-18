@@ -147,9 +147,9 @@
                                     </button>
                                 </td>
 
-                                <!-- Tanggal Pelaksanaan Kegiatan -->
-                                <td class="py-3 px-4 text-gray-600 text-center whitespace-nowrap">
-                                    {{$u->tanggalmulai_kegiatan && $u->tanggalselesai_kegiatan
+                        <!-- Tanggal Pelaksanaan Kegiatan -->
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{$u->tanggalmulai_kegiatan && $u->tanggalselesai_kegiatan
                                         ? \Carbon\Carbon::parse($u->tanggalmulai_kegiatan)->format('d/m/Y') . ' - ' .
                                         \Carbon\Carbon::parse($u->tanggalselesai_kegiatan)->format('d/m/Y') : '-'}}
                                 </td>
@@ -243,11 +243,11 @@
                                                     @if($u->status_ui === 'in_progress')
                                                     <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
                                                         class="block px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1]">
-                                                        Update Laporan Hasil Kegiatan
+                                                        Buat Laporan Hasil Kegiatan
                                                     </a>
                                                     @else
                                                     <span class="block px-4 py-2 rounded-lg bg-[#dedfe2] text-gray-400 italic cursor-not-allowed">
-                                                        Update Laporan Hasil Kegiatan
+                                                        Buat Laporan Hasil Kegiatan
                                                     </span>
                                                     @endif
                                                 </div>
@@ -256,92 +256,55 @@
                                     </div>
                                 </td>
 
-                                <!-- Tombol Aksi -->
-                                <td class="py-3 px-4 text-center" x-data="{ openDokumen: false }">
-                                    <div class="flex justify-center gap-4">
+                        <!-- Tombol Aksi -->
+                        <td class="py-3 px-4" x-data="{ openDokumen: false }">
+                            <div class="flex justify-center gap-4">
 
-                                        {{-- ===================== LIHAT DOKUMEN ===================== --}}
-                                        <a @click="openDokumen = true"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/File text.png') }}" class="w-6 h-6 inline">
-                                        </a>
+                                {{-- ===================== LIHAT DOKUMEN ===================== --}}
+                                <a @click="openDokumen = true" class="cursor-pointer">
+                                    <i class="inline" data-lucide="file-text"></i>
+                                </a>
 
-                                        <!-- MODAL DETAIL -->
-                                        <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-                                            <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
+                                <!-- MODAL DETAIL -->
+                                <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+                                    <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-abuabuMuda/60">
 
-                                                {{-- Button Close --}}
-                                                <button type="button" @click="openDokumen = false"
-                                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition text-lg font-bold">
-                                                    ✖
-                                                </button>
+                                        {{-- Button Close --}}
+                                        <button @click="openDokumen = false"
+                                            class="absolute top-3 right-3">
+                                            <i data-lucide="x"></i>
+                                        </button>
 
-                                                <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    📄 Daftar Dokumen
-                                                </h2>
+                                        <h2 class="text-2xl font-semibold bg-primary-gradient bg-clip-text text-transparent leading-tight">
+                                            DAFTAR DOKUMEN
+                                        </h2>
 
-                                                <p class="text-sm text-gray-500 mb-6">
-                                                    Pilih dokumen yang ingin dilihat:
-                                                </p>
+                                        <p class="text-sm font-normal text-abuabuCerah mb-6">
+                                            Pilih dokumen terkait usulan kegiatan yang ingin dilihat.
+                                        </p>
 
-                                                <div class="flex flex-col space-y-3 font-bold">
-                                                    {{-- Lihat Surat dan KAK Usulan --}}
-                                                    <a href="{{ route('admin.usulankegiatan.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#edf2fb] text-[#3a0ca3]">
-                                                        Lihat Surat dan KAK Usulan
-                                                    </a>
+                                        <div class="flex flex-col space-y-3 font-semibold text-sm">
+                                            {{-- Lihat Surat dan KAK Usulan --}}
+                                            <a href="{{ route('admin.usulankegiatan.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-unguTransparan text-unguTua hover:bg-unguTua/60 transition">
+                                                Lihat Surat dan KAK Usulan
+                                            </a>
 
-                                                    {{-- Lihat Surat Balasan Usulan --}}
-                                                    <a href="{{ route('admin.usulankegiatan.downloadBalasan', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#fff1f5] text-[#ab5353]">
-                                                        Lihat Surat Balasan Usulan
-                                                    </a>
+                                            {{-- Lihat Surat Balasan Usulan --}}
+                                            <a href="{{ route('admin.usulankegiatan.downloadBalasan', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-coklatMuda/25 text-coklatGelap hover:bg-coklatGelap/60 transition">
+                                                Lihat Surat Balasan Usulan
+                                            </a>
 
-                                                    {{-- Lihat Surat dan Laporan Hasil --}}
-                                                    <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6]">
-                                                        Lihat Surat dan Laporan Hasil
-                                                    </a>
-
-                                                    {{-- Lihat Surat Balasan Laporan --}}
-                                                    <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
-                                                        target="_blank"
-                                                        class="block px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000]">
-                                                        Lihat Surat Balasan Laporan
-                                                    </a>
-                                                </div>
-                                            </div>
+                                            {{-- Lihat Pelaksanaan Kegiatan --}}
+                                            <a href="{{ route('admin.pelaksanaankegiatan.show', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-merahBata/25 text-merahMaroon hover:bg-merahMaroon/60 transition">
+                                                Lihat Pelaksanaan Kegiatan
+                                            </a>
                                         </div>
-
-                                        {{-- ===================== TOMBOL EDIT ===================== --}}
-                                        @if(in_array($u->status_ui, ['draft', 'rejected']))
-                                        <a href="{{ route('admin.usulankegiatan.edit', $u->id) }}"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline">
-                                        </a>
-                                        @elseif($u->inputlaporankegiatans?->laporankegiatans?->canEditLaporan())
-                                        <a href="{{ route('admin.laporankegiatan.edit', $u->id) }}"
-                                            class="text-indigo-600 hover:underline">
-                                            <img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline">
-                                        </a>
-                                        @else
-                                        <span class="text-gray-400 italic"><img src="{{ asset('images/edit.png') }}" class="w-6 h-6 inline"></span>
-                                        @endif
-
-                                        {{-- ===================== TOMBOL HAPUS ===================== --}}
-                                        <form action="{{ route('admin.usulankegiatan.destroy', $u->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Yakin hapus usulan ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:underline">
-                                                <img src="{{ asset('images/delete.png') }}" alt="Hapus" class="w-6 h-6 inline">
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             @if($u->verifikasiusulankegiatanterakhir)

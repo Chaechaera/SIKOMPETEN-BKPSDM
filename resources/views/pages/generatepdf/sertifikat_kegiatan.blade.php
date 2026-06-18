@@ -3,173 +3,156 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Sertifikat {{ $peserta->nama_peserta ?? '' }}</title>
+
     <style>
-        @page {
-            margin: 0;
-        }
+    @page {
+        size: 1123px 794px;
+        margin: 0;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: "Times New Roman", serif;
-            position: relative;
-        }
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        width: 1123px;
+        height: 794px;
+        overflow: hidden;
+        font-family: "Times New Roman", serif;
+    }
 
-        .bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-        }
+    body {
+        position: relative;
+    }
 
-        .field {
-            position: absolute;
-            white-space: nowrap;
-            z-index: 5;
-            line-height: 1;
-        }
-    </style>
+    .certificate {
+        position: relative;
+        width: 1123px;
+        height: 794px;
+        overflow: hidden;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    .background {
+        position: absolute;
+        inset: 0;
+        width: 1123px;
+        height: 794px;
+        z-index: 0;
+    }
+
+    .field {
+        position: absolute;
+        z-index: 5;
+        white-space: nowrap;
+        line-height: 1;
+        transform: translate(-50%, -50%);
+    }
+</style>
 </head>
 
 <body>
 
-    {{-- Gambar background sertifikat --}}
-    <!--<img src="{{ $backgroundPath }}" class="bg">-->
-    <img src="data:{{ $backgroundMime }};base64,{{ $backgroundBase64 }}" class="bg">
+<div class="certificate">
+
+    {{-- Background --}}
+    <img
+        src="data:{{ $backgroundMime }};base64,{{ $backgroundBase64 }}"
+        class="background"
+    >
 
     @php
-    $fields = $fieldstemplatesertifikat_kegiatan ?? [];
+        $fields = $fieldstemplatesertifikat_kegiatan ?? [];
     @endphp
 
-    @if(is_array($fields))
     @foreach($fields as $f)
-    @php
-    /* =========================
-   BASE DATA
-========================= */
-$x = $f['x_percent'] ?? 0;
-$y = $f['y_percent'] ?? 0;
-$type = $f['type'] ?? '';
 
-$fs = $f['font_size'] ?? 42;
-$fc = $f['font_color'] ?? '#000';
-$fw = $f['font_weight'] ?? 'normal';
-$ta = $f['text_align'] ?? 'center';
+        @php
 
-/* =========================
-   TEXT REAL (Untuk Auto Offset)
-========================= */
+            $type = $f['type'] ?? '';
 
-$text = '';
+            /*
+            ============================
+            POSITION PERCENT
+            ============================
+            */
 
-switch($type){
-    case 'nama_peserta':
-        $text = $peserta->nama_peserta ?? '';
-    break;
+            $leftPx =
+    (($f['x_percent'] ?? 0) / 100) * 1123;
 
-    case 'nip_peserta':
-        $text = $peserta->nip_nik_peserta ?? '';
-    break;
+$topPx =
+    (($f['y_percent'] ?? 0) / 100) * 794;
 
-    case 'jabatan_peserta':
-        $text = $peserta->jabatan_peserta ?? '';
-    break;
+$width =
+    $f['width'] ?? 0;
 
-    case 'nomorsertifikatpeserta_kegiatan':
-        $text = $peserta->nomorsertifikatpeserta_kegiatan ?? ($sertifikat->nomorsertifikat_kegiatan ?? '');
-    break;
+$height =
+    $f['height'] ?? 0;
 
-    case 'totalcapaianjp_kegiatan':
-        $text = isset($sertifikat->balasanlaporankegiatans->totalcapaianjp_kegiatan)
-            ? $sertifikat->balasanlaporankegiatans->totalcapaianjp_kegiatan
-            : '';
-    break;
-}
+            /*
+            ============================
+            STYLE
+            ============================
+            */
 
-$textLength = strlen($text);
+            $fontSize = $f['font_size'] ?? 24;
+            $fontColor = $f['font_color'] ?? '#000';
+            $fontWeight = $f['font_weight'] ?? 'normal';
+            $textAlign = $f['text_align'] ?? 'center';
 
-/* =========================
-   AUTO OFFSET ENGINE
-========================= */
+            /*
+            ============================
+            VALUE
+            ============================
+            */
 
-/*
-Ide:
-Font besar → geser dikit
-Text panjang → geser dikit
-*/
+            $value = '';
 
-$autoOffsetX = ($textLength * $fs) / 900;
-$autoOffsetY = ($fs / 140);
+            switch($type){
 
-/* =========================
-   MANUAL OFFSET (Fine Tune)
-========================= */
+                case 'nama_peserta':
+                    $value = $peserta->nama_peserta ?? '';
+                break;
 
-$offsetMap = [
-    'nama_peserta' => ['x'=>10.8,'y'=>-0.70],
-    'nip_peserta' => ['x'=>3.32,'y'=>-1.7],
-    'nomorsertifikatpeserta_kegiatan' => ['x'=>-0.5,'y'=>0.4],
-    'totalcapaianjp_kegiatan' => ['x'=>-0.8,'y'=>0.35],
-];
+                case 'nip_peserta':
+                    $value = $peserta->nip_nik_peserta ?? '';
+                break;
 
-$manualX = $offsetMap[$type]['x'] ?? 0;
-$manualY = $offsetMap[$type]['y'] ?? 0;
+                case 'jabatan_peserta':
+                    $value = $peserta->jabatan_peserta ?? '';
+                break;
 
-/* =========================
-   FINAL POSITION
-========================= */
+                case 'nomorsertifikatpeserta_kegiatan':
+                    $value =
+                        $peserta->nomorsertifikatpeserta_kegiatan
+                        ?? ($sertifikat->nomorsertifikat_kegiatan ?? '');
+                break;
 
-$left = ($x + $autoOffsetX + $manualX) . '%';
-$top  = ($y - $autoOffsetY + $manualY) . '%';
+                case 'totalcapaianjp_kegiatan':
+                    $value = $totalcapaianjp_text ?? '';
+                break;
+            }
 
-@endphp
+        @endphp
 
+        <div
+            class="field"
+            style="
+                left: {{ $leftPx }}px;
+top: {{ $topPx }}px;
 
-<div class="field"
-style="
-left:{{ $left }};
-top:{{ $top }};
-font-size:{{ $fs }}px;
-color:{{ $fc }};
-font-weight:{{ $fw }};
-text-align:{{ $ta }};
-">
+        font-size: {{ $f['font_size'] ?? 24 }}px;
+        color: {{ $f['font_color'] ?? '#000' }};
+        font-weight: {{ $f['font_weight'] ?? 'normal' }};
+        text-align: {{ $f['text_align'] ?? 'center' }};
+            "
+        >
+            {{ $value }}
+        </div>
 
-@switch($type)
-@case('nama_peserta')
-{{ $peserta->nama_peserta ?? '-' }}
-@break
-
-@case('nip_peserta')
-{{ $peserta->nip_nik_peserta ?? '' }}
-@break
-
-@case('jabatan_peserta')
-{{ $peserta->jabatan_peserta ?? '' }}
-@break
-
-@case('nomorsertifikatpeserta_kegiatan')
-{{ $peserta->nomorsertifikatpeserta_kegiatan ?? ($sertifikat->nomorsertifikat_kegiatan ?? '') }}
-@break
-
-@case('totalcapaianjp_kegiatan')
-{{ $totalcapaianjp_text ?? '' }}
-@break
-
-{{--@case('totalcapaianjp_kegiatan')
-{{ isset($sertifikat->balasanlaporankegiatans->totalcapaianjp_kegiatan) ? $sertifikat->balasanlaporankegiatans->totalcapaianjp_kegiatan : '' }}
-@break--}}
-@endswitch
+    @endforeach
 
 </div>
 
-@endforeach
-@endif
-
 </body>
-
 </html>

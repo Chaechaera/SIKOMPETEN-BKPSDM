@@ -41,6 +41,7 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
+                    </div>
 
                         {{-- Nama --}}
                         <div>
@@ -50,6 +51,7 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
+                    </div>
 
                         {{-- Lokasi --}}
                         <div>
@@ -59,6 +61,7 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
+                    </div>
 
                         {{-- Tanggal --}}
                         <div>
@@ -71,6 +74,7 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
+                    </div>
 
                         {{-- Upload --}}
                         <div class="md:col-span-2">
@@ -148,8 +152,21 @@
                     </div>
 
                 </div>
-            </form>
-        </main>
+                {{-- ===================================================== --}}
+                {{-- =============== BAGIAN 3: TOMBOL AKSI =============== --}}
+                {{-- ===================================================== --}}
+                <div class="mt-6 flex justify-end gap-3">
+                    <button href="{{ route('admin.usulankegiatan.index') }}"
+                        class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 
     {{-- SCRIPT --}}

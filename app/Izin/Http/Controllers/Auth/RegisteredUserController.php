@@ -62,13 +62,14 @@ class RegisteredUserController extends Controller
             'nip' => $request->nip,
             'nama' => $request->nama,
             'role' => 'user',
+            'status' => 'nonaktif',
             'subunitkerja_id' => $request->subunitkerja_id,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
-
-        return redirect()->route('verification.notice');
+        return redirect('/login')
+    ->with('success',
+        'Registrasi berhasil. Menunggu persetujuan administrator.');
     }
 }
