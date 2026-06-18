@@ -306,7 +306,7 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        //$user = Auth::user();
+        $user = Auth::user();
 
         // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
         // Ambil dari USULAN, bukan langsung laporan
@@ -591,6 +591,22 @@ public function checkNomorSurat(Request $request)
     ]);
 }
 
+public function archive($id)
+{
+    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
+        ->findOrFail($id);
+
+    $laporan = $input->laporankegiatans;
+
+    if ($laporan) {
+        $laporan->update([
+            'is_archived' => 1
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Laporan berhasil diarsipkan');
+}
+
 public function unarchive($id)
 {
     $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
@@ -603,6 +619,8 @@ public function unarchive($id)
             'is_archived' => 0
         ]);
     }
+
+    
 
     return redirect()->back()->with('success', 'Laporan berhasil dikembalikan');
 

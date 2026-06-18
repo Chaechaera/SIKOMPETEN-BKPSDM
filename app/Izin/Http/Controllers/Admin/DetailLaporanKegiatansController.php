@@ -33,26 +33,13 @@ class DetailLaporanKegiatansController extends Controller
      */
     public function store(Request $request)
     {
+    
         // Validasi request
         $request->validate([
-            'laporankegiatan_id' => 'required|exists:izin_laporankegiatans,id',
-            'jeniskop_laporankegiatan' => 'required|in:kop_text,kop_gambar',
-            // 🔥 TAMBAHAN INI
-    'jenissertifikat_kegiatan' => 'required|in:template_bkpsdm,template_opd',
-    'templatesertifikat_kegiatan' => [
-        'nullable',
-        'image',
-        'mimes:jpg,jpeg,png',
-        function ($attr, $value, $fail) use ($request) {
-            if (
-                $request->jenissertifikat_kegiatan === 'template_opd' &&
-                !$request->hasFile('templatesertifikat_kegiatan')
-            ) {
-                $fail('Template OPD wajib upload gambar.');
-            }
-        }
-    ]
-        ]);
+    'laporankegiatan_id' => 'required|exists:izin_laporankegiatans,id',
+    'jeniskop_laporankegiatan' => 'required|in:kop_text,kop_gambar',
+]);
+        
 
         // Ambil data atribut khusus pada file khusus
         $config = config('atribut_khusus');
