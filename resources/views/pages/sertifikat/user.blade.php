@@ -87,18 +87,19 @@
                         @forelse ($sertifikats as $s)
 
                         @php
-                        $p = $s->pesertakegiatans->first();
-                        if (!$p) return;
-                        $laporan = $s->laporanpesertakegiatans->first();
-                        $tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
+$p = $s->pesertakegiatans->first();
 
-                        // Cek apakah peserta sudah upload laporan
-                        $laporanpesertakegiatans = \App\Izin\Models\Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $p->id)
-                        ->where('sertifikat_id', $p->sertifikat_id)
-                        ->first();
+if (!$p) return;
 
-                        $statuslaporan_pesertakegiatan = $laporanpesertakegiatans->statuslaporan_pesertakegiatan ?? null;
-                        @endphp
+$tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
+
+// Ambil laporan milik peserta yang sedang ditampilkan
+$laporan = \App\Izin\Models\Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $p->id)
+    ->where('sertifikat_id', $p->sertifikat_id)
+    ->first();
+
+$statuslaporan_pesertakegiatan = $laporan->statuslaporan_pesertakegiatan ?? null;
+@endphp
 
                         <tr class="border-b text-center hover:bg-abuabuCerah/30 table-row">
                             <td class="py-3 px-4 text-left whitespace-nowrap">{{ $p->nama_peserta }}</td>
@@ -116,7 +117,7 @@
                                 @elseif($laporan->statuslaporan_pesertakegiatan === 'pending')
                                 <span class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-unguMuda text-unguSedang transition">Pending</span>
                                 @elseif($laporan->statuslaporan_pesertakegiatan === 'revisi')
-<span class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-orangeBening text-orange transition">Revisi</span>
+                                <span class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-orangeBening text-orange transition">Revisi</span>
                                 @elseif($laporan->statuslaporan_pesertakegiatan === 'rejected')
                                 <button @click="openModal = true"
                                     class="inline-block px-4 py-2 text-xs font-semibold rounded-lg bg-merahBening text-merahCabai hover:bg-merahCabai/50 transition x-data=" { openProgress: false }"">
@@ -159,7 +160,7 @@
                                                 <b class="font-bold">"{{ $s->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-' }}"</b>
                                                 telah dinyatakan sesuai dengan kriteria dan disetujui oleh BKPSDM Kota Surakarta. Kini Anda dapat mengunduh sertifikat digital sebagai bukti partisipasi kegiatan.
                                             </p>
-                                            
+
                                             @if(!empty($laporan->catatanlaporan_pesertakegiatan))
                                             <p class="font-bold text-hijauDaun mt-3">
                                                 Berikut ada catatan yang diberikan:

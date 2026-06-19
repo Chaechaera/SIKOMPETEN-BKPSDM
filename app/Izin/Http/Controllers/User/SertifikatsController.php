@@ -126,15 +126,18 @@ class SertifikatsController extends Controller
         $sort = request('sort_tahun'); // asc / desc / null
 
         // Eager Loading
-        $sertifikats = Izin_Sertifikats::with([
-            'pesertakegiatans.subunitkerjas',
-            'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
-            'laporanpesertakegiatans'
-        ])
-            ->whereHas('pesertakegiatans', function ($q) use ($user) {
-                $q->where('nip_nik_peserta', $user->nip ?? $user->email);
-            })
-            ->get();
+            $sertifikats = Izin_Sertifikats::with([
+                'pesertakegiatans.subunitkerjas',
+    'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+    'laporanpesertakegiatans',
+    'pesertakegiatans' => function ($q) use ($user) {
+        $q->where('nip_nik_peserta', $user->nip);
+    }
+])
+->whereHas('pesertakegiatans', function ($q) use ($user) {
+    $q->where('nip_nik_peserta', $user->nip);
+})
+->get();
 
         // Filter search dengan collection
         if ($search) {
@@ -209,7 +212,7 @@ class SertifikatsController extends Controller
                 'query' => request()->query(),
             ]
         );
-        
+
         return view('pages.sertifikat.user', compact('sertifikats'));
     }
 

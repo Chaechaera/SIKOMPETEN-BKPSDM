@@ -223,31 +223,59 @@ class KopUnitKerjasController extends Controller
 
         // Update data gambar TTD OPD
         if ($request->hasFile('gambarttd_opd')) {
-            if ($ttd->gambarttd_opd) {
-                Storage::disk('public')->delete($ttd->gambarttd_opd);
-            }
-            $ttd->gambarttd_opd = $request->file('gambarttd_opd')
-                ->storeAs(
-                    'izin/gambarttd_opd',
-                    time() . '_' . $request->file('gambarttd_opd')->getClientOriginalName(),
-                    'public'
-                );
-            $ttd->save();
-        }
+
+    if ($ttd->gambarttd_opd) {
+        Storage::disk('public')->delete($ttd->gambarttd_opd);
+    }
+
+    $manager = new ImageManager(new Driver());
+
+    $file = $request->file('gambarttd_opd');
+    $filename = time() . '_' . $file->getClientOriginalName();
+
+    $path = storage_path('app/public/izin/gambarttd_opd/' . $filename);
+
+    if (!file_exists(dirname($path))) {
+        mkdir(dirname($path), 0755, true);
+    }
+
+    $manager->read($file->getRealPath())
+        ->toPng()
+        ->save($path);
+
+    $this->removeWhiteBackground($path, $path);
+
+    $ttd->gambarttd_opd = 'izin/gambarttd_opd/' . $filename;
+    $ttd->save();
+}
 
         // Update data gambar stempel OPD
         if ($request->hasFile('gambarstempel_opd')) {
-            if ($stempel->gambarstempel_opd) {
-                Storage::disk('public')->delete($stempel->gambarstempel_opd);
-            }
-            $stempel->gambarstempel_opd = $request->file('gambarstempel_opd')
-                ->storeAs(
-                    'izin/gambarstempel_opd',
-                    time() . '_' . $request->file('gambarstempel_opd')->getClientOriginalName(),
-                    'public'
-                );
-            $stempel->save();
-        }
+
+    if ($stempel->gambarstempel_opd) {
+        Storage::disk('public')->delete($stempel->gambarstempel_opd);
+    }
+
+    $manager = new ImageManager(new Driver());
+
+    $file = $request->file('gambarstempel_opd');
+    $filename = time() . '_' . $file->getClientOriginalName();
+
+    $path = storage_path('app/public/izin/gambarstempel_opd/' . $filename);
+
+    if (!file_exists(dirname($path))) {
+        mkdir(dirname($path), 0755, true);
+    }
+
+    $manager->read($file->getRealPath())
+        ->toPng()
+        ->save($path);
+
+    $this->removeWhiteBackground($path, $path);
+
+    $stempel->gambarstempel_opd = 'izin/gambarstempel_opd/' . $filename;
+    $stempel->save();
+}
 
         // Redirect ke halaman dashboard admin
         return redirect()->route('admin.dashboard')
