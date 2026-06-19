@@ -13,6 +13,7 @@ use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Stempelunitkerjas;
 use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
+use App\Izin\Models\Izin_Verifikasiusulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -170,7 +171,7 @@ class UsulanKegiatansController extends Controller
     /**
      * Tampilkan Daftar Usulan Kegiatan yang Telah Diajukan
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -179,36 +180,82 @@ class UsulanKegiatansController extends Controller
             'inputusulankegiatans',
             'inputusulankegiatans.pelaksanaankegiatans',
             'cetakusulankegiatans',
-            'verifikasiusulankegiatanterakhir'
-        ])->when($user && $user->subunitkerja_id, function ($u) use ($user) {
-            $u->whereHas('inputusulankegiatans.usulankegiatans.subunitkerjas', function ($u) use ($user) {
-                $u->where('id', $user->subunitkerja_id);
+            'verifikasiusulankegiatanterakhir',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.laporankegiatans'
+        ]);
+
+        // Filter berdasarkan role
+        if ($user->role === 'admin') {
+            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        }
+
+        if ($user->role === 'user') {
+            $usulankegiatans->where('dibuat_oleh', $user->id);
+        }
+
+        // Filter berdasarkan nama kegiatan (abjad)
+        if ($request->filled('search')) {
+            $usulankegiatans->whereHas('inputusulankegiatans', function ($query) use ($request) {
+                $query->where('nama_kegiatan', 'like', '%' . $request->search . '%');
             });
+        }
+
+        // Filter berdasarkan tanggal pengajuan
+        if ($request->filled('tanggal_pengajuan')) {
+            $usulankegiatans->whereDate('created_at', $request->tanggal_pengajuan);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $usulankegiatans->where('statususulan_kegiatan', $request->status);
+        }
+
+        $notifikasiReview = \App\Izin\Models\Izin_Verifikasiusulankegiatans::with([
+            'usulankegiatans.inputusulankegiatans'
+        ])
+        ->where('is_read', false)
+        ->whereHas('usulankegiatans', function ($q) use ($user) {
+
+            if ($user->role === 'admin') {
+                $q->where('subunitkerja_id', $user->subunitkerja_id);
+            }
+
+            if ($user->role === 'user') {
+                $q->where('dibuat_oleh', $user->id);
+            }
+
         })
-            ->when($user->role === 'user', function ($u) use ($user) {
-                $u->where('dibuat_oleh', $user->id);
-            })
-            ->get();
-
-        // 🔥 PAGINATION
-        $usulankegiatans = $usulankegiatans->values(); // reset index
-
-        $page = request()->get('page', 1);
-        $perPage = 20;
-
-        $usulankegiatans = new LengthAwarePaginator(
-            $usulankegiatans->forPage($page, $perPage),
-            $usulankegiatans->count(),
-            $perPage,
-            $page,
-            [
-                'path' => request()->url(),
-                'query' => request()->query(),
-            ]
-        );
+        ->latest('tanggalverifikasi_inputusulankegiatan')
+        ->get();
+        
+        $usulankegiatans = $usulankegiatans->orderBy('updated_at', 'desc')->paginate(20)->appends($request->query());
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
-        return view('pages.usulankegiatan.list_usulan_kegiatan', compact('usulankegiatans'));
+        return view(
+            'pages.usulankegiatan.list_usulan_kegiatan',
+            compact(
+                'usulankegiatans',
+                'notifikasiReview'
+            )
+        );
+    }
+
+    /**
+     * Tutup notifikasi review usulan kegiatan
+     */
+    public function closeNotification($id)
+    {
+        $notif = Izin_Verifikasiusulankegiatans::findOrFail($id);
+
+        $notif->update([
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 
     /**
@@ -262,6 +309,32 @@ class UsulanKegiatansController extends Controller
         return redirect()->route('admin.usulankegiatan.edit', $usulan->id)->with('success', 'Silakan lengkapi data usulan kegiatan.');
     }
 
+    public function destroy($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        // Hapus data terkait
+        $usulan->verifikasiusulankegiatans()->delete();
+
+        if ($usulan->cetakusulankegiatans) {
+            $usulan->cetakusulankegiatans()->delete();
+        }
+
+        if ($usulan->detailusulankegiatans) {
+            $usulan->detailusulankegiatans()->delete();
+        }
+
+        if ($usulan->inputusulankegiatans) {
+            $usulan->inputusulankegiatans()->delete();
+        }
+
+        $usulan->delete();
+
+        return redirect()
+            ->route('admin.usulankegiatan.index')
+            ->with('success', 'Usulan kegiatan berhasil dihapus.');
+    }
+
     /**
      * Tampilkan Form Edit Ajukan Usulan Kegiatan Pengembangan Kompetensi ASN
      */
@@ -281,8 +354,8 @@ class UsulanKegiatansController extends Controller
         $kopunitkerja_user = Izin_Kopunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
         $kopunitkerja_id = $usulan->inputusulankegiatans?->kopunitkerja_id ?? $kopunitkerja_user?->id ?? null;
 
-        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
-        if ($usulan->statususulan_kegiatan !== 'draft') {
+        // Verifikasi bahwa usulan dapat diedit
+        if (!$usulan->canEdit()) {
             abort(403, 'Usulan sudah tidak dapat diubah.');
         }
 
@@ -310,8 +383,8 @@ class UsulanKegiatansController extends Controller
         // Temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
 
-        // Verifikasi bahwa status usulankegiatan tidak sama dengan draft
-        if ($usulankegiatans->statususulan_kegiatan !== 'draft') {
+        // Verifikasi bahwa usulan dapat diedit
+        if (!$usulankegiatans->canEdit()) {
             abort(403);
         }
 
@@ -323,7 +396,12 @@ class UsulanKegiatansController extends Controller
             'tanggalselesai_kegiatan' => $request->tanggalselesai_kegiatan,
             'waktumulai_kegiatan' => $request->waktumulai_kegiatan,
             'waktuselesai_kegiatan' => $request->waktuselesai_kegiatan,
+            'statususulan_kegiatan' => 'draft', // Reset status ke draft untuk edit ulang
         ]);
+
+        // Reset related records to make it like a new submission
+        $usulankegiatans->cetakusulankegiatans()->delete();
+        $usulankegiatans->verifikasiusulankegiatans()->delete();
 
         // Merge request berdasarkan id usulankegiatan
         $request->merge([
@@ -416,42 +494,86 @@ class UsulanKegiatansController extends Controller
         return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
     }
 
-    public function destroy($id)
-{
-    $usulan = Izin_Usulankegiatans::with([
-        'inputusulankegiatans.inputlaporankegiatans.laporankegiatans'
-    ])->findOrFail($id);
+    public function preview(Request $request, $id)
+    {
+        $user = Auth::user();
 
-    if ($usulan->inputusulankegiatans) {
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'inputusulankegiatans.kopunitkerjas',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
 
-        $inputUsulan = $usulan->inputusulankegiatans;
+        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
 
-        // 🔥 Hapus laporan dulu (child paling bawah)
-        if ($inputUsulan->inputlaporankegiatans) {
+        $ttd = Izin_Ttdunitkerjas::where(
+            'unitkerja_id',
+            $user->subunitkerjas->unitkerja_id
+        )->first();
 
-            $inputLaporan = $inputUsulan->inputlaporankegiatans;
+        $stempel = Izin_Stempelunitkerjas::where(
+            'unitkerja_id',
+            $user->subunitkerjas->unitkerja_id
+        )->first();
 
-            if ($inputLaporan->laporankegiatans) {
-                $inputLaporan->laporankegiatans->detaillaporankegiatans()?->delete();
-                $inputLaporan->laporankegiatans->delete();
+        $kop_path = public_path('build/assets/kop_surat.png');
+
+        if (!file_exists($kop_path)) {
+            $kop_path = null;
+        }
+
+        // Baca file excel jadwal kegiatan kalau ada
+        $jadwalpelaksanaan_kegiatan = [];
+
+        if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
+
+            $path = storage_path(
+                'app/public/' .
+                $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan
+            );
+
+            if (file_exists($path)) {
+
+                try {
+
+                    $spreadsheet = IOFactory::load($path);
+
+                    $sheet = $spreadsheet->getActiveSheet();
+
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+                        $jadwalpelaksanaan_kegiatan[] = array_values($row);
+                    }
+
+                } catch (\Exception $e) {
+                    $jadwalpelaksanaan_kegiatan = [];
+                }
             }
-
-            $inputLaporan->delete();
         }
 
-        // hapus cetak
-        if ($inputUsulan->cetakusulankegiatans) {
-            $inputUsulan->cetakusulankegiatans()->delete();
-        }
+        $pdf = PDF::loadView(
+            'pages.generatepdf.surat_usulan_kegiatan',
+            [
+                'usulankegiatans' => $usulankegiatans,
+                'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
+                'kop_path' => $kop_path,
+                'kop' => $kop,
+                'ttd' => $ttd,
+                'stempel' => $stempel,
+                'user' => $user,
 
-        // hapus input usulan
-        $inputUsulan->delete();
+                'preview_identitas' => [
+                    'nomor_surat' => $request->nomor_surat,
+                    'tanggal_surat' => $request->tanggal_surat,
+                    'lampiran_surat' => $request->lampiran_surat,
+                    'sifat_surat' => $request->sifat_surat,
+                    'perihal_surat' => $request->perihal_surat,
+                ]
+            ]
+        );
+
+        return response(
+            $pdf->output(),
+            200
+        )->header('Content-Type', 'application/pdf');
     }
-
-    // terakhir hapus usulan
-    $usulan->delete();
-
-    return redirect()->route('admin.usulankegiatan.index')
-        ->with('success', 'Usulan kegiatan berhasil dihapus');
-}
 }

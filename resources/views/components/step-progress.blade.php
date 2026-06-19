@@ -1,11 +1,18 @@
-@props(['usulan' => null])
+@props(['usulan' => null, 'isLaporan' => null])
 
 @php
 $status = $usulan?->status_ui ?? 'null';
 
-$hasPelaksanaan = $usulan?->inputusulankegiatans?->pelaksanaankegiatans;
-
-$isLaporan = !empty($hasPelaksanaan);
+if (!is_null($isLaporan)) {
+    if (is_string($isLaporan)) {
+        $isLaporan = filter_var($isLaporan, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+    } else {
+        $isLaporan = (bool) $isLaporan;
+    }
+} else {
+    $hasPelaksanaan = $usulan?->inputusulankegiatans?->pelaksanaankegiatans;
+    $isLaporan = !empty($hasPelaksanaan);
+}
 
 /* ================= TITLE DINAMIS ================= */
 $title = $isLaporan

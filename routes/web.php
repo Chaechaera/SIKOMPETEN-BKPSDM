@@ -96,6 +96,7 @@ Route::middleware('auth')->group(function () {
 
         // Download Surat Pengajuan dan KAK Usulan Kegiatan
         Route::get('/admin/usulankegiatan/{id}/download', [UsulanKegiatansController::class, 'download'])->name('admin.usulankegiatan.download');
+        Route::post('/admin/usulankegiatan/{id}/preview', [UsulanKegiatansController::class, 'preview'])->name('admin.usulankegiatan.preview');
 
         // Cetak Surat Pengajuan dan KAK Usulan Kegiatan
         Route::match(['get', 'post'], '/admin/usulankegiatan/{id}/cetak', [CetakUsulanKegiatansController::class, 'store'])->name('admin.usulankegiatan.cetak');
@@ -187,7 +188,9 @@ Route::post('/admin/laporankegiatan/{id}/kirim',
 
         // Download Sertifikat Kegiatan dalam ZIP
         Route::get('/admin/sertifikat/{id}/downloadZIP', [SertifikatsController::class, 'downloadZIP'])->name('admin.sertifikat.download');
-    });
+    
+        // Close Notification
+        Route::post('/usulan/notifikasi/{id}/close',[UsulanKegiatansController::class, 'closeNotification'])->name('admin.usulankegiatan.notification.close');});
 
 
 

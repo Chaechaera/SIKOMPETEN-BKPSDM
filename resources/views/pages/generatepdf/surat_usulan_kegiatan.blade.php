@@ -606,31 +606,53 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>
+                    <td>
+                        {{ $preview_identitas['nomor_surat']
+                            ?? $usulankegiatans->identitassurats?->nomor_surat
+                            ?? '' }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
+                    <td>{{ $preview_identitas['sifat_surat']
+                        ?? $usulankegiatans->identitassurats?->sifat_surat
+                        ?? '' }}
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
+                    <td>{{ $preview_identitas['lampiran_surat']
+                        ?? $usulankegiatans->identitassurats?->lampiran_surat
+                        ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
+                    <td>
+                        <strong>
+                            {{ $preview_identitas['perihal_surat']
+                                ?? $usulankegiatans->identitassurats?->perihal_surat
+                                ?? '' }}
+                        </strong>
+                    </td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->tanggal_surat
-    ? \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans?->kirimusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
-    : '' }}
+                @php
+                $tanggalSurat =
+                    $preview_identitas['tanggal_surat']
+                    ?? $usulankegiatans->identitassurats?->tanggal_surat;
+                @endphp
+
+                {{ $tanggalSurat
+                    ? \Carbon\Carbon::parse($tanggalSurat)
+                        ->translatedFormat('d F Y')
+                    : '' }}
             </p>
         </div>
     </div>

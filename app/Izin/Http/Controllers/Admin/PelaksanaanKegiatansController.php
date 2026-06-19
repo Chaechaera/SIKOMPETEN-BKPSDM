@@ -11,86 +11,108 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class PelaksanaanKegiatansController extends Controller
 {
     /**
-     * Tampilkan Form Upload Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
+     * Form Upload
      */
     public function create($id)
     {
-        // Temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::findOrFail($id);
 
-        // Redirect ke halaman upload pelaksanaan kegiatan
         return view('pages.pelaksanaankegiatan.upload_pelaksanaan_kegiatan', compact('usulankegiatans'));
     }
 
     /**
-     * Simpan Data Upload Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
+     * Simpan Multi Upload
      */
     public function store(Request $request)
     {
-        // Validasi request
+        // ✅ VALIDASI (FIXED)
         $request->validate([
-            'buktipelaksanaan_kegiatan.*' => 'required|mimes:jpg,jpeg,png|max:2048',
+            'buktipelaksanaan_kegiatan' => 'required|array|max:5',
+            'buktipelaksanaan_kegiatan.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'catatan_pelaksanaan' => 'nullable|string|max:2000',
+            'hambatan_pelaksanaan' => 'nullable|string|max:2000',
+            'solusi_hambatan_pelaksanaan' => 'nullable|string|max:2000',
         ]);
 
-        // Ambil usulankegiatan dari id route
-        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans')->findOrFail($request->route('id'));
+        // Ambil ID dari route
+        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans')
+            ->findOrFail($request->route('id'));
+
         $inputusulankegiatan_id = $usulankegiatan->inputusulankegiatans->id;
 
-        // Simpan semua file ke array
         $path_buktipelaksanaan = [];
 
-        // Cek apakah terdapat file bukti yang diunggah
+        // ✅ HANDLE MULTI FILE
         if ($request->hasFile('buktipelaksanaan_kegiatan')) {
-            foreach ($request->file('buktipelaksanaan_kegiatan') as $file_buktipelaksanaan_kegiatan) {
-                $path_buktipelaksanaan[] = $file_buktipelaksanaan_kegiatan->storeAs(
+
+            foreach ($request->file('buktipelaksanaan_kegiatan') as $file) {
+
+                $namaFile = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+
+                $path = $file->storeAs(
                     'izin/buktipelaksanaan_kegiatan',
-                    time() . '_' . uniqid() . '_' . $file_buktipelaksanaan_kegiatan->getClientOriginalName(),
+                    $namaFile,
                     'public'
                 );
+
+                $path_buktipelaksanaan[] = $path;
             }
 
-            // Simpan data pelaksanaankegiatan
+            // ✅ SIMPAN KE DB (JSON)
             Izin_Pelaksanaankegiatans::create([
                 'inputusulankegiatan_id' => $inputusulankegiatan_id,
                 'buktipelaksanaan_kegiatan' => json_encode($path_buktipelaksanaan),
+                'catatan_pelaksanaan' => $request->catatan_pelaksanaan,
+                'hambatan_pelaksanaan' => $request->hambatan_pelaksanaan,
+                'solusi_hambatan_pelaksanaan' => $request->solusi_hambatan_pelaksanaan,
             ]);
 
-            // Redirect ke halaman daftar usulankegiatan yang diajukan
-            return redirect()->route('admin.usulankegiatan.index')->with('success', 'Bukti Pelaksanaan Kegiatan Berhasil Diunggah!');
+            return redirect()
+                ->route('admin.usulankegiatan.index')
+                ->with('success', 'Bukti Pelaksanaan Kegiatan berhasil diunggah!');
         }
+
+        // ❗ fallback kalau tidak ada file
+        return back()->with('error', 'Tidak ada file yang diupload.');
     }
 
     /**
-     * Tampilkan Bukti Pelaksanaan Kegiatan Pengembangan Kompetensi ASN
+     * Tampilkan Data
      */
     public function show(Request $request, $id)
     {
-        // Temukan usulankegiatan berdasarkan id
-        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans.pelaksanaankegiatans')->findOrFail($id);
+        $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans.pelaksanaankegiatans')
+            ->findOrFail($id);
 
-        // Ambil data pelaksanaankegiatan pada database
         $pelaksanaankegiatans = $usulankegiatan->inputusulankegiatans?->pelaksanaankegiatans;
+
         if (!$pelaksanaankegiatans) {
-            return redirect()->back()->with('error', 'Data pelaksanaan kegiatan belum tersedia.');
+            return redirect()->back()->with('error', 'Data belum tersedia.');
         }
 
-        // Decode JSON dari kolom buktipelaksanaan_kegiatan
-        $buktipelaksanaan_kegiatanFiles = json_decode($pelaksanaankegiatans->buktipelaksanaan_kegiatan, true) ?? [];
+        // ✅ Decode JSON
+        $files = json_decode($pelaksanaankegiatans->buktipelaksanaan_kegiatan, true) ?? [];
 
-        // 🔥 manual pagination dari array
-    $perPage = 8;
-    $currentPage = LengthAwarePaginator::resolveCurrentPage();
-    $collection = collect($buktipelaksanaan_kegiatanFiles);
+        // ✅ PAGINATION ARRAY
+        $perPage = 8;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
-    $buktipelaksanaan_kegiatanFiles = new LengthAwarePaginator(
-        $collection->slice(($currentPage - 1) * $perPage, $perPage)->values(),
-        $collection->count(),
-        $perPage,
-        $currentPage,
-        ['path' => $request->url(), 'query' => $request->query()]
-    );
+        $collection = collect($files);
 
-        // Redirect ke halaman lihat preview gambar bukti pelaksanaan kegiatan
-        return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', ['usulankegiatans' => $usulankegiatan, 'buktipelaksanaan_kegiatanFiles' => $buktipelaksanaan_kegiatanFiles,]);
+        $paginatedFiles = new LengthAwarePaginator(
+            $collection->slice(($currentPage - 1) * $perPage, $perPage)->values(),
+            $collection->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query()
+            ]
+        );
+
+        return view('pages.pelaksanaankegiatan.view_pelaksanaan_kegiatan', [
+            'usulankegiatans' => $usulankegiatan,
+            'buktipelaksanaan_kegiatanFiles' => $paginatedFiles,
+        ]);
     }
 }

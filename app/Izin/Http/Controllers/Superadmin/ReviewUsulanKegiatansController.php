@@ -35,8 +35,29 @@ class ReviewUsulanKegiatansController extends Controller
             }
         }
 
-        // paginate TERAKHIR
-    $usulankegiatans = $usulankegiatans->paginate(20);
+        // Search by nama kegiatan, nomor surat, atau OPD
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $usulankegiatans->where(function ($query) use ($search) {
+                $query->whereHas('inputusulankegiatans', function ($q) use ($search) {
+                    $q->where('nama_kegiatan', 'like', "%{$search}%");
+                })
+                ->orWhereHas('subunitkerjas', function ($q) use ($search) {
+                    $q->where('singkatan', 'like', "%{$search}%");
+                })
+                ->orWhereHas('inputusulankegiatans.kirimusulankegiatans.identitassurats', function ($q) use ($search) {
+                    $q->where('nomor_surat', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Filter by tanggal pengajuan usulan
+        if ($request->filled('tanggal_pengajuan')) {
+            $usulankegiatans->whereDate('created_at', $request->tanggal_pengajuan);
+        }
+
+        // Urutkan dari usulan terbaru ke terlama
+        $usulankegiatans = $usulankegiatans->orderByDesc('created_at')->paginate(20)->withQueryString();
 
         // Redirect ke halaman daftar usulan kegiatan yang perlu direview
         return view('pages.usulankegiatan.pending_list_usulan_kegiatan', compact('usulankegiatans'));

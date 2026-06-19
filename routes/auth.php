@@ -12,6 +12,7 @@ use App\Izin\Http\Controllers\Auth\RegisteredUserController;
 use App\Izin\Http\Controllers\Auth\VerifyEmailController;
 use App\Izin\Http\Controllers\Auth\SuperadminController;
 use App\Izin\Http\Controllers\Auth\UserController;
+use App\Izin\Http\Controllers\Auth\RoleSwitchController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -124,6 +125,14 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // ✅ DEVELOPMENT ONLY: Role Switcher (untuk testing multiple roles)
+    if (app()->isLocal()) {
+        Route::get('/dev/switch-user', [RoleSwitchController::class, 'showSwitcher'])
+            ->name('dev.switch-user');
+        Route::post('/dev/switch-user', [RoleSwitchController::class, 'switchUser'])
+            ->name('dev.switch-user-store');
+    }
 });
 
 Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)

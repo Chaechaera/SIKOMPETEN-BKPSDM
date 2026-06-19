@@ -6,6 +6,7 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Kirimusulankegiatans;
 use App\Izin\Models\Izin_Usulankegiatans;
 use App\Izin\Services\IdentitasSuratsService;
+use App\Izin\Models\Izin_Cetakusulankegiatans;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,16 +36,17 @@ class KirimUsulanKegiatansController extends Controller
         // Transaksi DB berlangsung
         DB::transaction(function () use ($request, $identitassuratservice, $user) {
 
-            // Simpan identitassurat
-            $identitassurats = $identitassuratservice->create(
-                $request->only([
-                    'nomor_surat',
-                    'tanggal_surat',
-                    'perihal_surat',
-                    'sifat_surat',
-                    'lampiran_surat',
-                ])
-            );
+            // Ambil usulan kegiatan untuk mendapatkan identitassurat dari cetak
+            $usulankegiatan = Izin_Usulankegiatans::with('cetakusulankegiatans')->findOrFail($request->usulankegiatan_id);
+
+            // Ambil identitassurat_id dari cetak usulan kegiatan
+            $cetak = Izin_Cetakusulankegiatans::where(
+                'inputusulankegiatan_id',
+                $usulankegiatan->inputusulankegiatans->id
+            )->first();
+
+            $identitassurat_id = $cetak?->identitassurat_id;
+
 
             // Validasi request
             $request->validate([
@@ -65,7 +67,7 @@ class KirimUsulanKegiatansController extends Controller
             // Simpan data kirim pengajuan usulan kegiatan final
             Izin_Kirimusulankegiatans::create([
                 'inputusulankegiatan_id' => $request->usulankegiatan_id,
-                'identitassurat_id' => $identitassurats->id,
+                'identitassurat_id' => $identitassurat_id,
                 'filekirim_inputusulankegiatan' => $kirimusulankegiatans,
                 'tanggalkirim_inputusulankegiatan' => now(),
                 'nipadmin_inputusulankegiatan' => $user->nip,

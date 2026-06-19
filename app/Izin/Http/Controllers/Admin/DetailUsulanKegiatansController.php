@@ -41,7 +41,8 @@ class DetailUsulanKegiatansController extends Controller
             'usulankegiatan_id' => 'required|exists:izin_usulankegiatans,id',
             'jeniskop_usulankegiatan' => 'required|in:kop_text,kop_gambar',
             'kopunitkerja_id' => 'nullable|exists:izin_kopunitkerjas,id',
-            'jadwalpelaksanaan_kegiatan' => 'nullable|file|mimes:xls,xlsx|max:5120'
+            'jadwalpelaksanaan_kegiatan' => 'nullable|file|mimes:xls,xlsx|max:5120',
+            'alokasianggaran_kegiatan' => 'required|integer|min:0',
         ]);
 
         // Update data pada inputusulankegiatan
