@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('unitkerja_id')->constrained('ref_unitkerjas')->cascadeOnDelete();
             $table->foreignId('subunitkerja_id')->nullable()->constrained('ref_subunitkerjas')->nullOnDelete();
+            $table->string('jabatanpenanggungjawab_opd')->nullable();
+            $table->string('pangkatpenanggungjawab_opd')->nullable();
+            $table->string('namakepala_opd')->nullable();
+            $table->string('nipkepala_opd')->nullable();
             $table->string('gambarttd_opd')->nullable();
             $table->timestamps();
         });

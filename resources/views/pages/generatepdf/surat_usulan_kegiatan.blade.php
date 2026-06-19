@@ -6,7 +6,7 @@
     <title>Surat Pengajuan dan KAK Usulan Kegiatan</title>
     <style>
         @page {
-            margin: 40px 50px;
+            margin: 1cm 2cm 1cm 2cm;
         }
 
         body {
@@ -16,19 +16,16 @@
             color: #000;
         }
 
-        /* ====================== KOP SURAT ====================== */
+        /* ====================== BAGIAN KOP SURAT ====================== */
         .kop-container {
             display: table;
             width: 100%;
             margin-bottom: 2px;
-            /* jarak ke garis bawah */
         }
 
         .kop-gambar-full {
             width: 100%;
-            /* full lebar surat */
             max-height: 150px;
-            /* proporsional */
             display: block;
         }
 
@@ -43,7 +40,6 @@
             height: auto;
             padding-left: 15px;
             padding-right: 5px;
-            /* jarak kiri-kanan logo */
         }
 
         .kop-text {
@@ -68,14 +64,12 @@
         .kop-text p {
             font-size: 10pt;
             margin: 1px 0;
-            /* biar antarbaris rapat */
             text-align: center;
         }
 
         .kop-line {
             border-bottom: 3px solid black;
             margin-top: 2px;
-            /* jarak ke logo */
         }
 
         .kop-line::after {
@@ -85,7 +79,7 @@
             margin-top: 3px;
         }
 
-        /* ====================== BAGIAN SURAT ====================== */
+        /* ====================== BAGIAN IDENTITAS SURAT ====================== */
         .meta-section {
             width: 100%;
             font-size: 12pt;
@@ -107,7 +101,6 @@
 
         .meta-table .label {
             width: 80px;
-            /* atur sesuai panjang teks */
         }
 
         .meta-table .colon {
@@ -139,6 +132,8 @@
             clear: both;
         }
 
+        /* ====================== BAGIAN SURAT USULAN ====================== */
+
         p {
             margin: 4px 0;
             text-align: justify;
@@ -161,13 +156,10 @@
 
         p.indent {
             text-align: justify;
-            /* biar teks rata kiri-kanan */
             text-indent: 30px;
-            /* ini kunci: jarak baris pertama menjorok */
             margin-top: 8px;
             margin-bottom: 8px;
             line-height: 1.5;
-            /* biar nyaman dibaca */
         }
 
         .ttd {
@@ -175,13 +167,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            /* ⬅️ ini yang bikin ke kanan */
             width: 50%;
-            /* batasi lebar area tanda tangan */
             margin-left: auto;
             margin-top: 30px;
             padding-right: 10px;
-            /* atur jarak dari tepi kanan */
             line-height: 1.3;
             page-break-inside: avoid;
         }
@@ -194,57 +183,43 @@
 
         .ttd img {
             display: inline-block;
-            /* bukan block */
             height: 100px;
             margin: 0;
             align-items: flex-end;
-            /* dorong ke kanan */
             margin-left: auto;
-            /* ini kunci biar ke kanan */
             position: relative;
             left: 5%;
-            /* ⬅️ tambahkan ini */
         }
 
         .ttd-wrapper {
             position: relative;
             width: 75%;
-            /* perbesar area gabungan */
             height: 300px;
-            /* tinggi total */
             margin-top: 5px;
             margin-bottom: -180px;
         }
 
-        /* === STEMPEL === */
         .stempel-layer {
             position: absolute;
             left: 30%;
-            /* pusatkan horizontal */
             top: 15px;
-            /* geser naik biar nyentuh tulisan atas */
             transform: translateX(-10%) scale(2);
-            /* perbesar proporsional (lebar & tinggi) */
             transform-origin: center;
             opacity: 0.6;
-            /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
-        /* === TTD === */
         .ttd-layer {
             position: absolute;
             left: 40%;
             top: -90px;
-            /* geser ke bawah biar nempel pas di atas stempel */
             transform: translateX(5%);
             width: 100%;
-            /* sedikit lebih kecil dari stempel */
             z-index: 1;
         }
 
-        /* ====================== PEMBATAS HALAMAN ====================== */
+        /* ====================== PEMBATAS HALAMAN AGAR TTD TIDAK TERPISAH ====================== */
         .page-break {
             page-break-after: always;
         }
@@ -345,13 +320,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            /* ⬅️ ini yang bikin ke kanan */
             width: 50%;
-            /* batasi lebar area tanda tangan */
             margin-left: auto;
             margin-top: 30px;
             padding-right: 10px;
-            /* atur jarak dari tepi kanan */
             line-height: 1.3;
             page-break-inside: avoid;
         }
@@ -364,52 +336,38 @@
 
         .kak-section .ttd img {
             display: inline-block;
-            /* bukan block */
             height: 100px;
             margin: 0;
             align-items: flex-end;
-            /* dorong ke kanan */
             margin-left: auto;
-            /* ini kunci biar ke kanan */
             position: relative;
             left: 5%;
-            /* ⬅️ tambahkan ini */
         }
 
         .kak-section .ttd-wrapper {
             position: relative;
             width: 75%;
-            /* perbesar area gabungan */
             height: 300px;
-            /* tinggi total */
             margin-top: 5px;
         }
 
-        /* === STEMPEL === */
         .kak-section .stempel-layer {
             position: absolute;
             left: 30%;
-            /* pusatkan horizontal */
             top: 15px;
-            /* geser naik biar nyentuh tulisan atas */
             transform: translateX(-10%) scale(2);
-            /* perbesar proporsional (lebar & tinggi) */
             transform-origin: center;
             opacity: 0.6;
-            /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
-        /* === TTD === */
         .kak-section .ttd-layer {
             position: absolute;
             left: 40%;
             top: -90px;
-            /* geser ke bawah biar nempel pas di atas stempel */
             transform: translateX(5%);
             width: 100%;
-            /* sedikit lebih kecil dari stempel */
             z-index: 1;
         }
 
@@ -429,7 +387,6 @@
 
         .kak-section .table .label {
             width: 160px;
-            /* atur sesuai panjang teks */
         }
 
         .kak-section .table .colon {
@@ -485,22 +442,37 @@
             padding-right: 0;
         }
 
+        .susunan-acara-wrapper {
+            display: block;
+        }
+
         .susunan-acara {
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
-            table-layout: auto;
+            table-layout: fixed;
             font-size: 10.5pt;
             margin-top: 8px;
+            page-break-inside: auto;
+            break-inside: auto;
+        }
+
+        .susunan-acara thead,
+        .susunan-acara tbody,
+        .susunan-acara tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .susunan-acara th,
         .susunan-acara td {
-            border: 0.7px solid #000;
-            padding: 2.5px 3.5px;
-            word-wrap: break-word;
+            border: 0.5px solid #000;
+            padding: 4px 6px;
             vertical-align: middle;
-            line-height: 1.2;
+            line-height: 1.25;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
 
         .susunan-acara th {
@@ -514,14 +486,9 @@
         .susunan-acara td {
             text-align: left;
             font-size: 10.3pt;
+            overflow-wrap: anywhere;
         }
 
-        /* Kolom angka */
-        .susunan-acara td:nth-child(n+6) {
-            text-align: right;
-        }
-
-        /* Judul Grup (Belanja Bahan Habis Pakai, dsb) */
         .susunan-acara tr.group-row td {
             font-weight: bold;
             text-align: left;
@@ -533,41 +500,29 @@
             text-transform: capitalize;
         }
 
-        /* Kolom Nomor agar kecil dan proporsional */
-        .susunan-acara td:first-child {
-            text-align: center;
-            width: 30px;
-            font-size: 9.5pt;
-        }
-
-        /* Agar teks kata panjang seperti “Belanja Operasional Lainnya” tidak nempel */
-        .susunan-acara td,
-        .susunan-acara th {
-            white-space: normal;
-            overflow-wrap: break-word;
-        }
-
-        /* Kolom nomor kecil & center */
-        .susunan-acara .td-nomor {
-            text-align: center;
-            width: 22px;
-            /* sebelumnya 30px, sekarang lebih rapat */
-            font-size: 9pt;
-            /* sedikit lebih kecil */
-            padding: 1px 2px;
-            /* padding diperkecil */
-            vertical-align: middle;
-            white-space: nowrap;
-            /* biar angka nggak turun ke bawah */
-        }
-
-        /* Kolom isi umum */
         .susunan-acara .td-isi {
             text-align: left;
             padding: 3px 4px;
             font-size: 10.3pt;
             line-height: 1.2;
         }
+
+        .susunan-acara th:nth-child(1),
+.susunan-acara td:nth-child(1) {
+    width: 20%;
+    text-align: center;
+}
+
+.susunan-acara th:nth-child(2),
+.susunan-acara td:nth-child(2) {
+    width: 50%;
+}
+
+.susunan-acara th:nth-child(3),
+.susunan-acara td:nth-child(3) {
+    width: 30%;
+    text-align: center;
+}
 
         table {
             width: 100%;
@@ -583,7 +538,6 @@
 
         .table .label {
             width: 150px;
-            /* atur sesuai panjang teks */
         }
 
         .table .colon {
@@ -713,8 +667,8 @@
     <div class="content">
         <p class="indent">
             Guna meningkatkan kompetensi sumber daya manusia di lingkungan
-            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit,
-            {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan
+            {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta serta unit,
+            {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-' }} Kota Surakarta akan menyelenggarakan kegiatan pengembangan
             kompetensi
             "{{ $usulankegiatans->inputusulankegiatans->nama_kegiatan ?? 'Workshop Deteksi dan Intervensi Dini Perkembangan pada Anak dengan Disabilitas untuk Tenaga Kesehatan' }}".
             Sehubungan dengan hal tersebut, bersama ini kami sampaikan permohonan rekomendasi pelaksanaan kegiatan
@@ -727,7 +681,7 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         <div class="ttd-wrapper">
@@ -744,8 +698,9 @@
 
         </div>
 
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 
     <div class="page-break"></div>
@@ -801,8 +756,8 @@
         @php
         $letterIndex = 0; // mulai dari A
         function getLetter($i) {
-            $alphabet = range('A', 'Z');
-            return $alphabet[$i] ?? ('Z' . ($i - 25));
+        $alphabet = range('A', 'Z');
+        return $alphabet[$i] ?? ('Z' . ($i - 25));
         } // fallback kalau lewat Z
         @endphp
 
@@ -1070,7 +1025,7 @@
                 <li>SASARAN PESERTA
                     <p class="indent">
                         Sasaran peserta yang mengikuti kegiatan ini merupakan orang yang berasal dari ruang lingkup
-                        {{ $user->subunitkerjas->sub_unitkerja }} di Kota Surakarta yang mana meliputi: <br>
+                        {{ $usulankegiatans?->subunitkerjas?->sub_unitkerja }} di Kota Surakarta yang mana meliputi: <br>
                         {!! nl2br(e($usulankegiatans->detailusulankegiatans->sasaranpeserta_kegiatan ?? 'Peserta berasal dari tenaga kesehatan puskesmas, sebanyak 50 orang.')) !!}
                     </p>
                 </li>
@@ -1127,15 +1082,32 @@
         <p class="section-title">{{ getLetter($letterIndex++) }}. SUSUNAN ACARA</p>
         <p class="indent">Berikut terlampir dalam rancangan susunan acara untuk kegiatan pengembangan komptensi yang akan dilaksanakan:</p>
         @if(!empty($jadwalpelaksanaan_kegiatan) && count($jadwalpelaksanaan_kegiatan) > 1)
-        <table class="susunan-acara">
+        <div class="susunan-acara-wrapper">
+            <table class="susunan-acara">
             @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
             @php
             // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            $row = array_map(function ($cell) {
+            /*$row = array_map(function ($cell) {
             if (is_array($cell))
             $cell = implode(', ', array_filter($cell));
             $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
             $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
+            return $cell === '' ? null : $cell;
+            }, $row);*/
+            $row = array_map(function ($cell) {
+
+            if (is_array($cell)) {
+            $cell = implode(', ', array_filter($cell));
+            }
+
+            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
+
+            // jangan hapus spasi
+            $cell = trim($cell);
+
+            // rapikan spasi ganda
+            $cell = preg_replace('/\s+/', ' ', $cell);
+
             return $cell === '' ? null : $cell;
             }, $row);
 
@@ -1187,7 +1159,14 @@
                     @foreach($row as $i => $cell)
                     @php
                     // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
-                    $cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                    //$cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                    $cleanCell = trim($cell);
+
+                    $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+                    $cleanCell = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleanCell);
+
+                    $cleanCell = preg_replace('/([a-zA-Z])\(/', '$1 (', $cleanCell);
                     $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
 
                     // Nomor kolom (kolom pertama) diperkecil
@@ -1203,6 +1182,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         @else
         <p class="indent">Terlampir dalam jadwal kegiatan.</p>
         @endif
@@ -1211,28 +1191,29 @@
         <p class="indent">
             {{ $usulankegiatans->detailusulankegiatans->penutup_kegiatan ?? 'Demikian Kerangka Acuan Kerja ini dibuat untuk digunakan sebagai pedoman pelaksanaan kegiatan.' }}
         </p>
+    </div>
 
-        <div class="ttd">
-            <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
-            <p><strong>Kota Surakarta</strong></p>
+    <div class="ttd">
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
+        <p><strong>Kota Surakarta</strong></p>
 
-            <div class="ttd-wrapper">
+        <div class="ttd-wrapper">
 
-                {{-- ===== STAMPEL ===== --}}
-                @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-                <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
-                @endif
+            {{-- ===== STAMPEL ===== --}}
+            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @endif
 
-                {{-- ===== TTD ===== --}}
-                @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-                <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
-                @endif
+            {{-- ===== TTD ===== --}}
+            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @endif
 
-            </div>
-
-            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
         </div>
+
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 </body>
 

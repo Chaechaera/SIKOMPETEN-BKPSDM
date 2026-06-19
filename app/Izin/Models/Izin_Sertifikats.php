@@ -14,6 +14,7 @@ class Izin_Sertifikats extends Model
     protected $fillable = [
         'laporankegiatan_id',
         'inputusulankegiatan_id',
+        'jenissertifikat_kegiatan',
         'templatesertifikat_kegiatan',
         'fieldstemplatesertifikat_kegiatan',
         'nomorsertifikat_kegiatan',

@@ -4,13 +4,17 @@ namespace App\Izin\Http\Controllers\User;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Laporanpesertakegiatans;
 use App\Izin\Models\Izin_Pesertakegiatans;
 use App\Izin\Models\Izin_Sertifikats;
+use App\Izin\Models\Izin_Stempelunitkerjas;
+use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class SertifikatsController extends Controller
@@ -18,57 +22,198 @@ class SertifikatsController extends Controller
     // New: list all users
     public function index()
     {
-        $usulankegiatans = Izin_Usulankegiatans::with(
+        $user   = Auth::user();
+        $search = request('search');
+        $tahun  = request('tahun');
+
+        $query = Izin_Usulankegiatans::with([
             'inputusulankegiatans',
+            'inputusulankegiatans.usulankegiatans',
+            'inputusulankegiatans.usulankegiatans.subunitkerjas',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans',
             'inputlaporankegiatans.laporankegiatans.sertifikats',
             'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
             'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-        )->orderBy('created_at', 'desc')
-        ->paginate(10);
+        ]);
 
-        return view('pages.sertifikat.admin', compact('usulankegiatans'));
+        // =========================
+        // 🔍 SEARCH (QUERY LEVEL)
+        // =========================
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('inputusulankegiatans', function ($q2) use ($search) {
+                    $q2->where('nama_kegiatan', 'like', "%$search%");
+                })
+                    ->orWhereHas('inputusulankegiatans.usulankegiatans.subunitkerjas', function ($q2) use ($search) {
+                        $q2->where('singkatan', 'like', "%$search%");
+                    })
+                    ->orWhereHas(
+                        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
+                        function ($q2) use ($search) {
+                            $q2->where('nomorsertifikatpeserta_kegiatan', 'like', "%$search%");
+                        }
+                    );
+            });
+        }
+
+        // =========================
+        // 📅 FILTER TAHUN
+        // =========================
+        if ($tahun) {
+            $query->whereHas(
+                'inputlaporankegiatans.laporankegiatans.sertifikats',
+                function ($q) use ($tahun) {
+                    $q->whereYear('tanggalkeluarsertifikat_kegiatan', $tahun);
+                }
+            );
+        }
+
+        // =========================
+        // 🏢 FILTER BERDASARKAN OPD USER
+        // =========================
+        if ($user && $user->subunitkerja_id) {
+            $query->whereHas('inputusulankegiatans.usulankegiatans.subunitkerjas', function ($q) use ($user) {
+                $q->where('id', $user->subunitkerja_id);
+            });
+        }
+
+        // =========================
+        // 📄 AMBIL DATA + PAGINATION MANUAL
+        // =========================
+        $collection = $query->get()->values();
+
+        $page    = request()->get('page', 1);
+        $perPage = 10;
+
+        $usulankegiatans = new LengthAwarePaginator(
+            $collection->forPage($page, $perPage),
+            $collection->count(),
+            $perPage,
+            $page,
+            [
+                'path'  => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        // =========================
+        // 📅 DROPDOWN TAHUN
+        // =========================
+        $tahuns = Izin_Sertifikats::selectRaw('YEAR(tanggalkeluarsertifikat_kegiatan) as tahun')
+            ->distinct()
+            ->orderByDesc('tahun')
+            ->pluck('tahun');
+
+        return view('pages.sertifikat.admin', compact(
+            'usulankegiatans',
+            'search',
+            'tahuns',
+            'tahun'
+        ));
     }
 
-    // New: list all users
+    /**
+     * List Sertifikat User
+     */
     public function listSertif()
     {
+        // Ambil user yang login saat ini
         $user = Auth::user();
 
-    $usulankegiatans = Izin_Usulankegiatans::with(
-        'inputusulankegiatans',
-        'inputlaporankegiatans',
-        'inputlaporankegiatans.laporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.sertifikats',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans.subunitkerjas'
-    )->orderBy('created_at', 'desc')
-    ->paginate(10);
+        // Inisiasi request 
+        $search = request('search');
+        $sort = request('sort_tahun'); // asc / desc / null
 
-    // Get all certificates for the user with relationships
-    $sertifikats = Izin_Sertifikats::with([
-        'pesertakegiatans',
-        'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
-        'laporanpesertakegiatans'
-    ])->whereHas('pesertakegiatans', function($query) use ($user) {
-        $query->where('nip_nik_peserta', $user->nip_nik ?? $user->email);
-    })->first();
+        // Eager Loading
+            $sertifikats = Izin_Sertifikats::with([
+                'pesertakegiatans.subunitkerjas',
+    'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+    'laporanpesertakegiatans',
+    'pesertakegiatans' => function ($q) use ($user) {
+        $q->where('nip_nik_peserta', $user->nip);
+    }
+])
+->whereHas('pesertakegiatans', function ($q) use ($user) {
+    $q->where('nip_nik_peserta', $user->nip);
+})
+->get();
 
-    $peserta = $sertifikats ? $sertifikats->pesertakegiatans->first() : null;
-    
-    $laporanPeserta = $sertifikats && $peserta ? 
-        Izin_LaporanPesertakegiatans::where('sertifikat_id', $sertifikats->id)
-            ->where('pesertakegiatan_id', $peserta->id)
-            ->first() : null;
+        // Filter search dengan collection
+        if ($search) {
+            $search = strtolower($search);
 
-    return view('pages.sertifikat.user', [
-        'usulankegiatans' => $usulankegiatans,
-        'sertifikat' => $sertifikats,
-        'peserta' => $peserta,
-        'laporanPeserta' => $laporanPeserta
-    ]);
+            $sertifikats = $sertifikats->filter(function ($s) use ($search) {
+
+                // Berdasarkan nomor sertifikat peserta, tahun, nama kegiatan, atau OPD
+                $p = $s->pesertakegiatans->first();
+                $nomor = strtolower($p->nomorsertifikatpeserta_kegiatan ?? '');
+
+                $tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
+
+                $namaKegiatan = strtolower(
+                    optional($s->laporankegiatans)
+                        ?->inputlaporankegiatans
+                        ?->inputusulankegiatans
+                        ?->nama_kegiatan ?? ''
+                );
+
+                $opd = strtolower(
+                    optional($p->sertifikats)
+                        ?->inputusulankegiatans
+                        ?->subunitkerjas
+                        ?->singkatan ?? ''
+                );
+
+                return
+                    str_contains($nomor, $search) ||
+                    str_contains((string)$tahun, $search) ||
+                    str_contains($namaKegiatan, $search) ||
+                    str_contains($opd, $search);
+            });
+        }
+
+        // Filter Status
+        $status = request('statuslaporan_pesertakegiatan');
+
+        if ($status) {
+            $sertifikats = $sertifikats->filter(function ($s) use ($status) {
+
+                $laporan = $s->laporanpesertakegiatans->first();
+
+                if ($status === 'belum_upload') {
+                    return $laporan === null;
+                }
+
+                return optional($laporan)->statuslaporan_pesertakegiatan === $status;
+            });
+        }
+
+        // Sorting tahun
+        if ($sort === 'asc') {
+            $sertifikats = $sertifikats->sortBy('tanggalkeluarsertifikat_kegiatan');
+        } else {
+            $sertifikats = $sertifikats->sortByDesc('tanggalkeluarsertifikat_kegiatan');
+        }
+
+        // Pagination manual
+        $sertifikats = $sertifikats->values();
+
+        $page = request()->get('page', 1);
+        $perPage = 20;
+
+        $sertifikats = new LengthAwarePaginator(
+            $sertifikats->forPage($page, $perPage),
+            $sertifikats->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('pages.sertifikat.user', compact('sertifikats'));
     }
 
     public function cek($nip)
@@ -81,23 +226,23 @@ class SertifikatsController extends Controller
             'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
             'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
         ])
-        ->where('nip_nik_peserta', $nip)
-        ->first();
+            ->where('nip_nik_peserta', $nip)
+            ->first();
 
         if (!$peserta || !$peserta->sertifikats) {
+            return response()->json([
+                'success' => false
+            ]);
+        }
+
+        $sertifikat = $peserta->sertifikats;
+
         return response()->json([
-            'success' => false
-        ]);
-    }
-
-    $sertifikat = $peserta->sertifikats;
-
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'nama' => $peserta->nama_peserta,
-            'nip' => $peserta->nip_nik_peserta,
-            'pelatihan' =>
+            'success' => true,
+            'data' => [
+                'nama' => $peserta->nama_peserta,
+                'nip' => $peserta->nip_nik_peserta,
+                'pelatihan' =>
                 optional(
                     $peserta->detaillaporankegiatans
                         ->laporankegiatans
@@ -105,12 +250,12 @@ class SertifikatsController extends Controller
                         ->inputusulankegiatans
                 )->nama_kegiatan ?? '-',
 
-            'download_url' => route(
-                'user.sertifikat.download',
-                [$peserta->sertifikat_id, $peserta->id]
-            )
-        ]
-    ]);
+                'download_url' => route(
+                    'user.sertifikat.download',
+                    [$peserta->sertifikat_id, $peserta->id]
+                )
+            ]
+        ]);
     }
 
     /**
@@ -187,72 +332,120 @@ class SertifikatsController extends Controller
      */
     public function download($sertifikat_id, $peserta_id)
     {
-        // Check if participant has uploaded the report first
-        /*$laporanpesertakegiatans = Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $peserta_id)
-            ->where('sertifikat_id', $sertifikat_id)
-            ->first();
-
-        if (!$laporanpesertakegiatans || $laporanpesertakegiatans->statuslaporan_pesertakegiatan !== 'pending') {
-            return redirect()->route('user.laporanpeserta.create', $sertifikat_id)
-                ->with('warning', 'Silahkan upload laporan peserta terlebih dahulu sebelum mengunduh sertifikat.');
-        }*/
-
-        // Eager load relasi dari model dan temukan sertifikat berdasarkan id
+        // Eager Loading
         $sertifikat = Izin_Sertifikats::with([
             'pesertakegiatans'
         ])->findOrFail($sertifikat_id);
 
-        // Ambil template sertifikat kegiatan
-        $templateSertifikat = $sertifikat->templatesertifikat_kegiatan;
-        if (!$templateSertifikat) {
-            return back()->withErrors('Template sertifikat belum diupload.');
+        // Menentukan halaman tampilan berdasarkan jenis sertifikat
+        $view = $sertifikat->jenissertifikat_kegiatan === 'template_opd'
+            ? 'pages.generatepdf.sertifikat_kegiatan' // pakai background upload
+            : 'pages.generatepdf.sertifikat_kegiatan_general'; // pakai template default
+
+        // Ambil peserta kegiatan
+        $peserta = Izin_Pesertakegiatans::where('sertifikat_id', $sertifikat_id)
+            ->findOrFail($peserta_id);
+
+
+        // Ambil data ttd dan stempel
+        $ttd = $peserta->detaillaporankegiatans
+            ->laporankegiatans
+            ->inputlaporankegiatans
+            ->inputusulankegiatans
+            ->usulankegiatans
+            ->subunitkerjas->ttdunitkerjas->first();
+        $stempel = $peserta->detaillaporankegiatans
+            ->laporankegiatans
+            ->inputlaporankegiatans
+            ->inputusulankegiatans
+            ->usulankegiatans
+            ->subunitkerjas->stempelunitkerjas->first();
+
+        // Encode ttd dan stempel ke base64 untuk disisipkan ke PDF
+        $ttdBase64 = base64_encode(file_get_contents(public_path('storage/' . $ttd->gambarttd_opd)));
+        $stempelBase64 = base64_encode(file_get_contents(public_path('storage/' . $stempel->gambarstempel_opd)));
+
+
+        // Ambil gambar logo surakarta sebagai kop surat dari asset
+        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
+        if (!file_exists($kop_path)) {
+            $kop_path = null; // fallback kalau tidak ada file kop
         }
 
-        // Ambil path file sertifikat asli
-        $backgroundPath = str_replace('\\', '/', public_path('storage/' . ltrim($templateSertifikat, '/')));
-        if (!file_exists($backgroundPath)) {
-            return back()->withErrors('File template tidak ditemukan: ' . $backgroundPath);
-        }
-
-        // Encode dan Mime file sertifikat asli
-        $backgroundBase64 = base64_encode(file_get_contents($backgroundPath));
-        $backgroundMime = mime_content_type($backgroundPath);
-
-        // Decode posisi fields sertifikat
+        // Decode field template
         $rawFields = $sertifikat->fieldstemplatesertifikat_kegiatan;
-        $fieldstemplates = is_string($rawFields) ? json_decode($rawFields, true) : (is_array($rawFields) ? $rawFields : []);
+        $fieldstemplates = is_string($rawFields)
+            ? json_decode($rawFields, true)
+            : (is_array($rawFields) ? $rawFields : []);
 
-        // Eager load relasi dari model dan temukan pesertakegiatan berdasarkan id
-        $peserta = Izin_Pesertakegiatans::where('sertifikat_id', $sertifikat_id)->findOrFail($peserta_id);
-
-        // Formating capaian JP ke text
+        // Format JP
         $totaljp = optional($sertifikat->balasanlaporankegiatans)->totalcapaianjp_kegiatan ?? 0;
         $totaljp_text = $totaljp > 0
             ? $totaljp . ' (' . $this->terbilangJP($totaljp) . ')'
             : '';
 
-        // Load view PDF
-        $pdf = PDF::loadView('pages.generatepdf.sertifikat_kegiatan', [
-            'sertifikat' => $sertifikat,
-            'peserta' => $peserta,
-            'fieldstemplatesertifikat_kegiatan' => $fieldstemplates,
-            'backgroundPath' => $backgroundPath, // <-- penting!
-            'backgroundBase64' => $backgroundBase64,
-            'backgroundMime' => $backgroundMime,
-            'totalcapaianjp_text' => $totaljp_text,
-        ])->setOptions([
+        // =====================================
+        // APABILA MENGGUNAKAN TEMPLATE OPD
+        // =====================================
+        if ($sertifikat->jenissertifikat_kegiatan === 'template_opd') {
+
+            $templateSertifikat = $sertifikat->templatesertifikat_kegiatan;
+
+            if (!$templateSertifikat) {
+                return back()->withErrors('Template sertifikat belum diupload.');
+            }
+
+            $backgroundPath = str_replace('\\', '/', public_path('storage/' . ltrim($templateSertifikat, '/')));
+
+            if (!file_exists($backgroundPath)) {
+                return back()->withErrors('File template tidak ditemukan: ' . $backgroundPath);
+            }
+
+            // Ambil background gambar sertifikat
+            $backgroundBase64 = base64_encode(file_get_contents($backgroundPath));
+            $backgroundMime = mime_content_type($backgroundPath);
+
+            // Load view PDF dengan data lengkap untuk template OPD
+            $pdf = PDF::loadView($view, [
+                'sertifikat' => $sertifikat,
+                'peserta' => $peserta,
+                'fieldstemplatesertifikat_kegiatan' => $fieldstemplates,
+                'backgroundPath' => $backgroundPath,
+                'backgroundBase64' => $backgroundBase64,
+                'backgroundMime' => $backgroundMime,
+                'totalcapaianjp_text' => $totaljp_text,
+            ]);
+        }
+
+        // =====================================
+        // APABILA MENGGUNAKAN TEMPLATE BKPSDM 
+        // =====================================
+        else {
+
+            // Load view PDF dengan data lengkap untuk template BKPSDM
+            $pdf = PDF::loadView($view, [
+                'sertifikat' => $sertifikat,
+                'peserta' => $peserta,
+                'kop_path' => $kop_path,
+                'ttd' => $ttd,
+                'stempel' => $stempel,
+                'stempelBase64' => $stempelBase64,
+                'ttdBase64' => $ttdBase64,
+                'totalcapaianjp_text' => $totaljp_text,
+            ]);
+        }
+
+        // Setting PDF
+        $pdf->setOptions([
             'dpi' => 96,
-            'defaultFont' => 'Times New Roman',
             'isRemoteEnabled' => true,
             'isHtml5ParserEnabled' => true,
-            'fontHeightRatio' => 1.3,
+            'fontHeightRatio' => 1.0,
             'chroot' => public_path(),
         ])->setPaper('A4', 'landscape');
 
-        // Penamaan file sertifikat
         $filename = 'Sertifikat_' . preg_replace('/[^A-Za-z0-9 _-]/', '', $peserta->nama_peserta) . '.pdf';
 
-        // Redirect dan simpan file PDF
         return $pdf->stream($filename);
     }
 
@@ -302,7 +495,6 @@ class SertifikatsController extends Controller
         $totaljp_text = $totaljp > 0
             ? $totaljp . ' (' . $this->terbilangJP($totaljp) . ')'
             : '';
-
 
         // Buat folder temp untuk ZIP
         $folder = storage_path('app/public/izin/temp/');

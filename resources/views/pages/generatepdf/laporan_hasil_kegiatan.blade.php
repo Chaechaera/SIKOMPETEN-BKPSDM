@@ -6,7 +6,7 @@
     <title>Surat dan Laporan Hasil Kegiatan</title>
     <style>
         @page {
-            margin: 40px 50px;
+            margin: 1cm 2cm 1cm 2cm;
         }
 
         body {
@@ -16,19 +16,16 @@
             color: #000;
         }
 
-        /* ====================== KOP SURAT ====================== */
+        /* ====================== BAGIAN KOP SURAT ====================== */
         .kop-container {
             display: table;
             width: 100%;
             margin-bottom: 2px;
-            /* jarak ke garis bawah */
         }
 
         .kop-gambar-full {
             width: 100%;
-            /* full lebar surat */
             max-height: 150px;
-            /* proporsional */
             display: block;
         }
 
@@ -43,7 +40,6 @@
             height: auto;
             padding-left: 15px;
             padding-right: 5px;
-            /* jarak kiri-kanan logo */
         }
 
         .kop-text {
@@ -68,14 +64,12 @@
         .kop-text p {
             font-size: 10pt;
             margin: 1px 0;
-            /* biar antarbaris rapat */
             text-align: center;
         }
 
         .kop-line {
             border-bottom: 3px solid black;
             margin-top: 2px;
-            /* jarak ke logo */
         }
 
         .kop-line::after {
@@ -85,7 +79,7 @@
             margin-top: 3px;
         }
 
-        /* ====================== BAGIAN SURAT ====================== */
+        /* ====================== BAGIAN IDENTITAS SURAT ====================== */
         .meta-section {
             width: 100%;
             font-size: 12pt;
@@ -107,7 +101,6 @@
 
         .meta-table .label {
             width: 80px;
-            /* atur sesuai panjang teks */
         }
 
         .meta-table .colon {
@@ -139,6 +132,8 @@
             clear: both;
         }
 
+        /* ====================== BAGIAN SURAT LAPORAN ====================== */
+
         p {
             margin: 4px 0;
             text-align: justify;
@@ -161,13 +156,10 @@
 
         p.indent {
             text-align: justify;
-            /* biar teks rata kiri-kanan */
             text-indent: 30px;
-            /* ini kunci: jarak baris pertama menjorok */
             margin-top: 8px;
             margin-bottom: 8px;
             line-height: 1.5;
-            /* biar nyaman dibaca */
         }
 
         .ttd {
@@ -175,13 +167,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            /* ⬅️ ini yang bikin ke kanan */
             width: 50%;
-            /* batasi lebar area tanda tangan */
             margin-left: auto;
             margin-top: 30px;
             padding-right: 10px;
-            /* atur jarak dari tepi kanan */
             line-height: 1.3;
             page-break-inside: avoid;
         }
@@ -194,57 +183,43 @@
 
         .ttd img {
             display: inline-block;
-            /* bukan block */
             height: 100px;
             margin: 0;
             align-items: flex-end;
-            /* dorong ke kanan */
             margin-left: auto;
-            /* ini kunci biar ke kanan */
             position: relative;
             left: 5%;
-            /* ⬅️ tambahkan ini */
         }
 
         .ttd-wrapper {
             position: relative;
             width: 75%;
-            /* perbesar area gabungan */
             height: 300px;
-            /* tinggi total */
             margin-top: 5px;
             margin-bottom: -180px;
         }
 
-        /* === STEMPEL === */
         .stempel-layer {
             position: absolute;
             left: 30%;
-            /* pusatkan horizontal */
             top: 15px;
-            /* geser naik biar nyentuh tulisan atas */
             transform: translateX(-10%) scale(2);
-            /* perbesar proporsional (lebar & tinggi) */
             transform-origin: center;
             opacity: 0.6;
-            /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
-        /* === TTD === */
         .ttd-layer {
             position: absolute;
             left: 40%;
             top: -90px;
-            /* geser ke bawah biar nempel pas di atas stempel */
             transform: translateX(5%);
             width: 100%;
-            /* sedikit lebih kecil dari stempel */
             z-index: 1;
         }
 
-        /* ====================== PEMBATAS HALAMAN ====================== */
+        /* ====================== PEMBATAS HALAMAN AGAR TTD TIDAK TERPISAH ====================== */
         .page-break {
             page-break-after: always;
         }
@@ -295,19 +270,10 @@
         }
 
         .kak-section p.indent {
-            text-indent: 20px;
+            text-indent: 30px;
             margin-top: 0;
             margin-bottom: 8px;
             padding-left: 40px;
-            padding-right: 40px;
-            text-align: justify;
-        }
-
-        .kak-section p.indent-link {
-            text-indent: 20px;
-            margin-top: 0;
-            margin-bottom: 8px;
-            padding-left: 20px;
             padding-right: 40px;
             text-align: justify;
         }
@@ -354,13 +320,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            /* ⬅️ ini yang bikin ke kanan */
             width: 50%;
-            /* batasi lebar area tanda tangan */
             margin-left: auto;
             margin-top: 30px;
             padding-right: 10px;
-            /* atur jarak dari tepi kanan */
             line-height: 1.3;
             page-break-inside: avoid;
         }
@@ -373,52 +336,38 @@
 
         .kak-section .ttd img {
             display: inline-block;
-            /* bukan block */
             height: 100px;
             margin: 0;
             align-items: flex-end;
-            /* dorong ke kanan */
             margin-left: auto;
-            /* ini kunci biar ke kanan */
             position: relative;
             left: 5%;
-            /* ⬅️ tambahkan ini */
         }
 
         .kak-section .ttd-wrapper {
             position: relative;
             width: 75%;
-            /* perbesar area gabungan */
             height: 300px;
-            /* tinggi total */
             margin-top: 5px;
         }
 
-        /* === STEMPEL === */
         .kak-section .stempel-layer {
             position: absolute;
             left: 30%;
-            /* pusatkan horizontal */
             top: 15px;
-            /* geser naik biar nyentuh tulisan atas */
             transform: translateX(-10%) scale(2);
-            /* perbesar proporsional (lebar & tinggi) */
             transform-origin: center;
             opacity: 0.6;
-            /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
-        /* === TTD === */
         .kak-section .ttd-layer {
             position: absolute;
             left: 40%;
             top: -90px;
-            /* geser ke bawah biar nempel pas di atas stempel */
             transform: translateX(5%);
             width: 100%;
-            /* sedikit lebih kecil dari stempel */
             z-index: 1;
         }
 
@@ -426,7 +375,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 6px;
-            padding-left: 0px;
+            padding-left: 0;
             padding-right: 40px;
         }
 
@@ -438,7 +387,6 @@
 
         .kak-section .table .label {
             width: 160px;
-            /* atur sesuai panjang teks */
         }
 
         .kak-section .table .colon {
@@ -494,25 +442,41 @@
             padding-right: 0;
         }
 
-        .susunan-acara {
+        .rundown-acara-wrapper,
+        .peserta-kegiatan-wrapper {
+            display: block;
+        }
+
+        .rundown-acara {
+            table-layout: fixed;
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
-            table-layout: auto;
             font-size: 10.5pt;
             margin-top: 8px;
+            page-break-inside: auto;
+            break-inside: auto;
         }
 
-        .susunan-acara th,
-        .susunan-acara td {
-            border: 0.7px solid #000;
-            padding: 2.5px 3.5px;
-            word-wrap: break-word;
+        .rundown-acara thead,
+        .rundown-acara tbody,
+        .rundown-acara tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .rundown-acara th,
+        .rundown-acara td {
+            border: 0.5px solid #000;
+            padding: 4px 6px;
             vertical-align: middle;
-            line-height: 1.2;
+            line-height: 1.25;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
 
-        .susunan-acara th {
+        .rundown-acara th {
             font-weight: bold;
             text-align: center;
             background-color: #fdfdfd;
@@ -520,18 +484,13 @@
             padding: 3px 4px;
         }
 
-        .susunan-acara td {
+        .rundown-acara td {
             text-align: left;
             font-size: 10.3pt;
+            overflow-wrap: anywhere;
         }
 
-        /* Kolom angka */
-        .susunan-acara td:nth-child(n+6) {
-            text-align: right;
-        }
-
-        /* Judul Grup (Belanja Bahan Habis Pakai, dsb) */
-        .susunan-acara tr.group-row td {
+        .rundown-acara tr.group-row td {
             font-weight: bold;
             text-align: left;
             padding: 4px 5px;
@@ -542,40 +501,119 @@
             text-transform: capitalize;
         }
 
-        /* Kolom Nomor agar kecil dan proporsional */
-        .susunan-acara td:first-child {
-            text-align: center;
-            width: 30px;
-            font-size: 9.5pt;
-        }
-
-        /* Agar teks kata panjang seperti “Belanja Operasional Lainnya” tidak nempel */
-        .susunan-acara td,
-        .susunan-acara th {
-            white-space: normal;
-            overflow-wrap: break-word;
-        }
-
-        /* Kolom nomor kecil & center */
-        .susunan-acara .td-nomor {
-            text-align: center;
-            width: 22px;
-            /* sebelumnya 30px, sekarang lebih rapat */
-            font-size: 9pt;
-            /* sedikit lebih kecil */
-            padding: 1px 2px;
-            /* padding diperkecil */
-            vertical-align: middle;
-            white-space: nowrap;
-            /* biar angka nggak turun ke bawah */
-        }
-
-        /* Kolom isi umum */
-        .susunan-acara .td-isi {
+        .rundown-acara .td-isi {
             text-align: left;
             padding: 3px 4px;
             font-size: 10.3pt;
             line-height: 1.2;
+        }
+
+        .rundown-acara th:nth-child(1),
+        .rundown-acara td:nth-child(1) {
+            width: 20%;
+            text-align: center;
+        }
+
+        .rundown-acara th:nth-child(2),
+        .rundown-acara td:nth-child(2) {
+            width: 50%;
+        }
+
+        .rundown-acara th:nth-child(3),
+        .rundown-acara td:nth-child(3) {
+            width: 30%;
+            text-align: center;
+        }
+
+        .peserta-kegiatan {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 10.5pt;
+            margin-top: 8px;
+        }
+
+        .peserta-kegiatan th,
+        .peserta-kegiatan td {
+            border: 0.5px solid #000;
+            padding: 4px 6px;
+            vertical-align: middle;
+            line-height: 1.25;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        .peserta-kegiatan th {
+            font-weight: bold;
+            text-align: center;
+            font-size: 10pt;
+            padding: 5px 6px;
+            background: #f8f8f8;
+        }
+
+        .peserta-kegiatan td {
+            text-align: left;
+            font-size: 10.3pt;
+            overflow-wrap: anywhere;
+        }
+
+        .peserta-kegiatan tr.group-row td {
+            font-weight: bold;
+            text-align: left;
+            padding: 4px 5px;
+            background-color: #f7f7f7;
+            border: 0.7px solid #000;
+            font-size: 10.7pt;
+            word-spacing: 2px;
+            text-transform: capitalize;
+        }
+
+        .peserta-kegiatan .td-isi {
+            text-align: left;
+            padding: 3px 4px;
+            font-size: 10.3pt;
+            line-height: 1.2;
+        }
+
+        .peserta-kegiatan th:nth-child(1),
+        .peserta-kegiatan td:nth-child(1) {
+            width: 20%;
+        }
+
+        .peserta-kegiatan th:nth-child(2),
+        .peserta-kegiatan td:nth-child(2) {
+            width: 20%;
+            text-align: center;
+        }
+
+        .peserta-kegiatan th:nth-child(3),
+        .peserta-kegiatan td:nth-child(3) {
+            width: 25%;
+        }
+
+        .peserta-kegiatan th:nth-child(4),
+        .peserta-kegiatan td:nth-child(4) {
+            width: 35%;
+        }
+
+        .peserta-kegiatan {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 10.5pt;
+            margin-top: 8px;
+            page-break-inside: auto;
+            break-inside: auto;
+        }
+
+        .peserta-kegiatan thead,
+        .peserta-kegiatan tbody,
+        .peserta-kegiatan tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         table {
@@ -592,7 +630,6 @@
 
         .table .label {
             width: 150px;
-            /* atur sesuai panjang teks */
         }
 
         .table .colon {
@@ -616,7 +653,7 @@
 <body>
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
     <div class="kop-container">
-        @if($laporankegiatans->detaillaporankegiatans->jeniskop_laporankegiatan === 'kop_text')
+   @if(optional($laporankegiatans?->detaillaporankegiatans)->jeniskop_laporankegiatan === 'kop_text')
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="kop-logo" alt="Logo Pemerintah Kota Surakarta">
         @endif
@@ -659,35 +696,39 @@
         <div class="meta-left">
             <table class="meta-table">
                 <tr>
-                    <td class="label">Nomor</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->identitassurats?->nomor_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Sifat</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->identitassurats?->sifat_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Lampiran</td>
-                    <td class="colon">:</td>
-                    <td>{{ $laporankegiatans->identitassurats?->lampiran_surat ?? '' }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Perihal</td>
-                    <td class="colon">:</td>
-                    <td><strong>{{ $laporankegiatans->identitassurats?->perihal_surat ?? '' }}</strong></td>
-                </tr>
+    <td class="label">Nomor</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->nomor_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Sifat</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->sifat_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Lampiran</td>
+    <td class="colon">:</td>
+    <td>{{ $identitas->lampiran_surat ?? '-' }}</td>
+</tr>
+
+<tr>
+    <td class="label">Perihal</td>
+    <td class="colon">:</td>
+    <td><strong>{{ $identitas->perihal_surat ?? '-' }}</strong></td>
+</tr>
             </table>
         </div>
 
         <div class="meta-right">
-            <p>Surakarta,
-                {{ $laporankegiatans->identitassurats?->tanggal_surat
-    ? \Carbon\Carbon::parse($laporankegiatans->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
-    : '' }}
-            </p>
-        </div>
+    <p>
+        Surakarta,
+{{ $identitas?->tanggal_surat
+    ? \Carbon\Carbon::parse($identitas->tanggal_surat)->format('d-m-Y')
+    : '-' }}
+    </p>
+</div>
     </div>
 
     <div class="tujuan">
@@ -713,15 +754,14 @@
     </div>
 
     <div class="ttd">
-        <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
         <p><strong>Kota Surakarta</strong></p>
 
         <div class="ttd-wrapper">
 
             {{-- ===== STAMPEL ===== --}}
             @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer"
-                alt="Stempel OPD">
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
@@ -731,8 +771,9 @@
 
         </div>
 
-        <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 
     <div class="page-break"></div>
@@ -1179,96 +1220,122 @@
         {{-- ==================================================================== --}}
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK UNDANGAN KEGIATAN</p>
-        <p class="indent-link">{{ $laporankegiatans->detaillaporankegiatans?->linkundangan_laporan ?? '-' }}</p>
+        <p>{{ $laporankegiatans->detaillaporankegiatans?->linkundangan_laporan ?? '-' }}</p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK MATERI KEGIATAN</p>
-        <p class="indent-link">{{ $laporankegiatans->detaillaporankegiatans?->linkmateri_laporan ?? '-'}}</p>
+        <p>{{ $laporankegiatans->detaillaporankegiatans?->linkmateri_laporan ?? '-'}}</p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK DAFTAR HADIR KEGIATAN</p>
-        <p class="indent-link">{{ $laporankegiatans->detaillaporankegiatans?->linkdaftarhadir_laporan ?? '-' }}</p>
+        <p>{{ $laporankegiatans->detaillaporankegiatans?->linkdaftarhadir_laporan ?? '-' }}</p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. LINK DOKUMENTASI KEGIATAN</p>
-        <p class="indent-link">{{ $laporankegiatans->detaillaporankegiatans?->linkdokumentasi_laporan ?? '-'}}</p>
+        <p>{{ $laporankegiatans->detaillaporankegiatans?->linkdokumentasi_laporan ?? '-'}}</p>
 
         <p class="section-title">{{ getLetter($letterIndex++) }}. RUNDOWN KEGIATAN PENGEMBANGAN KOMPETENSI</p>
         <p class="indent">Berikut terlampir rundown acara kegiatan pengembangan komptensi yang telah terlaksana:</p>
         @if(!empty($rundown_laporan) && count($rundown_laporan) > 1)
-        <table class="susunan-acara">
-            @foreach($rundown_laporan as $r => $row)
-            @php
-            // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            $row = array_map(function ($cell) {
-            if (is_array($cell))
-            $cell = implode(', ', array_filter($cell));
-            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
-            $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
-            return $cell === '' ? null : $cell;
-            }, $row);
+        <div class="rundown-acara-wrapper">
+            <table class="rundown-acara">
+                @foreach($rundown_laporan as $r => $row)
+                @php
+                // Bersihkan semua sel dari spasi tak terlihat dan format Excel
+                /*$row = array_map(function ($cell) {
+                if (is_array($cell))
+                $cell = implode(', ', array_filter($cell));
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
+                $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
+                return $cell === '' ? null : $cell;
+                }, $row);*/
+                $row = array_map(function ($cell) {
 
-            // Cek apakah semua kolom benar-benar kosong
-            $hasData = false;
-            foreach ($row as $v) {
-            if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
-            $hasData = true;
-            break;
-            }
-            }
-            if (!$hasData)
-            continue; // lewati baris kosong sepenuhnya
+                if (is_array($cell)) {
+                $cell = implode(', ', array_filter($cell));
+                }
 
-            // Deteksi header grup seperti "Belanja Operasional Lainnya"
-            $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
-            @endphp
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
 
-            {{-- Judul grup --}}
-            @if($isGroupHeader)
-            <tr class="group-row">
-                <td colspan="{{ count($rundown_laporan[0]) }}">
-                    {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
-                </td>
-            </tr>
+                // jangan hapus spasi
+                $cell = trim($cell);
 
-            {{-- Header tabel --}}
-            @elseif($r === 0)
-            <thead>
-                <tr>
-                    @foreach($row as $cell)
-                    <th>
-                        {{ ucwords(
+                // rapikan spasi ganda
+                $cell = preg_replace('/\s+/', ' ', $cell);
+
+                return $cell === '' ? null : $cell;
+                }, $row);
+
+                // Cek apakah semua kolom benar-benar kosong
+                $hasData = false;
+                foreach ($row as $v) {
+                if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
+                $hasData = true;
+                break;
+                }
+                }
+                if (!$hasData)
+                continue; // lewati baris kosong sepenuhnya
+
+                // Deteksi header grup seperti "Belanja Operasional Lainnya"
+                $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
+                @endphp
+
+                {{-- Judul grup --}}
+                @if($isGroupHeader)
+                <tr class="group-row">
+                    <td colspan="{{ count($rundown_laporan[0]) }}">
+                        {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
+                    </td>
+                </tr>
+
+                {{-- Header tabel --}}
+                @elseif($r === 0)
+                <thead>
+                    <tr>
+                        @foreach($row as $cell)
+                        <th>
+                            {{ ucwords(
                                         preg_replace(
                                             ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
                                             ['$1 $2', '$1 ('],
                                             $cell
                                         )
                                     ) }}
-                    </th>
+                        </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {{-- Data biasa --}}
+                    @else
+                    <tr>
+                        @foreach($row as $i => $cell)
+                        @php
+                        // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
+                        //$cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                        $cleanCell = trim($cell);
+
+                        $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+                        $cleanCell = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleanCell);
+
+                        $cleanCell = preg_replace('/([a-zA-Z])\(/', '$1 (', $cleanCell);
+                        $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+
+                        // Nomor kolom (kolom pertama) diperkecil
+                        $isNumberCol = $i === 0 && is_numeric(str_replace('.', '', $cleanCell));
+                        @endphp
+
+                        <td class="{{ $isNumberCol ? 'td-nomor' : 'td-isi' }}">
+                            {{ $cleanCell }}
+                        </td>
+                        @endforeach
+                    </tr>
+                    @endif
                     @endforeach
-                </tr>
-            </thead>
-            <tbody>
-
-                {{-- Data biasa --}}
-                @else
-                <tr>
-                    @foreach($row as $i => $cell)
-                    @php
-                    // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
-                    $cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
-                    $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
-
-                    // Nomor kolom (kolom pertama) diperkecil
-                    $isNumberCol = $i === 0 && is_numeric(str_replace('.', '', $cleanCell));
-                    @endphp
-
-                    <td class="{{ $isNumberCol ? 'td-nomor' : 'td-isi' }}">
-                        {{ $cleanCell }}
-                    </td>
-                    @endforeach
-                </tr>
-                @endif
-                @endforeach
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
         @else
         <p class="indent">Terlampir dalam jadwal kegiatan.</p>
         @endif
@@ -1276,116 +1343,141 @@
         <p class="section-title">{{ getLetter($letterIndex++) }}. PESERTA KEGIATAN PENGEMBANGAN KOMPETENSI</p>
         <p class="indent">Berikut terlampir peserta yang mengikuti kegiatan pengembangan kompetensi yang telah terlaksana:</p>
         @if(!empty($peserta_laporan) && count($peserta_laporan) > 1)
-        <table class="susunan-acara">
-            @foreach($peserta_laporan as $r => $row)
-            @php
-            // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            $row = array_map(function ($cell) {
-            if (is_array($cell))
-            $cell = implode(', ', array_filter($cell));
-            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
-            $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
-            return $cell === '' ? null : $cell;
-            }, $row);
+        <div class="peserta-kegiatan-wrapper">
+            <table class="peserta-kegiatan">
+                @foreach($peserta_laporan as $r => $row)
+                @php
+                // Bersihkan semua sel dari spasi tak terlihat dan format Excel
+                /*$row = array_map(function ($cell) {
+                if (is_array($cell))
+                $cell = implode(', ', array_filter($cell));
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
+                $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
+                return $cell === '' ? null : $cell;
+                }, $row);*/
+                $row = array_map(function ($cell) {
 
-            // Cek apakah semua kolom benar-benar kosong
-            $hasData = false;
-            foreach ($row as $v) {
-            if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
-            $hasData = true;
-            break;
-            }
-            }
-            if (!$hasData)
-            continue; // lewati baris kosong sepenuhnya
+                if (is_array($cell)) {
+                $cell = implode(', ', array_filter($cell));
+                }
 
-            // Deteksi header grup seperti "Belanja Operasional Lainnya"
-            $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
-            @endphp
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
 
-            {{-- Judul grup --}}
-            @if($isGroupHeader)
-            <tr class="group-row">
-                <td colspan="{{ count($peserta_laporan[0]) }}">
-                    {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
-                </td>
-            </tr>
+                // jangan hapus spasi
+                $cell = trim($cell);
 
-            {{-- Header tabel --}}
-            @elseif($r === 0)
-            <thead>
-                <tr>
-                    @foreach($row as $cell)
-                    <th>
-                        {{ ucwords(
+                // rapikan spasi ganda
+                $cell = preg_replace('/\s+/', ' ', $cell);
+
+                return $cell === '' ? null : $cell;
+                }, $row);
+
+                // Cek apakah semua kolom benar-benar kosong
+                $hasData = false;
+                foreach ($row as $v) {
+                if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
+                $hasData = true;
+                break;
+                }
+                }
+                if (!$hasData)
+                continue; // lewati baris kosong sepenuhnya
+
+                // Deteksi header grup seperti "Belanja Operasional Lainnya"
+                $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
+                @endphp
+
+                {{-- Judul grup --}}
+                @if($isGroupHeader)
+                <tr class="group-row">
+                    <td colspan="{{ count($peserta_laporan[0]) }}">
+                        {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
+                    </td>
+                </tr>
+
+                {{-- Header tabel --}}
+                @elseif($r === 0)
+                <thead>
+                    <tr>
+                        @foreach($row as $cell)
+                        <th>
+                            {{ ucwords(
                                         preg_replace(
                                             ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
                                             ['$1 $2', '$1 ('],
                                             $cell
                                         )
                                     ) }}
-                    </th>
+                        </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {{-- Data biasa --}}
+                    @else
+                    <tr>
+                        @foreach($row as $i => $cell)
+                        @php
+                        // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
+                        //$cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
+                        $cleanCell = trim($cell);
+
+                        $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+                        $cleanCell = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleanCell);
+
+                        $cleanCell = preg_replace('/([a-zA-Z])\(/', '$1 (', $cleanCell);
+                        $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
+
+
+                        // Nomor kolom (kolom pertama) diperkecil
+                        $isNumberCol = $i === 0 && is_numeric(str_replace('.', '', $cleanCell));
+                        @endphp
+
+                        <td class="{{ $isNumberCol ? 'td-nomor' : 'td-isi' }}">
+                            {{ $cleanCell }}
+                        </td>
+                        @endforeach
+                    </tr>
+                    @endif
                     @endforeach
-                </tr>
-            </thead>
-            <tbody>
-
-                {{-- Data biasa --}}
-                @else
-                <tr>
-                    @foreach($row as $i => $cell)
-                    @php
-                    // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
-                    $cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
-                    $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
-
-                    // Nomor kolom (kolom pertama) diperkecil
-                    $isNumberCol = $i === 0 && is_numeric(str_replace('.', '', $cleanCell));
-                    @endphp
-
-                    <td class="{{ $isNumberCol ? 'td-nomor' : 'td-isi' }}">
-                        {{ $cleanCell }}
-                    </td>
-                    @endforeach
-                </tr>
-                @endif
-                @endforeach
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
         @else
         <p class="indent">Terlampir dalam jadwal kegiatan.</p>
         @endif
 
-        <p class="section-title">{{ getLetter($letterIndex++) }}. PENUTUP</p>
-        <p class="indent">
-            {{ $laporankegiatans->detaillaporankegiatans?->penutup_laporan ?? 'Demikian Laporan Kegiatan ini disusun untuk dipergunakan sebagaimana mestinya.' }}
-        </p>
-
-        <div class="ttd">
-            <p><strong>Kepala {{ $user->subunitkerjas?->sub_unitkerja ?? '-' }}</strong></p>
-            <p><strong>Kota Surakarta</strong></p>
-
-            <div class="ttd-wrapper">
-
-                {{-- ===== STAMPEL ===== --}}
-                @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-                <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer"
-                    alt="Stempel OPD">
-                @endif
-
-                {{-- ===== TTD ===== --}}
-                @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-                <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
-                @endif
-
-            </div>
-
-            <p><strong>{{ $usulankegiatans->nama_pejabat ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-            <p>NIP. {{ $usulankegiatans->nip_pejabat ?? '19791218 200604 1 006' }}</p>
-        </div>
+    <p class="section-title">{{ getLetter($letterIndex++) }}. PENUTUP</p>
+    <p class="indent">
+        {{ $laporankegiatans->detaillaporankegiatans?->penutup_laporan ?? 'Demikian Laporan Kegiatan ini disusun untuk dipergunakan sebagaimana mestinya.' }}
+    </p>
     </div>
 
-    {{-- ====================== LAMPIRAN DOKUMENTASI HASIL KEGIATAN ====================== --}}
+    <div class="ttd">
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'Kepala Organisasi Perangkat Daerah' }}</strong></p>
+        <p><strong>Kota Surakarta</strong></p>
+
+        <div class="ttd-wrapper">
+
+            {{-- ===== STAMPEL ===== --}}
+            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @endif
+
+            {{-- ===== TTD ===== --}}
+            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
+            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @endif
+
+        </div>
+
+        <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
+        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+    </div>
+
     @if(!empty($gambardokumentasi_laporan))
     <div class="page-break"></div>
 
@@ -1410,6 +1502,4 @@
     @else
     <p style="text-align:center; color:gray;">Tidak ada dokumentasi kegiatan.</p>
     @endif
-</body>
-
 </html>
