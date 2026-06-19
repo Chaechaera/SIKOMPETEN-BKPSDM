@@ -99,33 +99,30 @@
                             Peserta
                         </td>
 
-                        {{-- Download --}}
-                        <td class="py-3 px-4">
-                            <a
-                                href="{{ route('admin.sertifikat.download', $u->id) }}"
-                                target="_blank"
-                                class="block px-3 py-3 text-xs font-semibold rounded-lg bg-hijauDaun text-white hover:bg-hijauDaun/60 transition">
-                                Download Sertifikat
-                            </a>
-                        </td>
+                                        <!-- Sertifikat -->
+                                        <td class="py-3 px-4 text-center">
+                                            @php
+    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
+@endphp
 
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="8" class="text-center py-6 text-abuabuMuda">
-                            Tidak ada data
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-
-            </table>
-        </div>
-
-        {{-- Pagination --}}
-        <div class="mt-4">
-            {{ $usulankegiatans->appends(request()->query())->links() }}
-        </div>
+@if($laporanId)
+    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
+        target="_blank"
+        class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
+        Download Sertifikat
+    </a>
+@else
+    <span class="block px-3 py-2 text-xs rounded-lg bg-gray-200 text-gray-400">
+        Tidak tersedia
+    </span>
+@endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
         {{-- Empty State --}}
         <div id="emptyState" class="hidden text-center py-12 text-gray-500">

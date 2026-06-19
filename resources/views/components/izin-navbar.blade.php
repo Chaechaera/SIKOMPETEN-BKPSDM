@@ -21,10 +21,10 @@ $realRole = Auth::user()->role ?? null;
     <div class="hidden md:flex items-center gap-10 font-normal text-sm">
         @auth
         {{-- ===== ROLE USER → PROFIL MODE ===== --}}
-        @if ($activeRole === 'user')
-        <div class="absolute left-1/2 -translate-x-1/2 flex items-center font-semibold gap-6">
-            <a href="{{ route('user.aboutus') }}" class="hover:text-orange transition">
-                About Us
+        @if ($realRole === 'user')
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
+            <a href="{{ route('user.aboutus') }}" class="hover:text-[#fea73d] transition">
+                Informasi
             </a>
             <a href="{{ route('user.sertifikat') }}" class="hover:text-orange transition">
                 Sertifikat
