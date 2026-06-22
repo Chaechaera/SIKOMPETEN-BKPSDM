@@ -25,9 +25,7 @@ $realRole = Auth::user()->role;
             <div>
                 <h1 class="text-2xl font-medium text-biruDark">
                     <span x-text="greeting"></span>,
-                    <span class="font-bold">
-    {{ Auth::user()->nama }} - {{ Auth::user()->subunitkerjas?->sub_unitkerja ?? '-' }} 🪄
-</span>
+                    <span class="font-bold">{{ $activeRole }} - {{ Auth::user()->subunitkerjas?->singkatan ?? '-' }} Kota Surakarta 🪄</span>
                 </h1>
                 <p class="text-sm font-normal text-abuabuCerah">
                     Hope you have a good day and good mood for work today!
@@ -46,7 +44,7 @@ $realRole = Auth::user()->role;
 
                         <!-- Nama User -->
                         <span class="font-medium text-sm">
-                            Halo, {{ $activeRole }}!!
+                            Halo, {{ Auth::user()->nama }}!!
                         </span>
                         <i data-lucide="chevron-down" class="text-sm w-5 h-5 transition-transform text-black duration-200" :class="{ 'rotate-180': openProfile }"></i>
                     </div>

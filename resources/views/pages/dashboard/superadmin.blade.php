@@ -25,42 +25,10 @@
                     <p class="text-xs text-hijauDaun mt-2">{{ $persenUsulanDisetujui }}% dari total</p>
                 </div>
 
-                <div class="p-5 sm:p-6 rounded-xl bg-[#E3EEFF] shadow-sm">
-    <h2 class="text-gray-700 text-sm font-medium">Laporan Masuk</h2>
-
-    <p class="text-2xl sm:text-3xl font-bold text-[#2B3674] mt-2">
-        {{ $total }}
-    </p>
-
-    <p class="text-xs text-blue-600">
-        {{ $menunggu }} menunggu verifikasi
-    </p>
-</div>
-            </div>
-
-            {{-- Content Box --}}
-            <div class="bg-white shadow-sm rounded-lg p-6">
-                <h2 class="text-xl font-semibold mb-4 text-[#2B3674]">Menu Utama</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-blue-50 p-6 rounded-lg">
-                    <h3 class="font-semibold text-gray-800">Daftar Usulan Masuk</h3>
-                    <p class="text-xs text-gray-600 mt-1">
-                        Verifikasi usulan kegiatan dari OPD
-                    </p>
-                </div>
-
-                <div class="bg-purple-50 p-6 rounded-lg">
-                    <h3 class="font-semibold text-gray-800">Daftar Laporan Masuk</h3>
-                    <p class="text-xs text-gray-600 mt-1">
-                        Verifikasi laporan hasil kegiatan
-                    </p>
-                </div>
-
-                <div class="bg-green-50 p-6 rounded-lg">
-                    <h3 class="font-semibold text-gray-800">Buat Surat Balasan</h3>
-                    <p class="text-xs text-gray-600 mt-1">
-                        Generate surat balasan untuk OPD
-                    </p>
+                <div class="p-2 sm:p-3 rounded-xl bg-merahBening shadow-sm">
+                    <h2 class="text-sm font-medium">Usulan yang Ditolak</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $usulanDitolak }}</p>
+                    <p class="text-xs text-merahCabai mt-2">{{ $persenUsulanDitolak }}% dari total</p>
                 </div>
             </div>
         </div>
@@ -179,47 +147,26 @@
                         </p>
                     </div>
 
-        {{-- Content --}}
-        <div class="px-6 py-4 space-y-3">
-           @foreach ($laporans as $item)
-@php
-    $input = $item->inputlaporankegiatans?->inputusulankegiatans;
+                    {{-- GARIS --}}
+                    <div class="w-0.5 h-14 bg-black mx-6"></div>
 
-    $title = $input->nama_kegiatan ?? '-';
+                    {{-- KOLOM TENGAH --}}
+                    <div class="w-[35%]">
+                        <p class="font-bold text-sm">
+                            {{ $laporan->lokasi_kegiatan }}
+                        </p>
+                    </div>
 
-    $opd = $input?->usulankegiatans?->subunitkerjas?->sub_unitkerja ?? '-';
+                    {{-- STATUS --}}
+                    <div class="w-[15%] flex justify-end">
+                        <span class="px-6 py-2 rounded-lg text-sm font-bold border {{ $laporan->status_ui_class }}">
+                            {{ ucfirst(str_replace('_', ' ', $laporan->status_ui)) }}
+                        </span>
+                    </div>
 
-    $date = \Carbon\Carbon::parse($item->created_at)->translatedFormat('d M Y');
-
-    $status = $item->status_laporan_ui;
-@endphp
-
-    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <div>
-            <p class="text-sm text-gray-900">{{ $title }}</p>
-            <p class="text-xs text-gray-500">{{ $opd }} • {{ $date }}</p>
-        </div>
-
-        <span class="px-2 py-1 rounded text-xs
-            @if(in_array($status, ['accepted','finish']))
-                bg-green-100 text-green-800
-            @elseif($status === 'need_review')
-                bg-yellow-100 text-yellow-800
-            @elseif($status === 'rejected')
-                bg-red-100 text-red-800
-            @else
-                bg-gray-100 text-gray-600
-            @endif
-        ">
-            {{ ucfirst($status) }}
-        </span>
-    </div>
-@endforeach
-
-            <a href="{{ route('superadmin.laporankegiatan.pending') }}"
-   class="w-full mt-4 text-blue-600 text-left hover:underline">
-    Lihat Semua Laporan →
-</a>
+                </div>
+                @endforeach
+            </div>
         </div>
 
         {{-- STATISTIK CARDS SERTIFIKAT --}}
@@ -239,23 +186,18 @@
                     <p class="text-xs text-hijauDaun mt-2">{{ $persenLaporanPesertaDisetujui }}% dari total</p>
                 </div>
 
-</div>
-            {{-- INFO ALERT --}}
-<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
-    <img src="{{ asset('images/Info.png') }}" class="h-5 w-5">
-    <div class="text-medium text-blue-800">
-        <p class="font-bold">Informasi</p>
-        <p class="mt-1">
-    Terdapat 8 usulan dan {{ $menunggu }} laporan yang menunggu verifikasi.
-    @if($menunggu > 0)
-        Mohon segera ditindaklanjuti.
-    @else
-        Semua laporan sudah diverifikasi 🎉
-    @endif
-</p>
-    </div>
-</div>
+                <div class="p-2 sm:p-3 rounded-xl bg-merahBening shadow-sm">
+                    <h2 class="text-sm font-medium">Laporan Peserta yang Ditolak</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $laporanPesertaDitolak }}</p>
+                    <p class="text-xs text-merahCabai mt-2">{{ $persenLaporanPesertaDitolak }}% dari total</p>
+                </div>
 
+                <div class="p-2 sm:p-3 rounded-xl bg-unguBening shadow-sm">
+                    <h2 class="text-sm font-medium">Total Sertifikat Peserta</h2>
+                    <p class="text-2xl sm:text-3xl font-bold text-biruMariana mt-2">{{ $totalSertifikatPeserta }}</p>
+                    <p class="text-xs text-merahBata mt-2">+{{ $sertifikatMingguIni }} minggu ini</p>
+                </div>
+            </div>
         </div>
     </div>
 
