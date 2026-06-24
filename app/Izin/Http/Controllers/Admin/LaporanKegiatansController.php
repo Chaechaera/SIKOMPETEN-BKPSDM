@@ -15,6 +15,7 @@ use App\Izin\Models\Izin_Usulankegiatans;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Barryvdh\DomPDF\Facade\PDF;
@@ -27,7 +28,8 @@ class LaporanKegiatansController extends Controller
      */
     public function index(Request $request)
 {
-    $user = Auth::user();
+    $role = session('active_role', Auth::user()->role);
+$subunit = session('active_subunit', Auth::user()->subunitkerja_id);
 
     $query = Izin_Usulankegiatans::with([
         'inputusulankegiatans',
@@ -75,13 +77,25 @@ class LaporanKegiatansController extends Controller
     }
 
     // 🔐 FILTER ROLE
-    if ($user->role == 'admin') {
+    /*if ($user->role == 'admin') {
         $query->where('izin_usulankegiatans.subunitkerja_id', $user->subunitkerja_id);
     }
 
     if ($user->role == 'user') {
         $query->where('izin_usulankegiatans.dibuat_oleh', $user->id);
-    }
+    }*/
+
+    if ($role === 'admin') {
+    $query->whereHas('inputusulankegiatans', function ($q) use ($subunit) {
+        $q->where('subunitkerja_id', $subunit);
+    });
+}
+
+if ($role === 'user') {
+    $query->whereHas('inputusulankegiatans', function ($q) use ($subunit) {
+        $q->where('subunitkerja_id', $subunit);
+    });
+}
 
     // 🔥 FILTER TAHUN
     if ($request->filled('tahun')) {
@@ -306,28 +320,21 @@ return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
     public function download($id)
     {
         // Ambil user yang sedang login saat ini
-        $user = Auth::user();
+        //$user = Auth::user();
 
-        // Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
-        // Ambil dari USULAN, bukan langsung laporan
-$usulan = Izin_Usulankegiatans::with([
-    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-    'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
-    'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans.pesertakegiatans',
-    'inputlaporankegiatans.laporankegiatans.sertifikats'
-])->findOrFail($id);
+// Eager load relasi dari model dan temukan laporankegiatan berdasarkan id
+        $laporankegiatans = Izin_Laporankegiatans::with([
+            'detaillaporankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
+            'detaillaporankegiatans.pesertakegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        ])->findOrFail($id);
 
-// Ambil laporan dari relasi
-$laporankegiatans = $usulan->inputlaporankegiatans?->laporankegiatans;
-
-if (!$laporankegiatans) {
-    abort(404, 'Laporan tidak ditemukan');
-}
-
-        // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        $kop = $laporankegiatans->inputlaporankegiatans->inputusulankegiatans?->kopunitkerjas ?? null;
-        $ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        $stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
+        $kop = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->kopunitkerjas;
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -375,9 +382,8 @@ if (!$laporankegiatans) {
             }
         }
 
-
-
-       $gambardokumentasi_laporan = [];
+        // Baca file gambar dokumentasi laporan kegiatan kalau ada
+        $gambardokumentasi_laporan = [];
         if ($laporankegiatans->detaillaporankegiatans?->gambardokumentasi_laporan) {
             $files_gambardokumentasi = $laporankegiatans->detaillaporankegiatans->gambardokumentasi_laporan ?? [];
             foreach ($files_gambardokumentasi as $file) {
@@ -405,9 +411,6 @@ if (!$laporankegiatans) {
     )->identitassurats
 );
 
-$rundown_laporan = [];
-$peserta_laporan = [];
-
         // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.laporan_hasil_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
@@ -420,7 +423,6 @@ $peserta_laporan = [];
             'kop' => $kop,
             'ttd' => $ttd,
             'stempel' => $stempel,
-            'user'   => $user,
             'identitas' => $identitas,
         ])->setPaper('A4', 'portrait');
 
