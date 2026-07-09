@@ -1,5 +1,5 @@
 <div class="p-6"
-     x-data="{
+    x-data="{
         open: true,
         showPreview: false
      }">
@@ -11,135 +11,134 @@
             <button @click="open = false" class="absolute top-2 right-3 text-gray-500 hover:text-gray-700"> ✕ </button>
             <div class="px-6 py-4 max-h-[80vh] overflow-y-auto">
 
+                {{-- Header Judul Usulan yang Direview --}}
+                <div class="mb-4">
 
-            {{-- Header Judul Usulan yang Direview --}}
-            <div class="mb-4">
+                    <div class="bg-white rounded-xl shadow p-6 mb-4">
+                        <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">REVIEW LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+                        <p class="text-sm text-gray-500 max-w-4xl">
+                            Silahkan download atau cek surat laporan hasil kegiatan Pengembangan Kompetensi dahulu sebelum melakukan review.
+                        </p>
+                    </div>
 
-                <div class="bg-white rounded-xl shadow p-6 mb-4">
-                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">REVIEW LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                    <p class="text-sm text-gray-500 max-w-4xl">
-                        Silahkan download atau cek surat laporan hasil kegiatan Pengembangan Kompetensi dahulu sebelum melakukan review.
-                    </p>
-                </div>
+                    <div class="bg-white shadow-lg rounded-lg p-6 mb-4">
+                        <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
+                            Ringkasan Data Laporan Hasil Kegiatan yang Direview
+                        </h2>
 
-                <div class="bg-white shadow-lg rounded-lg p-6 mb-4">
-                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
-                        Ringkasan Data Laporan Hasil Kegiatan yang Direview
-                    </h2>
+                        <!-- 🔻 DIVIDER -->
+                        <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                        <!-- content grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 text-sm">
 
-                    <!-- content grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 text-sm">
+                            <!-- Nama Kegiatan -->
+                            <div>
+                                <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
+                                <p class="font-semibold text-[#5A5A5A]">
+                                    {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '' }}
+                                </p>
+                            </div>
 
-                        <!-- Nama Kegiatan -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Nama Kegiatan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '' }}
-                            </p>
-                        </div>
+                            <!-- Diajukan Oleh -->
+                            <div>
+                                <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
+                                <p class="font-semibold text-[#5A5A5A]">
+                                    {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->subunitkerjas->sub_unitkerja ?? '-' }}
+                                </p>
+                            </div>
 
-                        <!-- Diajukan Oleh -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Diajukan Oleh</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->usulankegiatans->subunitkerjas->sub_unitkerja ?? '-' }}
-                            </p>
-                        </div>
+                            <!-- Lokasi -->
+                            <div>
+                                <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
+                                <p class="font-semibold text-[#5A5A5A]">
+                                    {{ $laporankegiatans->lokasi_kegiatan }}
+                                </p>
+                            </div>
 
-                        <!-- Lokasi -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Lokasi Kegiatan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $laporankegiatans->lokasi_kegiatan }}
-                            </p>
-                        </div>
-
-                        <!-- Tanggal -->
-                        <div>
-                            <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
-                            <p class="font-semibold text-[#5A5A5A]">
-                                {{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
+                            <!-- Tanggal -->
+                            <div>
+                                <p class="text-gray-400 text-xs mb-1">Tanggal Pelaksanaan</p>
+                                <p class="font-semibold text-[#5A5A5A]">
+                                    {{ $laporankegiatans->tanggalmulai_kegiatan && $laporankegiatans->tanggalselesai_kegiatan ? \Carbon\Carbon::parse($laporankegiatans->tanggalmulai_kegiatan)->format('d F Y') . ' s/d ' .
                     \Carbon\Carbon::parse($laporankegiatans->tanggalselesai_kegiatan)->format('d F Y') : '-'}}
-                            </p>
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white shadow-lg rounded-lg p-6 mb-4">
-                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
-                        Form Review Laporan Hasil Kegiatan
-                    </h2>
+                    <div class="bg-white shadow-lg rounded-lg p-6 mb-4">
+                        <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
+                            Form Review Laporan Hasil Kegiatan
+                        </h2>
 
-                    <!-- 🔻 DIVIDER -->
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                        <!-- 🔻 DIVIDER -->
+                        <div class="my-4 border-t-2 border-gray-200"></div>
 
-                    {{-- Form Review Laporan --}}
-                    @php
-                                $usulanId = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->id;
-                    @endphp
-                    <form method="POST" action="{{ route('superadmin.laporankegiatan.reviewUpload', $laporankegiatans->id) }}">
-                        @csrf
-                        <div class="mb-4">
-                            <label for="catatan_verifikasilaporankegiatan" class="block text-sm font-semibold text-[#5A5A5A] mb-2">Catatan Review (Opsional)</label>
-                            <textarea
-                                name="catatan_verifikasilaporankegiatan"
-                                id="catatan_verifikasilaporankegiatan"
-                                class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
-                                placeholder="Tuliskan catatan review untuk OPD"></textarea>
-                        </div>
+                        {{-- Form Review Laporan --}}
+                        @php
+                        $usulanId = $laporankegiatans->inputlaporankegiatans?->inputusulankegiatans?->id;
+                        @endphp
+                        <form method="POST" action="{{ route('superadmin.laporankegiatan.reviewUpload', $laporankegiatans->id) }}">
+                            @csrf
+                            <div class="mb-4">
+                                <label for="catatan_verifikasilaporankegiatan" class="block text-sm font-semibold text-[#5A5A5A] mb-2">Catatan Review (Opsional)</label>
+                                <textarea
+                                    name="catatan_verifikasilaporankegiatan"
+                                    id="catatan_verifikasilaporankegiatan"
+                                    class="overflow-hidden smart-textarea block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2"
+                                    placeholder="Tuliskan catatan review untuk OPD"></textarea>
+                            </div>
 
-                        
-                        {{-- Preview Laporan --}}
-                        <div
-                            x-show="showPreview"
-                            x-transition
-                            class="mt-4 border border-gray-200 rounded-lg overflow-hidden">
 
-                            <template x-if="showPreview">
-                                <iframe
-                                    src="{{ route('superadmin.laporankegiatan.download', $usulanId) }}"
-                                    width="100%"
-                                    height="700">
-                                </iframe>
-                            </template>
-                        </div>
+                            {{-- Preview Laporan --}}
+                            <div
+                                x-show="showPreview"
+                                x-transition
+                                class="mt-4 border border-gray-200 rounded-lg overflow-hidden">
 
-                        {{-- Tombol Aksi --}}
-                        <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                                <template x-if="showPreview">
+                                    <iframe
+                                        src="{{ route('superadmin.laporankegiatan.download', ['id' => $usulanId, 'preview' => 1]) }}"
+                                        width="100%"
+                                        height="700">
+                                    </iframe>
+                                </template>
+                            </div>
 
-                            <button
-                                type="button"
-                                @click="showPreview = !showPreview"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
+                            {{-- Tombol Aksi --}}
+                            <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
 
-                                <span x-show="!showPreview">
-                                    Tinjau Laporan
-                                </span>
+                                <button
+                                    type="button"
+                                    @click="showPreview = !showPreview"
+                                    class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#FFA41B] to-[#FFA41B] text-white font-semibold hover:opacity-90 transition">
 
-                                <span x-show="showPreview">
-                                    Sembunyikan Preview
-                                </span>
+                                    <span x-show="!showPreview">
+                                        Tinjau Laporan
+                                    </span>
 
-                            </button>
-                            <button
-                                type="submit"
-                                name="actionlaporan_kegiatan"
-                                value="accepted"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition">
-                                Setujui Laporan
-                            </button>
-                            <button
-                                type="submit"
-                                name="actionlaporan_kegiatan"
-                                value="rejected"
-                                class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition">
-                                Tolak Laporan
-                            </button>
-                        </div>
-                    </form>
+                                    <span x-show="showPreview">
+                                        Sembunyikan Preview
+                                    </span>
+
+                                </button>
+                                <button
+                                    type="submit"
+                                    name="actionlaporan_kegiatan"
+                                    value="accepted"
+                                    class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold transition">
+                                    Setujui Laporan
+                                </button>
+                                <button
+                                    type="submit"
+                                    name="actionlaporan_kegiatan"
+                                    value="rejected"
+                                    class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition">
+                                    Tolak Laporan
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

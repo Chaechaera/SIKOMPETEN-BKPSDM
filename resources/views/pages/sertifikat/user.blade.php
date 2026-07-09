@@ -87,19 +87,19 @@
                         @forelse ($sertifikats as $s)
 
                         @php
-$p = $s->pesertakegiatans->first();
+                        $p = $s->pesertakegiatans->first();
 
-if (!$p) return;
+                        if (!$p) return;
 
-$tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
+                        $tahun = \Carbon\Carbon::parse($s->tanggalkeluarsertifikat_kegiatan)->year;
 
-// Ambil laporan milik peserta yang sedang ditampilkan
-$laporan = \App\Izin\Models\Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $p->id)
-    ->where('sertifikat_id', $p->sertifikat_id)
-    ->first();
+                        // Ambil laporan milik peserta yang sedang ditampilkan
+                        $laporan = \App\Izin\Models\Izin_Laporanpesertakegiatans::where('pesertakegiatan_id', $p->id)
+                        ->where('sertifikat_id', $p->sertifikat_id)
+                        ->first();
 
-$statuslaporan_pesertakegiatan = $laporan->statuslaporan_pesertakegiatan ?? null;
-@endphp
+                        $statuslaporan_pesertakegiatan = $laporan->statuslaporan_pesertakegiatan ?? null;
+                        @endphp
 
                         <tr class="border-b text-center hover:bg-abuabuCerah/30 table-row">
                             <td class="py-3 px-4 text-left whitespace-nowrap">{{ $p->nama_peserta }}</td>

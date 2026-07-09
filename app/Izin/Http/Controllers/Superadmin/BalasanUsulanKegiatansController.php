@@ -3,6 +3,7 @@
 namespace App\Izin\Http\Controllers\Superadmin;
 
 use App\Izin\Http\Controllers\Controller;
+use App\Izin\Models\Izin_Identitassurats;
 use App\Izin\Models\Izin_Inputusulankegiatans;
 use App\Izin\Models\Izin_Kirimbalasanusulankegiatans;
 use App\Izin\Models\Izin_Kopunitkerjas;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class BalasanUsulanKegiatansController extends Controller
 {
@@ -22,149 +24,385 @@ class BalasanUsulanKegiatansController extends Controller
      * Download Surat Balasan Pengajuan Usulan Kegiatan
      */
     public function downloadBalasan($id)
-    {
-        // Ambil user yang sedang login saat ini
-        //$user = Auth::user();
+{
+    $usulan = Izin_Usulankegiatans::with([
+        'inputusulankegiatans.kirimbalasanusulankegiatans'
+    ])->findOrFail($id);
 
-        // Eager load relasi dari model dan temukan usulankegiatan berdasarkan id
-        $usulankegiatans = Izin_Usulankegiatans::with([
-            'inputusulankegiatans',
-            'inputusulankegiatans.kopunitkerjas',
-            'inputusulankegiatans.kirimusulankegiatans.identitassurats',
-            'inputusulankegiatans.kirimbalasanusulankegiatans.identitassurats',
-            'balasanusulankegiatans',
-            'detailusulankegiatans'
-        ])->findOrFail($id);
+    $kirimBalasan = $usulan
+        ->inputusulankegiatans
+        ->kirimbalasanusulankegiatans;
 
-        $kirimBalasan = $usulankegiatans->balasanusulankegiatans;
-        $admin = User::where(
-    'nip',
-    $kirimBalasan->nipadmin_kirimbalasanusulankegiatan
-)->first();
-
-$kop = Izin_Kopunitkerjas::where(
-    'subunitkerja_id',
-    $admin->subunitkerja_id
-)->latest()->first();
-
-$ttd = Izin_Ttdunitkerjas::where(
-    'subunitkerja_id',
-    $admin->subunitkerja_id
-)->latest()->first();
-
-$stempel = Izin_Stempelunitkerjas::where(
-    'subunitkerja_id',
-    $admin->subunitkerja_id
-)->latest()->first();
-
-$ttdPengusul = Izin_Ttdunitkerjas::where(
-    'subunitkerja_id',
-    $usulankegiatans?->subunitkerja_id
-)->latest()->first();
-        // Ambil kop, ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        //$kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
-        //$kop = $usulankegiatans->inputusulankegiatans->balasanusulankegiatans?->kopunitkerjas;
-        //$ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
-        //$ttd = Izin_Ttdunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-        //$stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
-        //$stempel = Izin_Stempelunitkerjas::where('unitkerja_id', $user->subunitkerjas->unitkerja_id)->first();
-
-        // Ambil gambar logo surakarta sebagai kop surat dari asset
-        $kop_path = public_path('build/assets/kop_surat.png');
-        if (!file_exists($kop_path)) {
-            $kop_path = null;
-        }
-
-        // Load view PDF
-        $pdf = PDF::loadView('pages.generatepdf.balasan_usulan_kegiatan', [
-            'usulankegiatans' => $usulankegiatans,
-            'kop_path' => $kop_path,
-            'kop' => $kop,
-            'ttd' => $ttd,
-            'stempel' => $stempel,
-            'ttdPengusul' => $ttdPengusul,
-            //'user'   => $user,
-        ])->setPaper('A4', 'portrait');
-
-        // Redirect dan simpan file PDF
-        return $pdf->stream('Surat Balasan Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
+    if (
+        !$kirimBalasan ||
+        !$kirimBalasan->filepdfgenerate_path ||
+        !Storage::disk('public')->exists(
+            $kirimBalasan->filepdfgenerate_path
+        )
+    ) {
+        abort(404, 'Dokumen belum digenerate.');
     }
+
+    return Storage::disk('public')->download(
+        $kirimBalasan->filepdfgenerate_path,
+        'Surat Balasan Pengajuan Usulan Kegiatan ' .
+                $usulan->inputusulankegiatans->nama_kegiatan .
+                '.pdf'
+    );
+}
+
+    public function createCetak($id)
+{
+    $usulankegiatans = Izin_Usulankegiatans::with([
+        'inputusulankegiatans.usulankegiatans'
+    ])->findOrFail($id);
+
+    $bulan = now()->month;
+    $tahun = now()->year;
+
+    $urutan = Izin_Identitassurats::count() + 1;
+    $urutan = str_pad($urutan, 3, '0', STR_PAD_LEFT);
+
+    $cara = optional(
+        $usulankegiatans->inputusulankegiatans?->usulankegiatans
+    )->carapelatihan_id ?? 0;
+
+    $nomorSurat = "{$urutan}/BKPSDM/{$this->bulanRomawi($bulan)}/{$cara}/{$tahun}";
+
+    return view(
+        'pages.balasanusulankegiatan.cetak_balasan_usulan_kegiatan',
+        compact('usulankegiatans', 'nomorSurat')
+    );
+}
+
 
     /**
      * Tampilkan Form Kirim Balasan Pengajuan Usulan Kegiatan Final
      */
     public function create($id)
     {
-        // Temukan usulankegiatan berdasarkan id
-        $usulankegiatan = Izin_Usulankegiatans::findOrFail($id);
+        $usulankegiatan = Izin_Usulankegiatans::with([
+            'inputusulankegiatans.kirimbalasanusulankegiatans.identitassurats'
+        ])->findOrFail($id);
 
-        // Redirect ke halaman kirim balasan usulan kegiatan
-        return view('pages.balasanusulankegiatan.kirim_balasan_usulan_kegiatan', compact('usulankegiatan'));
+        return view(
+            'pages.balasanusulankegiatan.kirim_balasan_usulan_kegiatan',
+            compact('usulankegiatan')
+        );
     }
 
     /**
      * Simpan File Balasan Usulan Kegiatan Final
      */
-    public function store(Request $request, IdentitasSuratsService $identitassuratservice)
+    public function storeCetak(
+    Request $request,
+    IdentitasSuratsService $identitassuratservice,
+    $id
+) {
+    $request->validate([
+        'nomor_surat'    => 'required|string|max:30|unique:izin_identitassurats,nomor_surat',
+        'tanggal_surat'  => 'required|date',
+        'perihal_surat'  => 'required|string',
+        'sifat_surat'    => 'required|string',
+        'lampiran_surat' => 'nullable|string',
+    ]);
+
+    $user = Auth::user();
+
+    DB::transaction(function () use (
+        $request,
+        $identitassuratservice,
+        $user,
+        $id
+    ) {
+
+        // Simpan Identitas Surat
+        $identitas = $identitassuratservice->create(
+            $request->only([
+                'nomor_surat',
+                'tanggal_surat',
+                'perihal_surat',
+                'sifat_surat',
+                'lampiran_surat',
+            ])
+        );
+
+        // Ambil data usulan
+        $usulan = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        // Simpan data kirim balasan
+        $kirimBalasan = Izin_Kirimbalasanusulankegiatans::updateOrCreate(
+            [
+                'inputusulankegiatan_id' => $usulan->inputusulankegiatans->id,
+            ],
+            [
+                'identitassurat_id' => $identitas->id,
+                'nipadmin_cetakbalasanusulankegiatan' => $user->nip,
+                'tanggalcetak_balasanusulankegiatan' => now(),
+            ]
+        );
+
+        Izin_Inputusulankegiatans::where(
+            'id',
+            $usulan->inputusulankegiatans->id
+        )->update([
+            'kirimbalasanusulankegiatan_id' => $kirimBalasan->id,
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kalau PDF sudah pernah dibuat, langsung download file lama
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $kirimBalasan &&
+            $kirimBalasan->filepdfgenerate_path &&
+            Storage::disk('public')->exists($kirimBalasan->filepdfgenerate_path)
+        ) {
+            return Storage::disk('public')->download(
+                $kirimBalasan->filepdfgenerate_path,
+                'Surat Balasan Pengajuan Usulan Kegiatan ' .
+                    $usulan->inputusulankegiatans->nama_kegiatan .
+                    '.pdf'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Generate PDF
+        |--------------------------------------------------------------------------
+        */
+
+        $admin = User::where(
+            'nip',
+            $user->nip
+        )->first();
+
+        $kop = Izin_Kopunitkerjas::where(
+            'subunitkerja_id',
+            $admin->subunitkerja_id
+        )->latest()->first();
+
+        $ttd = Izin_Ttdunitkerjas::where(
+            'subunitkerja_id',
+            $admin->subunitkerja_id
+        )->latest()->first();
+
+        $stempel = Izin_Stempelunitkerjas::where(
+            'subunitkerja_id',
+            $admin->subunitkerja_id
+        )->latest()->first();
+
+        $ttdPengusul = Izin_Ttdunitkerjas::where(
+            'subunitkerja_id',
+            $usulan->subunitkerja_id
+        )->latest()->first();
+
+        // Ambil gambar logo surakarta sebagai kop surat dari asset
+        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
+        if (!file_exists($kop_path)) {
+            $kop_path = null; // fallback kalau tidak ada file kop
+        }
+
+        // Ambil identitas surat
+        $identitas = optional(
+            optional($kirimBalasan)->identitassurats
+        );
+
+        $pdf = PDF::loadView(
+            'pages.generatepdf.balasan_usulan_kegiatan',
+            [
+                'usulankegiatans' => $usulan,
+                'kop_path' => $kop_path,
+                'identitas' => $identitas,
+                'kop' => $kop,
+                'ttd' => $ttd,
+                'stempel' => $stempel,
+                'ttdPengusul' => $ttdPengusul,
+            ]
+        )->setPaper('A4', 'portrait');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan PDF
+        |--------------------------------------------------------------------------
+        */
+
+        $folder = 'generated/balasan-usulan';
+
+        Storage::disk('public')->makeDirectory($folder);
+
+        $fileName = $id . '.pdf';
+
+        $path = $folder . '/' . $fileName;
+
+        Storage::disk('public')->put(
+            $path,
+            $pdf->output()
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update path PDF
+        |--------------------------------------------------------------------------
+        */
+        // Simpan lokasi file ke database
+        if ($kirimBalasan) {
+            $kirimBalasan->update([
+                'filepdfgenerate_path' => $path,
+            ]);
+        } else {
+            $kirimBalasan = $usulan
+                ->inputusulankegiatans
+                ->cetakusulankegiatans()
+                ->create([
+                    'filepdfgenerate_path' => $path,
+                ]);
+        }
+
+        $kirimBalasan->update([
+            'filepdfgenerate_path' => $path,
+        ]);
+    });
+
+    return redirect()
+        ->route('superadmin.usulankegiatan.pending')
+        ->with(
+            'success',
+            'Surat balasan berhasil dicetak.'
+        );
+}
+
+    public function storeFinal(Request $request, $id)
     {
-        // Ambil user yang sedang login saat ini
+        $request->validate([
+            'filekirim_balasanusulankegiatan' =>
+            'required|file|mimes:pdf,doc,docx|max:10240',
+        ]);
+
         $user = Auth::user();
 
-        // Transaksi DB berlangsung
-        DB::transaction(function () use ($request, $identitassuratservice, $user) {
+        DB::transaction(function () use ($request, $user, $id) {
 
-            // Simpan identitassurat
-            $identitassurats = $identitassuratservice->create(
-                $request->only([
-                    'nomor_surat',
-                    'tanggal_surat',
-                    'perihal_surat',
-                    'sifat_surat',
-                    'lampiran_surat',
-                ])
-            );
+            $usulan = Izin_Usulankegiatans::with(
+                'inputusulankegiatans.kirimbalasanusulankegiatans'
+            )->findOrFail($id);
 
-            // Validasi request
-            $request->validate([
-                'filekirim_balasanusulankegiatan' => 'required|file|mimes:pdf,doc,docx|max:10240',
-                'usulankegiatan_id' => 'required',
-            ]);
+            $file = $request->file('filekirim_balasanusulankegiatan')
+                ->storeAs(
+                    'izin/filekirim_balasanusulankegiatan',
+                    time() . '_' . $request->file('filekirim_balasanusulankegiatan')
+                        ->getClientOriginalName(),
+                    'public'
+                );
 
-            // Ambil usulankegiatan dari id route
-            $usulankegiatan = Izin_Usulankegiatans::with('inputusulankegiatans')->findOrFail($request->route('id'));
-            $inputusulankegiatan_id = $usulankegiatan->inputusulankegiatans->id;
-
-            // Upload file kirim balasan usulan kegiatan final
-            if ($request->hasFile('filekirim_balasanusulankegiatan')) {
-                $kirimbalasanusulankegiatans = $request->file('filekirim_balasanusulankegiatan')
-                    ->storeAs(
-                        'izin/filekirim_balasanusulankegiatan',
-                        time() . '_' . $request->file('filekirim_balasanusulankegiatan')->getClientOriginalName(),
-                        'public'
-                    );
-            }
-
-            // Simpan dan update data kirim balasan usulan kegiatan final
-            $kirimbalasanusulan = Izin_Kirimbalasanusulankegiatans::updateOrCreate(
-                [
-                    'inputusulankegiatan_id' => $inputusulankegiatan_id
-                ],
-                [
-                    'identitassurat_id' => $identitassurats->id,
-                    'filekirim_balasanusulankegiatan' => $kirimbalasanusulankegiatans,
+            $usulan->inputusulankegiatans
+                ->kirimbalasanusulankegiatans
+                ->update([
+                    'filekirim_balasanusulankegiatan' => $file,
                     'tanggalkirim_balasanusulankegiatan' => now(),
                     'nipadmin_kirimbalasanusulankegiatan' => $user->nip,
-                ]
-            );
-
-            // Update FK pada inputusulankegiatan
-            Izin_Inputusulankegiatans::where('id', $inputusulankegiatan_id)
-                ->update([
-                    'kirimbalasanusulankegiatan_id' => $kirimbalasanusulan->id
                 ]);
         });
 
-        // Redirect ke halaman daftar usulan kegiatan superadmin
-        return redirect()->route('superadmin.usulankegiatan.pending')->with('success', 'Usulan kegiatan berhasil dikirim!');
+        return redirect()
+            ->route('superadmin.usulankegiatan.pending')
+            ->with('success', 'Balasan usulan kegiatan berhasil dikirim.');
+    }
+
+    public function preview(Request $request, $id)
+    {
+        $request->validate([
+            'nomor_surat'   => 'required|string|max:30',
+            'tanggal_surat' => 'required|date',
+            'perihal_surat' => 'required|string',
+            'sifat_surat'   => 'required|string',
+            'lampiran_surat' => 'nullable|string',
+        ]);
+
+        // Ambil data usulan
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'inputusulankegiatans.kirimusulankegiatans.identitassurats',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        // Data identitas surat dari form (belum disimpan)
+        $identitassurat = (object) [
+            'nomor_surat'   => $request->nomor_surat,
+            'tanggal_surat' => $request->tanggal_surat,
+            'perihal_surat' => $request->perihal_surat,
+            'sifat_surat'   => $request->sifat_surat,
+            'lampiran_surat' => $request->lampiran_surat,
+        ];
+
+        // Ambil data user login
+        $user = Auth::user();
+
+        $kop = Izin_Kopunitkerjas::where(
+            'subunitkerja_id',
+            $user->subunitkerja_id
+        )->latest()->first();
+
+        $ttd = Izin_Ttdunitkerjas::where(
+            'subunitkerja_id',
+            $user->subunitkerja_id
+        )->latest()->first();
+
+        $stempel = Izin_Stempelunitkerjas::where(
+            'subunitkerja_id',
+            $user->subunitkerja_id
+        )->latest()->first();
+
+        $ttdPengusul = Izin_Ttdunitkerjas::where(
+            'subunitkerja_id',
+            $usulankegiatans->subunitkerja_id
+        )->latest()->first();
+
+        $kop_path = public_path('build/assets/kop_surat.png');
+
+        if (!file_exists($kop_path)) {
+            $kop_path = null;
+        }
+
+        $pdf = PDF::loadView(
+            'pages.generatepdf.balasan_usulan_kegiatan',
+            [
+                'usulankegiatans' => $usulankegiatans,
+                'identitassurat'  => $identitassurat,
+                'kop_path'        => $kop_path,
+                'kop'             => $kop,
+                'ttd'             => $ttd,
+                'stempel'         => $stempel,
+                'ttdPengusul'     => $ttdPengusul,
+                'isPreview'       => true,
+            ]
+        )->setPaper('A4', 'portrait');
+
+        return $pdf->stream('Preview Surat Balasan.pdf');
+    }
+
+    private function bulanRomawi($bulan)
+    {
+        $romawi = [
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        ];
+
+        return $romawi[(int)$bulan] ?? '-';
     }
 }

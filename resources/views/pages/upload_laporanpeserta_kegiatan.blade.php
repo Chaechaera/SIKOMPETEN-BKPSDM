@@ -111,6 +111,18 @@
                         'placeholder' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book dst',
                         'numbering' => false
                         ],
+                        'hambatanpeserta_kegiatan' => [
+                        'label' => 'Hambatan Kegiatan',
+                        'placeholder' => 'Tuliskan hambatan yang dialami selama mengikuti kegiatan (Opsional)',
+                        'numbering' => false,
+                        'optional' => true,
+                        ],
+                        'solusipeserta_kegiatan' => [
+                        'label' => 'Solusi atas Hambatan',
+                        'placeholder' => 'Tuliskan solusi terhadap hambatan yang dialami (Opsional)',
+                        'numbering' => false,
+                        'optional' => true,
+                        ],
                         ];
                         @endphp
 
@@ -119,6 +131,10 @@
                             <div class="flex justify-between items-center">
                                 <label class="block text-sm font-medium text-abuabuDark mb-2">
                                     {{ $field['label'] }}
+
+                                    @if(!empty($field['optional']))
+                                    <span class="text-xs text-abuabuBesi">(Opsional)</span>
+                                    @endif
                                 </label>
                             </div>
                             <div class="relative">
@@ -154,32 +170,32 @@
                                   bg-biruMuda focus:ring-2 file:text-xs file:font-medium file:bg-abuabuMuda file:py-2 file:px-3 file:rounded-md file:border-[0.5px]
                                   focus:outline-none p-2" multiple required>
                                 @if($laporanpesertakegiatans?->dokumentasipeserta_kegiatan)
-                            <div class="mt-2">
-                                <span>
-                                    <p class="text-xs text-gray-500">File saat ini:
-                                        {{-- <a href="{{ asset('storage/'.$laporanpesertakegiatans->dokumentasipeserta_kegiatan) }}" target="_blank" class="text-blue-600">
+                                <div class="mt-2">
+                                    <span>
+                                        <p class="text-xs text-gray-500">File saat ini:
+                                            {{-- <a href="{{ asset('storage/'.$laporanpesertakegiatans->dokumentasipeserta_kegiatan) }}" target="_blank" class="text-blue-600">
                                             {{ basename($laporanpesertakegiatans->dokumentasipeserta_kegiatan) }}
-                                        </a> --}}
-                                    </p>
-                                    {{-- <img src="{{ asset('storage/'.$laporanpesertakegiatans->dokumentasipeserta_kegiatan) }}"
+                                            </a> --}}
+                                        </p>
+                                        {{-- <img src="{{ asset('storage/'.$laporanpesertakegiatans->dokumentasipeserta_kegiatan) }}"
                                         class="h-16 rounded border"> --}}
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            @foreach($laporanpesertakegiatans->dokumentasipeserta_kegiatan as $index => $img)
-                <div class="relative">
-                    <img src="{{ asset('storage/'.$img) }}"
-                        class="h-24 w-full object-cover rounded border">
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            @foreach($laporanpesertakegiatans->dokumentasipeserta_kegiatan as $index => $img)
+                                            <div class="relative">
+                                                <img src="{{ asset('storage/'.$img) }}"
+                                                    class="h-24 w-full object-cover rounded border">
 
-                    {{-- tombol hapus --}}
-                    <label class="absolute top-1 right-1 bg-white px-1 text-xs rounded shadow">
-                        <input type="checkbox" name="hapus_gambar[]" value="{{ $index }}">
-                        ✕
-                    </label>
-                </div>
-            @endforeach
-        </div>
-                                </span>
-                            </div>
-                            @endif
+                                                {{-- tombol hapus --}}
+                                                <label class="absolute top-1 right-1 bg-white px-1 text-xs rounded shadow">
+                                                    <input type="checkbox" name="hapus_gambar[]" value="{{ $index }}">
+                                                    ✕
+                                                </label>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </span>
+                                </div>
+                                @endif
                                 @error('dokumentasipeserta_kegiatan')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                                 @enderror

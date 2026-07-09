@@ -18,11 +18,22 @@ class Izin_Kirimbalasanusulankegiatans extends Model
         'filekirim_balasanusulankegiatan',
         'tanggalkirim_balasanusulankegiatan',
         'nipadmin_cetakbalasanusulankegiatan',
-        'tanggalcetak_balasanusulankegiatan'
+        'tanggalcetak_balasanusulankegiatan',
+        'filepdfgenerate_path',
     ];
+
+    public function inputusulankegiatans()
+    {
+        return $this->belongsTo(Izin_Inputusulankegiatans::class, 'inputusulankegiatan_id');
+    }
 
     public function identitassurats()
     {
         return $this->belongsTo(Izin_Identitassurats::class, 'identitassurat_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'nipadmin_kirimbalasanusulankegiatan', 'nip');
     }
 }

@@ -1,14 +1,9 @@
 ﻿<x-app-layout>
     <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
-
         {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+        <main class="flex-1 space-y-6 transition-all duration-300 px-6 py-6" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
 
-            {{-- Header --}}
-            @include('layouts.navigation')
 
             {{-- 📝 FORM CETAK USULAN KEGIATAN --}}
             <form id="formCetakUsulan" method="POST" action="{{ route('admin.usulankegiatan.cetak', $usulan->id) }}" enctype="multipart/form-data">

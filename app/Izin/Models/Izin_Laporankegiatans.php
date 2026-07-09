@@ -80,17 +80,25 @@ class Izin_Laporankegiatans extends Model
 {
     // 1. FINISH PALING PRIORITAS
     if (
-        $this->sertifikats &&
-        $this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan
-    ) {
-        return 'finish';
-    }
+    $this->sertifikats &&
+    optional($this->inputlaporankegiatans->kirimbalasanlaporankegiatans)
+        ->tanggalkirim_balasanlaporankegiatan
+) {
+    return 'finish';
+}
 
     // 2. ACCEPTED (HARUS ADA INI)
-    if (
+    /*if (
     $this->verifikasilaporankegiatanterakhir &&
     $this->verifikasilaporankegiatanterakhir->status_verifikasilaporankegiatan === 'accepted' &&
     $this->statuslaporan_kegiatan === 'need_review'
+) {
+    return 'accepted';
+}*/
+
+if (
+    optional($this->verifikasilaporankegiatanterakhir)
+        ->status_verifikasilaporankegiatan === 'accepted'
 ) {
     return 'accepted';
 }
@@ -130,7 +138,7 @@ class Izin_Laporankegiatans extends Model
             'revisi'      => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
             'rejected' => 'px-3 py-1 text-xs rounded-full bg-red-100 text-red-600 font-medium',
             'accepted' => 'px-3 py-1 text-xs rounded-full bg-green-100 text-green-600 font-medium',
-            'finish' => 'px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-600 font-medium',
+            'finish' => 'px-3 py-1 text-xs rounded-full bg-pink-100 text-pink-600 font-medium',
             default       => 'px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-400 font-medium',
         };
     }
@@ -152,20 +160,38 @@ class Izin_Laporankegiatans extends Model
         return $this->status_laporan_ui === 'pending';
     }
 
-    public function getSudahCetakLaporanAttribute()
+    /*public function getSudahCetakLaporanAttribute()
     {
         return $this->balasanlaporankegiatans && $this->balasanlaporankegiatans->tanggalcetak_balasanlaporankegiatan;
-    }
+    }*/
+    public function getSudahCetakLaporanAttribute()
+{
+    return optional(
+        $this->inputlaporankegiatans?->kirimbalasanlaporankegiatans
+    )->tanggalcetak_balasanlaporankegiatan != null;
+}
 
-    public function getSudahKirimLaporanAttribute()
+    /*public function getSudahKirimLaporanAttribute()
     {
         return $this->balasanlaporankegiatans && $this->balasanlaporankegiatans->tanggalkirim_balasanlaporankegiatan;
-    }
+    }*/
+        public function getSudahKirimLaporanAttribute()
+{
+    return optional(
+        $this->inputlaporankegiatans?->kirimbalasanlaporankegiatans
+    )->tanggalkirim_balasanlaporankegiatan != null;
+}
 
-    public function getBolehCetakLaporanAttribute()
+    /*public function getBolehCetakLaporanAttribute()
     {
         return $this->status_laporan_ui === 'accepted' && !$this->sudah_cetakLaporan;
-    }
+    }*/
+        public function getBolehCetakLaporanAttribute()
+{
+    return
+        $this->status_laporan_ui === 'accepted'
+        && !$this->sudah_cetak_laporan;
+}
 
     public function getBolehKirimLaporanAttribute()
 {
@@ -174,10 +200,18 @@ class Izin_Laporankegiatans extends Model
         && !$this->sudah_kirimLaporan;
 }
 
-public function getBolehKirimBalasanAttribute()
+/*public function getBolehKirimBalasanAttribute()
 {
     return $this->status_laporan_ui === 'pending'
         && !$this->balasanlaporankegiatans?->tanggalkirim_balasanlaporankegiatan;
+}*/
+
+public function getBolehKirimBalasanAttribute()
+{
+    return
+        $this->status_laporan_ui === 'accepted'
+        && $this->sudah_cetak_balasan
+        && !$this->sudah_kirim_balasan;
 }
     /* ======================= ASSESSOR ATRIBUT UNTUK KOP SURAT ======================= */
 
@@ -203,5 +237,19 @@ public function getBolehKirimBalasanAttribute()
     public function getInputUsulanAttribute()
 {
     return $this->inputlaporankegiatans?->inputusulankegiatans;
+}
+
+public function getSudahCetakBalasanAttribute()
+{
+    return optional(
+        $this->inputlaporankegiatans?->kirimbalasanlaporankegiatans
+    )->filepdfgenerate_path != null;
+}
+
+public function getSudahKirimBalasanAttribute()
+{
+    return optional(
+        $this->inputlaporankegiatans?->kirimbalasanlaporankegiatans
+    )->filekirim_balasanlaporankegiatan != null;
 }
 }

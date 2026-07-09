@@ -75,19 +75,22 @@ Route::middleware('guest')->group(function () {
 */
 
 Route::middleware('auth')->group(function () {
-        // Email Verification
-        Route::get('verify-email', EmailVerificationPromptController::class)
-            ->name('verification.notice');
+    // Verifikasi Email
+    Route::get('verify-email', EmailVerificationPromptController::class)
+        ->name('verification.notice');
 
-        Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-            ->middleware('throttle:6,1')
-            ->name('verification.send');
+    // Nitifikasi Kirim Verifikasi Email
+    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 
-        Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
-            ->name('password.confirm');
-        Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
-        Route::put('password', [PasswordController::class, 'update'])
-            ->name('password.update');
+    // Setting Password
+    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+        ->name('password.confirm');
+    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+    Route::put('password', [PasswordController::class, 'update'])
+        ->name('password.update');
+
     /*
     |--------------------------------------------------------------------------
     | Switch Panel Routes
@@ -96,11 +99,13 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/switch-panel/{role}', function ($role) {
 
+        // List Role
         $allowedRoles = ['admin', 'superadmin', 'user'];
         if (!in_array($role, $allowedRoles)) {
             abort(403);
         }
 
+        // Logika Role
         $realRole = Auth::user()->role;
         if ($realRole === 'superadmin') {
         } elseif ($realRole === 'admin') {
@@ -126,6 +131,7 @@ Route::middleware('auth')->group(function () {
         ->name('logout');
 });
 
+// Verifikasi Email User
 Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');

@@ -55,21 +55,106 @@
                         @endforeach
                     </select>
                 </form>
+
+                {{-- Kategori Filter --}}
+                <form method="GET">
+                    <select name="kategori"
+                        onchange="this.form.submit()"
+                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
+                        <option value="">Semua Kategori</option>
+                        <option value="Sangat Baik" {{ request('kategori')=='Sangat Baik' ? 'selected' : '' }}>
+                            🟢 Sangat Baik
+                        </option>
+                        <option value="Baik" {{ request('kategori')=='Baik' ? 'selected' : '' }}>
+                            🔵 Baik
+                        </option>
+                        <option value="Cukup" {{ request('kategori')=='Cukup' ? 'selected' : '' }}>
+                            🟡 Cukup
+                        </option>
+                        <option value="Kurang" {{ request('kategori')=='Kurang' ? 'selected' : '' }}>
+                            🟠 Kurang
+                        </option>
+                        <option value="Sangat Kurang" {{ request('kategori')=='Sangat Kurang' ? 'selected' : '' }}>
+                            🔴 Sangat Kurang
+                        </option>
+                    </select>
+                </form>
             </div>
 
             {{-- Tabel Rekapitulasi --}}
-            <div class="bg-white rounded-xl overflow-hidden shadow">
+            <div class="bg-white rounded-xl overflow-x-auto overflow-y-visible shadow">
                 <table class="w-full text-sm table-auto">
                     <thead>
                         <tr class="bg-abuabuMuda font-semibold border-b text-center">
                             <th class="p-4">No</th>
                             <th class="p-4">Sub Unit Kerja OPD</th>
-                            <th class="p-4">Jumlah Kegiatan PK</th>
-                            <th class="p-4">0 - 10 JP</th>
-                            <th class="p-4">11 - 19 JP</th>
-                            <th class="p-4">&gt; 20 JP</th>
-                            <th class="p-4">Total JP</th>
-                            <th class="p-4">% &gt; 20 JP</th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    Jumlah Kegiatan PK
+                                    <x-izin-info-tooltip
+                                        position="left"
+                                        title="Jumlah Kegiatan PK"
+                                        description="Jumlah seluruh kegiatan Pengembangan Kompetensi (PK) yang telah terlaksana pada masing-masing OPD dalam periode tahun anggaran yang dipilih." />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    0 - 10 JP
+                                    <x-izin-info-tooltip
+                                        position="left"
+                                        title="0 - 10 JP"
+                                        description="Jumlah kegiatan PK yang menghasilkan capaian 0 sampai dengan 10 Jam Pelajaran (JP)." />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    11 - 19 JP
+                                    <x-izin-info-tooltip
+                                        position="left"
+                                        title="11 - 19 JP"
+                                        description="Jumlah kegiatan PK yang menghasilkan capaian 11 sampai dengan 19 Jam Pelajaran (JP)." />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    &gt; 20 JP
+                                    <x-izin-info-tooltip
+                                        position="left"
+                                        title="> 20 JP"
+                                        description="Jumlah kegiatan PK yang menghasilkan capaian lebih dari 20 Jam Pelajaran (JP)." />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    Total JP
+                                    <x-izin-info-tooltip
+                                        position="right"
+                                        title="Total JP"
+                                        description="Total akumulasi Jam Pelajaran (JP) dari seluruh kegiatan PK yang telah dilaksanakan oleh masing-masing OPD." />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    % &gt; 20 JP
+                                    <x-izin-info-tooltip
+                                        position="right"
+                                        title="% > 20 JP"
+                                        :description="'Persentase kegiatan PK yang memiliki capaian lebih dari 20 JP dibandingkan dengan seluruh kegiatan PK yang telah dilaksanakan oleh OPD.
+                                        Rumus:
+                                        (Jumlah kegiatan > 20 JP ÷ Jumlah seluruh kegiatan PK) × 100%.'" />
+                                </div>
+                            </th>
+                            <th class="p-4 whitespace-nowrap">
+                                <div class="flex justify-center items-center gap-1">
+                                    Kategori Kinerja PK
+                                    <x-izin-info-tooltip
+                                        position="right"
+                                        title="Kategori Kinerja PK ASN"
+                                        :description="'Kategori yang menggambarkan tingkat kinerja pelaksanaan Pengembangan Kompetensi ASN berdasarkan indikator yang telah ditetapkan sehingga dapat digunakan sebagai bahan perbandingan antar OPD. Indikator yang digunakan meliputi:
+                                        1. Jumlah kegiatan PK yang terlaksana (menunjukkan tingkat aktivitas OPD).
+                                        2. Persentase kegiatan dengan capaian > 20 JP (menunjukkan kualitas atau intensitas kegiatan).'" />
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,8 +179,24 @@
                             <td class="p-4 font-semibold border-r">
                                 {{ $row['total'] }}
                             </td>
-                            <td class="p-4 font-semibold">
+                            <td class="p-4 font-semibold border-r">
                                 {{ $row['persen_20'] }}
+                            </td>
+                            <td class="p-4 font-semibold whitespace-nowrap">
+                                @php
+                                $badge = match ($row['kategori_kinerja']) {
+                                'Sangat Baik' => ['bg-hijauBening text-hijauTua', '🟢'],
+                                'Baik' => ['bg-biruCerah text-biruMariana', '🔵'],
+                                'Cukup' => ['bg-kuningBening text-orangeMuda', '🟡'],
+                                'Kurang' => ['bg-orangeBening text-orange', '🟠'],
+                                'Sangat Kurang' => ['bg-merahBening text-merahCabai', '🔴'],
+                                };
+                                @endphp
+
+                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold {{ $badge[0] }}">
+                                    <span>{{ $badge[1] }}</span>
+                                    <span>{{ $row['kategori_kinerja'] }}</span>
+                                </span>
                             </td>
                         </tr>
                         @empty

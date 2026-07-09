@@ -2,8 +2,10 @@
 
 namespace App\Izin\Http\Controllers\Superadmin;
 
+use App\Izin\Models\Izin_Balasanlaporankegiatans;
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Http\Controllers\User\SertifikatsController;
+use App\Izin\Models\Izin_Inputlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Sertifikats;
 use App\Izin\Models\Izin_Usulankegiatans;
@@ -19,18 +21,23 @@ class ReviewLaporanKegiatansController extends Controller
      */
     public function pendingList(Request $request)
 {
+    
     $query = Izin_Usulankegiatans::with([
-        'inputusulankegiatans',
-        'inputlaporankegiatans',
-        'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
-        'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
-        'subunitkerjas'
-    ])
-    ->whereHas(
-    'inputlaporankegiatans.laporankegiatans',
-    function ($q) {
+    'inputusulankegiatans',
+    'inputlaporankegiatans',
+    'inputlaporankegiatans.laporankegiatans.verifikasilaporankegiatanterakhir',
+    'inputlaporankegiatans.laporankegiatans.cetaklaporankegiatans',
+
+    // balasan
+    'inputlaporankegiatans.balasanlaporankegiatans' => function ($q) {
         $q->where('is_archived', 0);
-    }
+    },
+
+    'subunitkerjas'
+])
+
+->whereHas(
+    'inputlaporankegiatans.kirimlaporankegiatans'
 )
 
     ->leftJoin('izin_inputlaporankegiatans', 'izin_inputlaporankegiatans.inputusulankegiatan_id', '=', 'izin_usulankegiatans.id')
@@ -115,43 +122,102 @@ class ReviewLaporanKegiatansController extends Controller
      * ARCHIVE
      */
 
-public function archive($id)
+/*public function archive($id)
 {
-    $laporan = Izin_Laporankegiatans::findOrFail($id);
+    $balasan = Izin_Balasanlaporankegiatans::findOrFail($id);
 
-    $laporan->update([
+    $balasan->update([
         'is_archived' => 1
     ]);
 
     return back()->with(
         'success',
-        'Laporan berhasil diarsipkan'
+        'Balasan laporan berhasil diarsipkan'
+    );
+}*/
+
+public function archive($id)
+{
+    $inputlaporankegiatans = Izin_Inputlaporankegiatans::where(
+        'laporankegiatan_id',
+        $id
+    )->firstOrFail();
+
+    $balasan = Izin_Balasanlaporankegiatans::where(
+        'inputlaporankegiatan_id',
+        $inputlaporankegiatans->id
+    )->firstOrFail();
+
+    $balasan->update([
+        'is_archived' => 1
+    ]);
+
+    return back()->with(
+        'success',
+        'Balasan laporan berhasil diarsipkan'
     );
 }
-public function unarchive($id)
-{
-    $laporan = Izin_Laporankegiatans::findOrFail($id);
 
-    $laporan->update([
+/*public function unarchive($id)
+{
+    $balasan = Izin_Balasanlaporankegiatans::findOrFail($id);
+
+    $balasan->update([
         'is_archived' => 0
     ]);
 
     return back()->with(
         'success',
-        'Laporan berhasil dipulihkan'
+        'Balasan laporan berhasil dipulihkan'
+    );
+}*/
+
+public function unarchive($id)
+{
+    $inputlaporankegiatans = Izin_Inputlaporankegiatans::where(
+        'laporankegiatan_id',
+        $id
+    )->firstOrFail();
+
+    $balasan = Izin_Balasanlaporankegiatans::where(
+        'inputlaporankegiatan_id',
+        $inputlaporankegiatans->id
+    )->firstOrFail();
+
+
+    $balasan->update([
+        'is_archived' => 0
+    ]);
+
+    return back()->with(
+        'success',
+        'Balasan laporan berhasil dipulihkan'
     );
 }
+
+
 public function archivePage(Request $request)
 {
+    $user = Auth::user();
+
     $query = Izin_Usulankegiatans::with([
         'inputusulankegiatans',
         'inputlaporankegiatans',
         'inputlaporankegiatans.laporankegiatans',
         'subunitkerjas'
     ])
-    ->whereHas('inputlaporankegiatans.laporankegiatans', function ($q) {
+
+->whereHas(
+    'inputlaporankegiatans.balasanlaporankegiatans',
+    function ($q) {
         $q->where('is_archived', 1);
-    });
+    }
+);
+
+        // 🔐 ROLE FILTER
+        if ($user->role == 'admin') {
+            $query->where('subunitkerja_id', $user->subunitkerja_id);
+        }
 
     // SEARCH
     if ($request->filled('search')) {
@@ -294,6 +360,10 @@ $query->leftJoin(
 
             // Ambil sertifikat berdasarkan id laporan kegiatan
             $sertifikat = Izin_Sertifikats::where('laporankegiatan_id', $id)->first();
+
+            $laporankegiatans->update([
+        'statuslaporan_kegiatan' => 'accepted',
+    ]);
 
             // Redirect ke halaman buat balasan laporan hasil kegiatan
             return redirect()

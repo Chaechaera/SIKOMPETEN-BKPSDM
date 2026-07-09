@@ -1,30 +1,17 @@
 <x-app-layout>
-<div class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-    {{-- Sidebar --}}
-    @include('pages.sidebar.admin')
-
-    {{-- Main Content --}}
-    <main class="flex-1 space-y-6">
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">  CETAK LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Silahkan periksa dan pastikan data laporan sebelum mencetak.
+            </p>
+        </div>
 
         {{-- Header --}}
-        @include('layouts.navigation')
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-            {{-- PAGE CONTENT --}}
-
-    {{-- ================================================== --}}
-    {{-- HEADER --}}
-    {{-- ================================================== --}}
-    <div class="bg-white rounded-xl shadow p-6 mb-4">
-        <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
-            CETAK LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN
-        </h1>
-
-        <p class="text-sm text-gray-500 max-w-4xl">
-            Silahkan periksa dan pastikan data laporan sebelum mencetak.
-        </p>
-    </div>
 
     {{-- STEP --}}
     <x-step-progress :usulan="$usulan" :is-laporan="true" />

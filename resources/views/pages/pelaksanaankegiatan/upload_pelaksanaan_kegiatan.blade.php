@@ -1,35 +1,31 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
+        {{-- Card Informasi --}}
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">
+                FORMULIR UPLOAD BUKTI PELAKSANAAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN
+            </h1>
+            <p class="text-sm text-abuabuCerah max-w-5xl">
+                Silahkan upload gambar bukti pelaksanaan kegiatan pada form ini dan pastikan bahwa gambar yang diunggah sesuai dengan kegiatan yang dilaksanakan.
+            </p>
+        </div>
 
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
+        <!-- Card
+        <div class="w-full max-w-7xl relative">-->
 
             {{-- Form --}}
             <form action="{{ route('admin.pelaksanaankegiatan.store', $usulankegiatans->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <div class="bg-white rounded-xl shadow p-6 mb-4">
-                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">
-                        FORMULIR UPLOAD BUKTI PELAKSANAAN KEGIATAN PENGEMBANGAN KOMPETENSI ASN
-                    </h1>
-                    <p class="text-sm text-gray-500 max-w-4xl">
-                        Silahkan upload gambar bukti pelaksanaan kegiatan pada form ini dan pastikan bahwa gambar yang diunggah sesuai dengan kegiatan yang dilaksanakan.
-                    </p>
-                </div>
+                {{-- ====================================================== --}}
+                {{-- ============= BAGIAN 1: RINGKASAN DATA OPD ============= --}}
+                {{-- ====================================================== --}}
+                <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-6">
+                    <h2 class="text-lg font-bold bg-primary-gradient bg-clip-text text-transparent leading-tight mb-4">Ringkasan Data Kegiatan Pengembangan Kompetensi ASN yang Dilaksanakan</h2>
 
-                <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
-
-                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight mb-4">
-                        Ringkasan Data Kegiatan Pengembangan Kompetensi ASN yang Dilaksanakan
-                    </h2>
-
-                    <div class="my-4 border-t-2 border-gray-200"></div>
+                    <!-- 🔻 DIVIDER -->
+                    <div class="my-4 border-t-2 border-abuabuCerah/70"></div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -41,7 +37,6 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
-                    </div>
 
                         {{-- Nama --}}
                         <div>
@@ -51,7 +46,6 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
-                    </div>
 
                         {{-- Lokasi --}}
                         <div>
@@ -61,7 +55,6 @@
                                 class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2"
                                 readonly>
                         </div>
-                    </div>
 
                         {{-- Tanggal --}}
                         <div>
@@ -75,98 +68,124 @@
                                 readonly>
                         </div>
                     </div>
+                </div>
 
-                        {{-- Upload --}}
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-                                Unggah Bukti Pelaksanaan
-                                <span class="text-gray-400 text-sm">(JPG, PNG, JPEG)</span>
-                            </label>
+                {{-- Upload --}}
+                <div class="md:col-span-2 mt-2">
 
-                            <p class="text-xs text-gray-500 mt-1">Format: .jpg / .png / .jpeg | Maksimal 5 file</p>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Unggah Bukti Pelaksanaan
+                    </label>
 
-                            <label id="dropArea"
-                                class="mt-2 border border-gray-300 rounded-lg px-3 py-6 flex flex-col items-center text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition">
+                    <p class="text-xs text-gray-500 mt-1">
+                        Format: .jpg / .png / .jpeg | Maksimal 5 file
+                    </p>
 
-                                <i class="fa-solid fa-upload text-2xl mb-2"></i>
-                                Klik untuk upload atau drag & drop
+                    <label id="dropArea"
+                        class="mt-3 flex flex-col items-center justify-center h-36 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition">
 
-                                <input type="file"
-                                    id="buktipelaksanaan_kegiatanFiles"
-                                    name="buktipelaksanaan_kegiatan[]"
-                                    class="hidden"
-                                    accept=".jpg,.png,.jpeg"
-                                    multiple required>
-                            </label>
+                        <i class="fa-solid fa-upload text-2xl text-gray-500 mb-2"></i>
 
-                            {{-- TABLE --}}
-                            <div class="mt-4">
-                                <table class="w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg overflow-hidden">
-                                    <thead class="bg-gray-100 text-gray-600">
-                                        <tr>
-                                            <th class="px-4 py-2 w-10">No</th>
-                                            <th class="px-4 py-2">Nama File</th>
-                                            <th class="px-4 py-2 w-32 text-center">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="fileList"></tbody>
-                                </table>
-                            </div>
+                        <span class="text-sm text-gray-500">
+                            Klik untuk upload atau drag & drop
+                        </span>
 
-                        </div>
+                        <input type="file"
+                            id="buktipelaksanaan_kegiatanFiles"
+                            name="buktipelaksanaan_kegiatan[]"
+                            class="hidden"
+                            accept=".jpg,.jpeg,.png"
+                            multiple
+                            required>
+                    </label>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Catatan Pelaksanaan</label>
-                            <textarea name="catatan_pelaksanaan" rows="4"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
-                                placeholder="Tuliskan catatan penting selama pelaksanaan kegiatan...">{{ old('catatan_pelaksanaan') }}</textarea>
-                        </div>
+                    {{-- Table --}}
+                    <div class="mt-4 overflow-hidden rounded-xl border border-gray-200">
+                        <table class="w-full text-sm">
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Hambatan Pelaksanaan</label>
-                            <textarea name="hambatan_pelaksanaan" rows="4"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
-                                placeholder="Tuliskan hambatan yang ditemukan selama pelaksanaan kegiatan...">{{ old('hambatan_pelaksanaan') }}</textarea>
-                        </div>
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-3 text-left w-16">
+                                        No
+                                    </th>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Solusi untuk Hambatan</label>
-                            <textarea name="solusi_hambatan_pelaksanaan" rows="4"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg p-3"
-                                placeholder="Tuliskan solusi yang dilakukan untuk mengatasi hambatan tersebut...">{{ old('solusi_hambatan_pelaksanaan') }}</textarea>
-                        </div>
+                                    <th class="px-4 py-3 text-left">
+                                        Nama File
+                                    </th>
 
-                    </div>
+                                    <th class="px-4 py-3 text-center w-40">
+                                        Aksi
+                                    </th>
+                                </tr>
+                            </thead>
 
-                    {{-- BUTTON --}}
-                    <div class="mt-6 flex justify-end gap-3">
-                        <a href="{{ route('admin.usulankegiatan.index') }}"
-                            class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
-                            Batal
-                        </a>
+                            <tbody id="fileList" class="divide-y divide-gray-200">
+                            </tbody>
 
-                        <button type="submit"
-                            class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
-                            Submit
-                        </button>
+                        </table>
                     </div>
 
                 </div>
-                {{-- ===================================================== --}}
-                {{-- =============== BAGIAN 3: TOMBOL AKSI =============== --}}
-                {{-- ===================================================== --}}
-                <div class="mt-6 flex justify-end gap-3">
-                    <button href="{{ route('admin.usulankegiatan.index') }}"
-                        class="w-2/12 text-center py-2.5 bg-gray-300 text-gray-700 px-6 rounded-lg text-sm hover:bg-gray-200 transition font-semibold">
-                        Batal
-                    </button>
-                    <button type="submit"
-                        class="w-2/12 text-center py-2.5 bg-[#FFA41B] text-white px-6 rounded-lg text-sm hover:bg-[#ff9600] transition font-semibold">
-                        Submit
-                    </button>
+
+                {{-- Textarea --}}
+                <div class="space-y-5 mt-6">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Catatan Pelaksanaan
+                        </label>
+
+                        <textarea
+                            name="catatan_pelaksanaan"
+                            rows="4"
+                            class="w-full rounded-lg border border-[#E0E7FF] p-3 text-sm"
+                            placeholder="Tuliskan catatan penting selama pelaksanaan kegiatan...">{{ old('catatan_pelaksanaan') }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Hambatan Pelaksanaan
+                        </label>
+
+                        <textarea
+                            name="hambatan_pelaksanaan"
+                            rows="4"
+                            class="w-full rounded-lg border border-[#E0E7FF] p-3 text-sm"
+                            placeholder="Tuliskan hambatan yang ditemukan selama pelaksanaan kegiatan...">{{ old('hambatan_pelaksanaan') }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Solusi untuk Hambatan
+                        </label>
+
+                        <textarea
+                            name="solusi_hambatan_pelaksanaan"
+                            rows="4"
+                            class="w-full rounded-lg border border-[#E0E7FF] p-3 text-sm"
+                            placeholder="Tuliskan solusi yang dilakukan untuk mengatasi hambatan tersebut...">{{ old('solusi_hambatan_pelaksanaan') }}</textarea>
+                    </div>
+
                 </div>
-            </div>
+
+        </div>
+
+        {{-- ===================================================== --}}
+        {{-- =============== BAGIAN 3: TOMBOL AKSI =============== --}}
+        {{-- ===================================================== --}}
+        <div class="mt-6 flex justify-end gap-3">
+            <a href="{{ route('admin.usulankegiatan.index') }}"
+                class="w-2/12 text-center py-2.5 bg-abuabuMuda rounded-lg font-semibold hover:bg-abuabuMuda/60 transition">
+                Batal
+            </a>
+            <button type="submit"
+                class="w-2/12 py-2.5 bg-orangeMuda text-white rounded-lg font-semibold hover:bg-orangeMuda/80 transition">
+                Simpan
+            </button>
+        </div>
+
         </form>
+
     </div>
 
     {{-- SCRIPT --}}
@@ -192,7 +211,7 @@
             handleFiles(e.dataTransfer.files);
         });
 
-        fileInput.addEventListener('change', function () {
+        fileInput.addEventListener('change', function() {
             handleFiles(this.files);
         });
 

@@ -1,288 +1,213 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
-
-            <!-- JUDUL -->
-            <div class="bg-white rounded-xl shadow p-6 mb-4">
-                <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">DAFTAR ARSIP LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                <p class="text-sm text-gray-500 max-w-4xl">
-                    Daftar kegiatan yang saat ini telah diarsipkan.
-                </p>
-            </div>
-
-            <!-- TABLE -->
-<div class="bg-white rounded-xl shadow p-6">
-
-    <!-- FILTER ATAS -->
-    <form method="GET" class="flex flex-col md:flex-row gap-4 mb-4 items-center">
-
-        {{-- SEARCH --}}
-        <input type="text"
-               name="search"
-               value="{{ request('search') }}"
-               placeholder="Cari..."
-               class="flex-1 border rounded-lg px-4 py-2"
-               onkeydown="if(event.key==='Enter'){this.form.submit()}" />
-
-        {{-- TAHUN --}}
-        <select name="tahun"
-                onchange="this.form.submit()"
-                class="border rounded-lg px-4 py-2 min-w-[140px]">
-            <option value="">Semua Tahun</option>
-            @for($y = 2021; $y <= 2026; $y++)
-                <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>
-                    {{ $y }}
-                </option>
-            @endfor
-        </select>
-
-        {{-- SORT DROPDOWN --}}
-        <div x-data="{ openSort: false }" class="relative">
-
-            <!-- ICON SORT -->
-            <button type="button"
-                    @click="openSort = !openSort"
-                    class="border rounded-lg px-3 py-2 bg-white hover:bg-gray-100 flex items-center gap-1">
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-6 h-6"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
-
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M3 4h13M3 8h9m-9 4h6m-6 4h3" />
-                </svg>
-
-            </button>
-
-            <!-- DROPDOWN -->
-            <div x-show="openSort"
-                 x-transition
-                 @click.outside="openSort = false"
-                 class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow z-50">
-
-                <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}"
-                   class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort','desc')=='desc'?'bg-gray-100 font-semibold':'' }}">
-                    Terbaru
-                </a>
-
-                <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}"
-                   class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort')=='asc'?'bg-gray-100 font-semibold':'' }}">
-                    Terlama
-                </a>
-
-            </div>
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">DAFTAR ARSIP LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Daftar arsip laporan hasil kegiatan pengembangan kompetensi ASN.
+            </p>
         </div>
 
-    </form>
+        {{-- Search and Filtering --}}
+        <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
 
-               <div class="border rounded-lg overflow-hidden">
-    <table class="w-full table-fixed text-sm">
-        <thead>
-    <tr class="bg-gray-50 border-b text-gray-600">
-        <th class="py-3 px-4 w-16 text-center">No</th>
-        <th class="py-3 px-4 text-left">Nama Kegiatan</th>
-        <th class="py-3 px-4 text-left">Lokasi Kegiatan</th>
-        <th class="py-3 px-4 text-center">Tanggal Pelaksanaan</th>
-        <th class="py-3 px-4 text-center">Aksi</th>
-    </tr>
-</thead>
+            {{-- Search --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
+                <form method="GET">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search ....."
+                        class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
 
-        <tbody>
-@forelse ($usulankegiatans as $index => $u)
-<tr class="border-b hover:bg-gray-50 " x-data="{ openModal:false }">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-abuabuGelap">
+                        <i data-lucide="search"></i>
+                    </span>
+                </form>
+            </div>
 
-    <td class="py-4 px-4 text-center">
-        {{ $usulankegiatans->firstItem() + $index }}
-    </td>
+            {{-- Tahun --}}
+            <form method="GET">
+                <select
+                    name="tahun"
+                    onchange="this.form.submit()"
+                    class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
+                    <option value="">Semua Tahun</option>
+                    @for ($year = 2021; $year <= 2026; $year++)
+                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
+                        {{ $year }}
+                        </option>
+                        @endfor
+                </select>
+            </form>
 
-    <td class="py-4 px-4 font-medium text-gray-800">
-        {{ $u->inputusulankegiatans->nama_kegiatan }}
-    </td>
+            {{-- Sort --}}
+            <a href="{{ request()->fullUrlWithQuery(['sort' => request('sort') == 'asc' ? 'desc' : 'asc']) }}"
+                class="bg-white rounded-xl border border-abuabuMuda/60 shadow px-4 py-3 flex items-center justify-center">
+                @if(request('sort','desc') == 'desc')
+                <i data-lucide="list-sort-descending" class="w-5 h-5 text-abuabuSedang"></i>
+                @else
+                <i data-lucide="list-sort-ascending" class="w-5 h-5 text-abuabuSedang"></i>
+                @endif
+            </a>
+        </div>
 
-    <td class="py-4 px-4 text-gray-600">
-        {{ $u->inputlaporankegiatans?->laporankegiatans?->lokasi_kegiatan ?? '-' }}
-    </td>
+        <!-- TABLE -->
+        <div class="bg-white rounded-xl overflow-hidden shadow">
+            <table class="w-full text-sm font-semibold table-auto">
+                <thead>
+                    <tr class="bg-abuabuMuda border-b text-center">
+                        <th class="py-3 px-4">No</th>
+                        <th class="py-3 px-4">Nama Kegiatan</th>
+                        <th class="py-3 px-4">Lokasi Kegiatan</th>
+                        <th class="py-3 px-4">Tanggal Pelaksanaan</th>
+                        <th class="py-3 px-4">Aksi</th>
+                    </tr>
+                </thead>
 
-    <td class="py-4 px-4 text-center text-gray-600 whitespace-nowrap">
-        {{
+                <tbody>
+                    @forelse ($usulankegiatans as $index => $u)
+                    <tr class="border-b text-center text-sm font-normal hover:bg-abuabuCerah/30">
+
+                        <td class="py-3 px-4 text-center">
+                            {{ $usulankegiatans->firstItem() + $index }}
+                        </td>
+
+                        <td class="py-3 px-4 text-left font-semibold">
+                            {{ $u->inputusulankegiatans->nama_kegiatan }}
+                        </td>
+
+                        <td class="py-3 px-4 text-center">
+                            {{ $u->inputlaporankegiatans?->laporankegiatans?->lokasi_kegiatan ?? '-' }}
+                        </td>
+
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{
             $u->inputlaporankegiatans?->laporankegiatans?->tanggalmulai_kegiatan
             ? \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalmulai_kegiatan)->format('d/m/Y')
             : '-'
         }}
-        -
-        {{
+                            -
+                            {{
             $u->inputlaporankegiatans?->laporankegiatans?->tanggalselesai_kegiatan
             ? \Carbon\Carbon::parse($u->inputlaporankegiatans->laporankegiatans->tanggalselesai_kegiatan)->format('d/m/Y')
             : '-'
         }}
-    </td>
+                        </td>
 
-    <td class="py-4 px-4 text-center">
-        {{-- BUTTON UPDATE --}}
-<button type="button"
-    @click="openModal = true"
-    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
-    Update
-</button>
+                        <!-- Tombol Aksi -->
+                        <td class="py-3 px-4" x-data="{ openDokumen: false }">
+                            <div class="flex justify-center gap-4">
 
-{{-- MODAL --}}
-<div x-show="openModal"
-     x-cloak
-     x-transition.opacity
-     class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-
-    <div @click.outside="openModal = false"
-         x-transition.scale
-         class="relative bg-white w-[440px] max-w-full rounded-2xl shadow-2xl p-6">
-
-        {{-- CLOSE --}}
-        <button type="button"
-            @click="openModal = false"
-            class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl">
-            ✖
+                                {{-- ===================== LIHAT DOKUMEN ===================== --}}
+                                <button
+            type="button"
+            @click="openDokumen = true"
+            class="w-9 h-9 flex items-center justify-center rounded-lg bg-biruCerah/20 text-biruNavy/75 hover:bg-biruCerah/50 transition"
+            title="Open Dokumen">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
         </button>
 
-        {{-- TITLE --}}
-        <h2 class="text-lg font-semibold text-gray-800 mb-1">
-            Update & Aksi
-        </h2>
+                                <!-- MODAL DETAIL -->
+                                <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+                                    <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-abuabuMuda/60">
 
-        <p class="text-sm text-gray-500 mb-5">
-            Pilih menu yang ingin dilakukan
-        </p>
+                                        {{-- Button Close --}}
+                                        <button @click="openDokumen = false"
+                                            class="absolute top-3 right-3">
+                                            <i data-lucide="x"></i>
+                                        </button>
 
-        {{-- CONTENT --}}
-        <div class="flex flex-col space-y-3 font-bold">
+                                        <h2 class="text-2xl font-semibold bg-primary-gradient bg-clip-text text-transparent leading-tight">
+                                            DAFTAR DOKUMEN
+                                        </h2>
 
-            {{-- UPDATE --}}
-            @if($u->status_ui === 'in_progress')
-                <a href="{{ route('admin.laporankegiatan.create', $u->id) }}"
-                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#e0f2fe] text-[#0369a1] font-medium hover:brightness-95 transition">
-                    Update Laporan
-                </a>
-            @else
-                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Update Laporan
-                </div>
-            @endif
+                                        <p class="text-sm font-normal text-abuabuCerah mb-6">
+                                            Pilih dokumen terkait usulan kegiatan yang ingin dilihat.
+                                        </p>
 
-            {{-- SURAT & LAPORAN --}}
-            @if($u->inputlaporankegiatans?->laporankegiatans)
-                <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
-                   target="_blank"
-                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6] font-medium hover:brightness-95 transition">
-                    Lihat Surat & Laporan Hasil
-                </a>
-            @else
-                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Lihat Surat & Laporan Hasil
-                </div>
-            @endif
+                                        <div class="flex flex-col space-y-3 font-semibold text-sm">
+                                            {{-- Lihat Surat dan Laporan Kegiatan --}}
+                                            <a href="{{ route('admin.laporankegiatan.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-hijauTransparan text-hijauTua hover:bg-hijauTua/60 transition">
+                                                Lihat Surat dan Laporan Hasil
+                                            </a>
 
-            {{-- BALASAN --}}
-            @if($u->inputlaporankegiatans?->laporankegiatans?->balasanlaporankegiatans ?? false)
-                <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
-                   target="_blank"
-                   class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#ffe5ec] text-[#d00000] font-medium hover:brightness-95 transition">
-                    Lihat Surat Balasan
-                </a>
-            @else
-                <div class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Lihat Surat Balasan
-                </div>
-            @endif
+                                            {{-- Lihat Surat Balasan Laporan Kegiatan --}}
+                                            <a href="{{ route('admin.balasanlaporankegiatan.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-unguBening text-unguSedang hover:bg-unguSedang/60 transition">
+                                                Lihat Surat Balasan Laporan
+                                            </a>
 
-            {{-- SERTIFIKAT --}}
-                                            @php
-    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
-@endphp
+                                            {{-- Lihat Pelaksanaan Kegiatan --}}
+                                            <a href="{{ route('admin.pelaksanaankegiatan.show', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-merahBata/25 text-merahMaroon hover:bg-merahMaroon/60 transition">
+                                                Lihat Pelaksanaan Kegiatan
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
 
-@if($laporanId)
-    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
-        target="_blank"
-       class="flex items-center justify-center px-4 py-2 rounded-lg bg-[#defff8] text-[#136769] font-medium hover:brightness-95 transition">
-                    Download Sertifikat
+                                {{-- TOMBOL PULIHKAN --}}
+                                @if($u->inputlaporankegiatans?->laporankegiatans?->is_archived)
+                                <form action="{{ route('admin.laporankegiatan.unarchive', $u->inputlaporankegiatans->id) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Pulihkan laporan ini dari arsip?')">
+                                    @csrf
 
-    </a>
-@else
-    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                    Sertifikat belum tersedia
+                                    <button
+                                        type="submit"
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition"
+                                        title="Pulihkan">
+                                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
 
-    </span>
-@endif
+                                @elseif(
+                                $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
+                                )
+                                <button
+                                    type="submit"
+                                    class="text-abuabuMuda">
+                                    <i alt="Pulihkan" class="inline" data-lucide="rotate-ccw"></i>
+                                </button>
+
+                                @else
+                                <button
+                                    type="submit"
+                                    class="text-abuabuMuda">
+                                    <i alt="Pulihkan" class="inline" data-lucide="rotate-ccw"></i>
+                                </button>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-6 text-abuabuMuda">
+                            Tidak ada data arsip
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        
+        {{-- Pagination --}}
+        <div class="mt-4">
+            {{ $usulankegiatans->appends(request()->query())->links() }}
         </div>
 
-        <p class="text-sm text-gray-500 my-6">
-                                                    Pilih aksi yang ingin dilakukan:
-                                                    </p>
-
-                                                    <div class="flex flex-col space-y-3 font-bold">
-
-
-{{-- RESTORE --}}
-@if($u->inputlaporankegiatans?->laporankegiatans?->is_archived)
-    <form action="{{ route('admin.laporankegiatan.unarchive', $u->inputlaporankegiatans->id) }}"
-          method="POST"
-          onsubmit="return confirm('Pulihkan laporan ini dari arsip?')">
-        @csrf
-
-        <button type="submit"
-                class="block w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
-            Pulihkan
-        </button>
-    </form>
-
-@elseif(
-    $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
-)
-    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
-        Pulihkan
-    </span>
-
-@else
-    <span class="flex items-center justify-center px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-        Pulihkan
-    </span>
-@endif
-
-            </div>
+        {{-- Empty State --}}
+        <div id="emptyState" class="hidden text-center py-12 text-abuabuSedang">
+            Tidak ada data yang sesuai dengan pencarian
         </div>
-    </td>
-</tr>
-@empty
-<tr>
-    <td colspan="5" class="text-center text-gray-500 py-4">
-        Tidak ada data arsip.
-    </td>
-</tr>
-@endforelse
-</tbody>
-    </table>
-</div>
-                {{-- Footer Pagination --}}
-                <div class="flex flex-col md:flex-row justify-between items-center mt-4 gap-3 text-sm text-gray-500">
-                    <span>Total {{ $usulankegiatans->total() }} arsip
-                    <div>
-                        {{ $usulankegiatans->links() }}
-                    </div>
-                </div>
-            </div>
-        </main>
     </div>
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
+    </div>
 </x-app-layout>
-

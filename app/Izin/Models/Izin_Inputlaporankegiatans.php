@@ -54,8 +54,13 @@ class Izin_Inputlaporankegiatans extends Model
 
     public function cetaklaporankegiatans()
 {
+    return $this->hasOne(Izin_Cetaklaporankegiatans::class,'inputlaporankegiatan_id');
+}
+
+public function balasanlaporankegiatans()
+{
     return $this->hasOne(
-        \App\Izin\Models\Izin_Cetaklaporankegiatans::class,
+        Izin_Balasanlaporankegiatans::class,
         'inputlaporankegiatan_id'
     );
 }

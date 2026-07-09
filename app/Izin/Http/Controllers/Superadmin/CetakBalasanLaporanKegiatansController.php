@@ -6,6 +6,10 @@ use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Kirimbalasanlaporankegiatans;
 use App\Izin\Models\Izin_Laporankegiatans;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
+use App\Izin\Models\Izin_Kopunitkerjas;
+use App\Izin\Models\Izin_Stempelunitkerjas;
+use App\Izin\Models\Izin_Ttdunitkerjas;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -52,30 +56,83 @@ class CetakBalasanLaporanKegiatansController extends Controller
 
 public function preview($id)
 {
-    $laporan = Izin_Laporankegiatans::with('inputlaporankegiatans')
-        ->findOrFail($id);
+    $laporan = Izin_Laporankegiatans::with([
+        'detaillaporankegiatans',
+        'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        'inputlaporankegiatans.kirimlaporankegiatans.identitassurats',
+    ])->findOrFail($id);
+
+    // dummy object supaya template PDF tetap jalan
+        $balasanlaporankegiatans = (object) [
+            'laporankegiatans' => $laporan,
+            'totalcapaianjp_kegiatan' => $laporan->totalcapaianjp_kegiatan,
+        ];
 
     $bulan = now()->month;
     $tahun = now()->year;
 
     $urutan = Izin_Identitassurats::count() + 1;
     $urutan = str_pad($urutan, 3, '0', STR_PAD_LEFT);
+
     $cara = optional(
-    $laporan->inputlaporankegiatans
-        ?->inputusulankegiatans
-        ?->usulankegiatans
+        $laporan->inputlaporankegiatans
+            ?->inputusulankegiatans
+            ?->usulankegiatans
     )->carapelatihan_id ?? 0;
-    $bulanRomawi = $this->bulanRomawi($bulan);
-    $tahun = date('Y');
 
-    $nomorSurat = "{$urutan}/BKPSDM/{$bulanRomawi}/{$cara}/{$tahun}";
+    $nomorSurat =
+        "{$urutan}/BKPSDM/{$this->bulanRomawi($bulan)}/{$cara}/{$tahun}";
 
-    return view('pages.balasanlaporankegiatan.cetak_balasan_laporan', [
-        'id' => $id,
-        'laporankegiatans' => $laporan, // ✅ sekarang aman
-        'nomorSurat' => $nomorSurat,
-    ]);
+    $admin = User::where(
+        'nip',
+        Auth::user()->nip
+    )->first();
+
+    $kop = Izin_Kopunitkerjas::where(
+        'subunitkerja_id',
+        $admin->subunitkerja_id
+    )->latest()->first();
+
+    $ttd = Izin_Ttdunitkerjas::where(
+        'subunitkerja_id',
+        $admin->subunitkerja_id
+    )->latest()->first();
+
+    $stempel = Izin_Stempelunitkerjas::where(
+        'subunitkerja_id',
+        $admin->subunitkerja_id
+    )->latest()->first();
+
+    $ttdPengusul = Izin_Ttdunitkerjas::where(
+        'subunitkerja_id',
+        $laporan
+            ->inputlaporankegiatans
+            ->inputusulankegiatans
+            ?->usulankegiatans
+            ?->subunitkerja_id
+    )->latest()->first();
+
+    $kop_path = public_path('build/assets/kop_surat.png');
+    if (!file_exists($kop_path)) {
+        $kop_path = null;
+    }
+
+    return view(
+        'pages.balasanlaporankegiatan.cetak_balasan_laporan',
+        [
+            'id' => $id,
+            'laporankegiatans' => $laporan,
+            'nomorSurat' => $nomorSurat,
+            'balasanlaporankegiatans' => $balasanlaporankegiatans,
+            'kop_path' => $kop_path,
+            'kop' => $kop,
+            'ttd' => $ttd,
+            'stempel' => $stempel,
+            'ttdPengusul' => $ttdPengusul,
+        ]
+    );
 }
+
 private function bulanRomawi($bulan)
 {
     $romawi = [

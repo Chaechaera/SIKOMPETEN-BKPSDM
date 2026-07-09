@@ -112,7 +112,7 @@
                         <td class="py-3 px-4 text-center">
                             <a href="{{ route('superadmin.laporanpesertakegiatan.download', $laporan->id) }}"
                                 target="_blank"
-                                class="inline-block whitespace-nowrap px-4 py-2 text-xs font-semibold rounded-lg bg-blue-100 text-blue-600 hover:bg-hijauTua/60">
+                                class="inline-block whitespace-nowrap px-4 py-2 text-xs font-semibold rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200">
                                 Lihat File
                             </a>
                         </td>

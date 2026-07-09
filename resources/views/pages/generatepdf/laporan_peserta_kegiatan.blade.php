@@ -3,10 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Surat dan Laporan Hasil Kegiatan</title>
+    <title>Laporan Keikutsertaan Peserta Kegiatan</title>
     <style>
         @page {
-            margin: 40px 50px;
+            margin: 1cm 2cm 1cm 2cm;
         }
 
         body {
@@ -34,6 +34,14 @@
         .cover-judul-kegiatan {
             width: 85%;
             margin: 0 auto;
+            font-size: 16pt;
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .cover-jumlah-jp {
+            margin-top: 16px;
             font-size: 16pt;
             font-weight: bold;
             line-height: 1.2;
@@ -96,15 +104,12 @@
 
         p.indent {
             text-align: justify;
-            /* biar teks rata kiri-kanan */
             text-indent: 30px;
-            /* ini kunci: jarak baris pertama menjorok */
             margin-top: 8px;
             margin-bottom: 8px;
             line-height: 1.5;
-            /* biar nyaman dibaca */
         }
-        
+
         .kak-section {
             margin-top: 10px;
             font-size: 12pt;
@@ -280,6 +285,10 @@
             {{ strtoupper($laporanpesertakegiatans->sertifikats->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan ?? '-') }}
         </h2>
 
+        <h2 class="cover-jumlah-jp">
+            SEJUMLAH {{ $laporanpesertakegiatans->sertifikats->laporankegiatans->inputlaporankegiatans->balasanlaporankegiatans->totalcapaianjp_kegiatan ?? '-' }} JAM PELAJARAN
+        </h2>
+
         @if($kop_path && file_exists($kop_path))
         <img src="{{ $kop_path }}" class="cover-logo" alt="Logo">
         @endif
@@ -405,6 +414,74 @@
         @endphp
 
         @if(!empty($rangkumansesi))
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
+        <ol>
+            @endif
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
+        </ol>
+        @php $inList = false; @endphp
+        @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. HAMBATAN PESERTA KEGIATAN</p>
+        @php
+        $hambatanpartisipasi = trim($laporanpesertakegiatans->hambatanpeserta_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $hambatanpartisipasi); // pisah tiap paragraf kosong
+        @endphp
+
+        @if(!empty($hambatanpartisipasi))
+        @php $inList = false; @endphp
+        @foreach($blocks as $block)
+        @php
+        $trimmed = trim($block);
+        $isList = preg_match('/^\s*(\d+[\.\)]|[\-\•\*])/', $trimmed);
+        @endphp
+        @if($isList)
+        @if(!$inList)
+        @php $inList = true; @endphp
+        <ol>
+            @endif
+            <li>{{ preg_replace('/^\s*(\d+[\.\)]|[\-\•\*])\s*/', '', $trimmed) }}</li>
+            @else
+            @if($inList)
+        </ol>
+        @php $inList = false; @endphp
+        @endif
+        <p class="indent">{!! nl2br(e($trimmed)) !!}</p>
+        @endif
+        @endforeach
+        @if($inList)</ol>@endif
+        @else
+        <p class="indent">
+            Kegiatan ini dilaksanakan untuk meningkatkan kemampuan pegawai di bidangnya.
+        </p>
+        @endif
+
+        <p class="section-title">{{ getLetter($letterIndex++) }}. SOLUSI HAMBATAN PESERTA KEGIATAN</p>
+        @php
+        $solusipartisipasi = trim($laporanpesertakegiatans->solusipeserta_kegiatan ?? '');
+        $blocks = preg_split("/\r\n|\r|\n/", $solusipartisipasi); // pisah tiap paragraf kosong
+        @endphp
+
+        @if(!empty($solusipartisipasi))
         @php $inList = false; @endphp
         @foreach($blocks as $block)
         @php

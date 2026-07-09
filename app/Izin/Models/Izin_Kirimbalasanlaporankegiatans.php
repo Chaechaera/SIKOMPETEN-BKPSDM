@@ -4,7 +4,6 @@ namespace App\Izin\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
 class Izin_Kirimbalasanlaporankegiatans extends Model
 {
@@ -19,7 +18,8 @@ class Izin_Kirimbalasanlaporankegiatans extends Model
         'filekirim_balasanlaporankegiatan',
         'tanggalkirim_balasanlaporankegiatan',
         'nipadmin_cetakbalasanlaporankegiatan',
-        'tanggalcetak_balasanlaporankegiatan'
+        'tanggalcetak_balasanlaporankegiatan',
+        'filepdfgenerate_path',
     ];
 
     // 🔗 RELASI

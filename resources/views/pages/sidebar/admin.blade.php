@@ -137,6 +137,38 @@
                     <span x-show="sidebarOpen">Sertifikat</span>
                 </a>
 
+                <!-- Arsip Usulan Kegiatan -->
+                <a href="{{ route('admin.usulankegiatan.arsip') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                    {{ Route::is('admin.usulankegiatan.arsip')
+                        ? 'bg-biruMariana text-white'
+                        : 'text-abuabuSedang hover:bg-abuabuMuda/75' }}">
+
+                    <!-- ICON -->
+                    <i data-lucide="archive"
+                        class="w-5 h-5 shrink-0
+                        {{ Route::is('admin.usulankegiatan.arsip')
+                            ? 'text-white'
+                            : 'text-abuabuSedang' }}">
+                    </i>
+
+                    <span x-show="sidebarOpen">Arsip Usulan</span>
+                </a>
+                
+                <!-- Arsipkan Laporan -->
+                <a href="{{ route('admin.laporankegiatan.arsip') }}"
+                    class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                    {{ Route::is('admin.laporankegiatan.arsip')
+                    ? 'bg-biruMariana text-white'
+                    : 'text-abuabuSedang hover:bg-abuabuMuda/75' }}">
+
+                    <!-- ICON -->
+                    <i data-lucide="archive" class="w-5 h-5 shrink-0
+                        {{ Route::is('admin.laporankegiatan.arsip') ? 'text-white' : 'text-abuabuSedang' }}">
+                    </i>
+                    <span x-show="sidebarOpen">Arsip Laporan</span>
+                </a>
+
                 <!-- Rekapitulasi -->
                 <a href="{{ route('admin.rekapitulasi') }}"
                     class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
@@ -150,36 +182,6 @@
                     </i>
                     <span x-show="sidebarOpen">Rekapitulasi</span>
                 </a>
-
-                <!-- Sertifikat -->
-                <a href="{{ route('admin.sertifikat') }}"
-                    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
-               {{ Route::is('admin.sertifikat')
-                    ? 'bg-[#1C1F4A] text-white'
-                    : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-
-                    <img src="{{ Route::is('admin.sertifikat')
-                    ? asset('images/Award-white.png')
-                    : asset('images/Award.png') }}"
-                        class="w-5 shrink-0">
-
-                    <span x-show="sidebarOpen">Sertifikat</span>
-                </a>
-
-                <!-- Arsip Laporan  -->
-                <a href="{{ route('admin.laporankegiatan.arsip') }}"
-    class="flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all duration-200
-    {{ Route::is('admin.laporankegiatan.arsip')
-        ? 'bg-[#1C1F4A] text-white'
-        : 'text-gray-600 hover:bg-[#E8EDFF]' }}">
-
-    <img src="{{ Route::is('admin.laporankegiatan.arsip')
-        ? asset('images/Archive-white.png')
-        : asset('images/Archive.png') }}"
-        class="w-5 shrink-0">
-
-    <span x-show="sidebarOpen">Arsip Laporan</span>
-</a>
 
                 <!-- Informasi -->
                 <a href="{{ route('admin.informasi') }}"

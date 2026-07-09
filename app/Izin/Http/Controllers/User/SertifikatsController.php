@@ -4,18 +4,15 @@ namespace App\Izin\Http\Controllers\User;
 
 use App\Izin\Http\Controllers\Controller;
 use App\Izin\Models\Izin_Balasanlaporankegiatans;
-use App\Izin\Models\Izin_Kopunitkerjas;
 use App\Izin\Models\Izin_Laporankegiatans;
-use App\Izin\Models\Izin_Laporanpesertakegiatans;
 use App\Izin\Models\Izin_Pesertakegiatans;
 use App\Izin\Models\Izin_Sertifikats;
-use App\Izin\Models\Izin_Stempelunitkerjas;
-use App\Izin\Models\Izin_Ttdunitkerjas;
 use App\Izin\Models\Izin_Usulankegiatans;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class SertifikatsController extends Controller
 {
@@ -114,7 +111,7 @@ class SertifikatsController extends Controller
     }
 
     /**
-     * List Sertifikat User
+     * Melihat List Sertifikat User
      */
     public function listSertif()
     {
@@ -126,18 +123,18 @@ class SertifikatsController extends Controller
         $sort = request('sort_tahun'); // asc / desc / null
 
         // Eager Loading
-            $sertifikats = Izin_Sertifikats::with([
-                'pesertakegiatans.subunitkerjas',
-    'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
-    'laporanpesertakegiatans',
-    'pesertakegiatans' => function ($q) use ($user) {
-        $q->where('nip_nik_peserta', $user->nip);
-    }
-])
-->whereHas('pesertakegiatans', function ($q) use ($user) {
-    $q->where('nip_nik_peserta', $user->nip);
-})
-->get();
+        $sertifikats = Izin_Sertifikats::with([
+            'pesertakegiatans.subunitkerjas',
+            'laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
+            'laporanpesertakegiatans',
+            'pesertakegiatans' => function ($q) use ($user) {
+                $q->where('nip_nik_peserta', $user->nip);
+            }
+        ])
+            ->whereHas('pesertakegiatans', function ($q) use ($user) {
+                $q->where('nip_nik_peserta', $user->nip);
+            })
+            ->get();
 
         // Filter search dengan collection
         if ($search) {
@@ -165,6 +162,7 @@ class SertifikatsController extends Controller
                         ?->singkatan ?? ''
                 );
 
+                // Return hasil pencarian
                 return
                     str_contains($nomor, $search) ||
                     str_contains((string)$tahun, $search) ||
@@ -175,7 +173,6 @@ class SertifikatsController extends Controller
 
         // Filter Status
         $status = request('statuslaporan_pesertakegiatan');
-
         if ($status) {
             $sertifikats = $sertifikats->filter(function ($s) use ($status) {
 
@@ -185,6 +182,7 @@ class SertifikatsController extends Controller
                     return $laporan === null;
                 }
 
+                // Return hasil filtering
                 return optional($laporan)->statuslaporan_pesertakegiatan === $status;
             });
         }
@@ -196,9 +194,10 @@ class SertifikatsController extends Controller
             $sertifikats = $sertifikats->sortByDesc('tanggalkeluarsertifikat_kegiatan');
         }
 
-        // Pagination manual
+        // ===============================
+        // Pagination Data Sertifikat
+        // ===============================
         $sertifikats = $sertifikats->values();
-
         $page = request()->get('page', 1);
         $perPage = 20;
 
@@ -213,49 +212,8 @@ class SertifikatsController extends Controller
             ]
         );
 
+        // Return halaman sertifikat user
         return view('pages.sertifikat.user', compact('sertifikats'));
-    }
-
-    public function cek($nip)
-    {
-        $peserta = Izin_Pesertakegiatans::with([
-            'sertifikats',
-            'detaillaporankegiatans',
-            'detaillaporankegiatans.laporankegiatans',
-            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans',
-            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans',
-            'detaillaporankegiatans.laporankegiatans.inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
-        ])
-            ->where('nip_nik_peserta', $nip)
-            ->first();
-
-        if (!$peserta || !$peserta->sertifikats) {
-            return response()->json([
-                'success' => false
-            ]);
-        }
-
-        $sertifikat = $peserta->sertifikats;
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'nama' => $peserta->nama_peserta,
-                'nip' => $peserta->nip_nik_peserta,
-                'pelatihan' =>
-                optional(
-                    $peserta->detaillaporankegiatans
-                        ->laporankegiatans
-                        ->inputlaporankegiatans
-                        ->inputusulankegiatans
-                )->nama_kegiatan ?? '-',
-
-                'download_url' => route(
-                    'user.sertifikat.download',
-                    [$peserta->sertifikat_id, $peserta->id]
-                )
-            ]
-        ]);
     }
 
     /**
@@ -332,121 +290,28 @@ class SertifikatsController extends Controller
      */
     public function download($sertifikat_id, $peserta_id)
     {
-        // Eager Loading
-        $sertifikat = Izin_Sertifikats::with([
-            'pesertakegiatans'
-        ])->findOrFail($sertifikat_id);
-
-        // Menentukan halaman tampilan berdasarkan jenis sertifikat
-        $view = $sertifikat->jenissertifikat_kegiatan === 'template_opd'
-            ? 'pages.generatepdf.sertifikat_kegiatan' // pakai background upload
-            : 'pages.generatepdf.sertifikat_kegiatan_general'; // pakai template default
-
-        // Ambil peserta kegiatan
+        // Eager load and find sertifikat berdasarkan peserta id
         $peserta = Izin_Pesertakegiatans::where('sertifikat_id', $sertifikat_id)
             ->findOrFail($peserta_id);
 
-
-        // Ambil data ttd dan stempel
-        $ttd = $peserta->detaillaporankegiatans
-            ->laporankegiatans
-            ->inputlaporankegiatans
-            ->inputusulankegiatans
-            ->usulankegiatans
-            ->subunitkerjas->ttdunitkerjas->first();
-        $stempel = $peserta->detaillaporankegiatans
-            ->laporankegiatans
-            ->inputlaporankegiatans
-            ->inputusulankegiatans
-            ->usulankegiatans
-            ->subunitkerjas->stempelunitkerjas->first();
-
-        // Encode ttd dan stempel ke base64 untuk disisipkan ke PDF
-        $ttdBase64 = base64_encode(file_get_contents(public_path('storage/' . $ttd->gambarttd_opd)));
-        $stempelBase64 = base64_encode(file_get_contents(public_path('storage/' . $stempel->gambarstempel_opd)));
-
-
-        // Ambil gambar logo surakarta sebagai kop surat dari asset
-        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
-        if (!file_exists($kop_path)) {
-            $kop_path = null; // fallback kalau tidak ada file kop
+        // Jika file generate sudah ada
+        if (
+            !$peserta->filesertifikatgenerate_path ||
+            !Storage::disk('public')->exists($peserta->filesertifikatgenerate_path)
+        ) {
+            return back()->withErrors('PDF sertifikat belum difinalisasi.');
         }
 
-        // Decode field template
-        $rawFields = $sertifikat->fieldstemplatesertifikat_kegiatan;
-        $fieldstemplates = is_string($rawFields)
-            ? json_decode($rawFields, true)
-            : (is_array($rawFields) ? $rawFields : []);
+        // Penamaan file sertifikat
+        $filename = 'Sertifikat_' .
+            preg_replace('/[^A-Za-z0-9 _-]/', '', $peserta->nama_peserta) .
+            '.pdf';
 
-        // Format JP
-        $totaljp = optional($sertifikat->balasanlaporankegiatans)->totalcapaianjp_kegiatan ?? 0;
-        $totaljp_text = $totaljp > 0
-            ? $totaljp . ' (' . $this->terbilangJP($totaljp) . ')'
-            : '';
-
-        // =====================================
-        // APABILA MENGGUNAKAN TEMPLATE OPD
-        // =====================================
-        if ($sertifikat->jenissertifikat_kegiatan === 'template_opd') {
-
-            $templateSertifikat = $sertifikat->templatesertifikat_kegiatan;
-
-            if (!$templateSertifikat) {
-                return back()->withErrors('Template sertifikat belum diupload.');
-            }
-
-            $backgroundPath = str_replace('\\', '/', public_path('storage/' . ltrim($templateSertifikat, '/')));
-
-            if (!file_exists($backgroundPath)) {
-                return back()->withErrors('File template tidak ditemukan: ' . $backgroundPath);
-            }
-
-            // Ambil background gambar sertifikat
-            $backgroundBase64 = base64_encode(file_get_contents($backgroundPath));
-            $backgroundMime = mime_content_type($backgroundPath);
-
-            // Load view PDF dengan data lengkap untuk template OPD
-            $pdf = PDF::loadView($view, [
-                'sertifikat' => $sertifikat,
-                'peserta' => $peserta,
-                'fieldstemplatesertifikat_kegiatan' => $fieldstemplates,
-                'backgroundPath' => $backgroundPath,
-                'backgroundBase64' => $backgroundBase64,
-                'backgroundMime' => $backgroundMime,
-                'totalcapaianjp_text' => $totaljp_text,
-            ]);
-        }
-
-        // =====================================
-        // APABILA MENGGUNAKAN TEMPLATE BKPSDM 
-        // =====================================
-        else {
-
-            // Load view PDF dengan data lengkap untuk template BKPSDM
-            $pdf = PDF::loadView($view, [
-                'sertifikat' => $sertifikat,
-                'peserta' => $peserta,
-                'kop_path' => $kop_path,
-                'ttd' => $ttd,
-                'stempel' => $stempel,
-                'stempelBase64' => $stempelBase64,
-                'ttdBase64' => $ttdBase64,
-                'totalcapaianjp_text' => $totaljp_text,
-            ]);
-        }
-
-        // Setting PDF
-        $pdf->setOptions([
-            'dpi' => 96,
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-            'fontHeightRatio' => 1.0,
-            'chroot' => public_path(),
-        ])->setPaper('A4', 'landscape');
-
-        $filename = 'Sertifikat_' . preg_replace('/[^A-Za-z0-9 _-]/', '', $peserta->nama_peserta) . '.pdf';
-
-        return $pdf->stream($filename);
+        // Download file sertifikat hasil generate langsung
+        return Storage::disk('public')->download(
+            $peserta->filesertifikatgenerate_path,
+            $filename
+        );
     }
 
     /**
@@ -454,93 +319,218 @@ class SertifikatsController extends Controller
      */
     public function downloadZIP($laporankegiatan_id)
     {
-        // Eager load relasi dari model dan temukan sertifikat berdasarkan id laporankegiatan
-        $sertifikat = Izin_Sertifikats::with([
-            'pesertakegiatans'
-        ])->where('laporankegiatan_id', $laporankegiatan_id)->first();
+        // Eager loading sertifikat
+        $sertifikat = Izin_Sertifikats::with('pesertakegiatans')
+            ->where('laporankegiatan_id', $laporankegiatan_id)
+            ->first();
 
-        // Jika sertifikat tidak ada munculkan peringatan
+        // Jika tidak ada sertifikat maka return error
         if (!$sertifikat) {
             return back()->withErrors('Tidak ada sertifikat untuk kegiatan ini.');
         }
 
-        // Ambil template sertifikat kegiatan
-        $templateSertifikat = $sertifikat->templatesertifikat_kegiatan;
-        if (!$templateSertifikat) {
-            return back()->withErrors('Template sertifikat belum diupload.');
-        }
-
-        // Ambil path file sertifikat asli
-        $backgroundPath = str_replace('\\', '/', public_path('storage/' . ltrim($templateSertifikat, '/')));
-        if (!file_exists($backgroundPath)) {
-            return back()->withErrors('File template tidak ditemukan: ' . $backgroundPath);
-        }
-
-        // Encode dan Mime file sertifikat asli
-        $backgroundBase64 = base64_encode(file_get_contents($backgroundPath));
-        $backgroundMime = mime_content_type($backgroundPath);
-
-        // Decode posisi fields sertifikat
-        $rawFields = $sertifikat->fieldstemplatesertifikat_kegiatan;
-        $fieldstemplates = is_string($rawFields) ? json_decode($rawFields, true) : (is_array($rawFields) ? $rawFields : []);
-
-        // Ambil list peserta kegiatan
-        $pesertaList = $sertifikat->pesertakegiatans;
-        if ($pesertaList->isEmpty()) {
+        // Jika tidak ada peserta kegiatan return error
+        if ($sertifikat->pesertakegiatans->isEmpty()) {
             return back()->withErrors('Tidak ada peserta.');
         }
 
-        // Formating capaian JP ke text
-        $totaljp = optional($sertifikat->balasanlaporankegiatans)->totalcapaianjp_kegiatan ?? 0;
+        // Folder sementara untuk ZIP
+        $tempFolder = storage_path('app/public/izin/temp/');
+        if (!file_exists($tempFolder)) {
+            mkdir($tempFolder, 0777, true);
+        }
+        $zipFileName = "Sertifikat_Kegiatan_{$sertifikat->laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan}.zip";
+        $zipPath = $tempFolder . $zipFileName;
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            return back()->withErrors('Gagal membuat ZIP.');
+        }
+
+        // Proses ZIP berlangsung
+        foreach ($sertifikat->pesertakegiatans as $peserta) {
+
+            // Pastikan PDF hasil finalisasi ada
+            if (
+                empty($peserta->filesertifikatgenerate_path) ||
+                !Storage::disk('public')->exists($peserta->filesertifikatgenerate_path)
+            ) {
+                $zip->close();
+                if (file_exists($zipPath)) {
+                    unlink($zipPath);
+                }
+                return back()->withErrors(
+                    "Sertifikat {$peserta->nama_peserta} belum difinalisasi."
+                );
+            }
+            $cleanName = preg_replace(
+                '/[^A-Za-z0-9 _-]/',
+                '',
+                $peserta->nama_peserta
+            );
+
+            $zip->addFile(
+                storage_path('app/public/' . $peserta->filesertifikatgenerate_path),
+                $cleanName . '.pdf'
+            );
+        }
+        $zip->close();
+
+        // Download file ZIP hasil generate langsung
+        return response()
+            ->download(
+                $zipPath,
+                $zipFileName,
+                ['Content-Type' => 'application/zip']
+            )
+            ->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Finalisasi File Sertifikat Kegiatan Milik Peserta Kegiatan Sekaligus
+     */
+    public function finalisasi($sertifikat_id)
+    {
+        // Eager load and find by sertifikat id
+        $sertifikat = Izin_Sertifikats::with([
+            'pesertakegiatans'
+        ])->findOrFail($sertifikat_id);
+
+        // pilih view sertifikat yang digunakan
+        $view = $sertifikat->jenissertifikat_kegiatan === 'template_opd'
+            ? 'pages.generatepdf.sertifikat_kegiatan'
+            : 'pages.generatepdf.sertifikat_kegiatan_general';
+
+        // decode field template
+        $rawFields = $sertifikat->fieldstemplatesertifikat_kegiatan;
+        $fieldstemplates = is_string($rawFields)
+            ? json_decode($rawFields, true)
+            : (is_array($rawFields) ? $rawFields : []);
+
+        // Ambil data total JP kegiatan
+        $totaljp = optional($sertifikat->balasanlaporankegiatans)
+            ->totalcapaianjp_kegiatan ?? 0;
+
+        // Rubah menjadi terbilang angka JP kegiatan
         $totaljp_text = $totaljp > 0
             ? $totaljp . ' (' . $this->terbilangJP($totaljp) . ')'
             : '';
 
-        // Buat folder temp untuk ZIP
-        $folder = storage_path('app/public/izin/temp/');
-        if (!file_exists($folder)) {
-            mkdir($folder, 0777, true);
-        }
+        // folder penyimpanan
+        $folder = 'generated/sertifikat/kegiatan_' . $sertifikat->laporankegiatan_id;
+        Storage::disk('public')->makeDirectory($folder);
 
-        // Penamaan file ZIP
-        $zipFileName = "Sertifikat_Kegiatan_{$laporankegiatan_id}.zip";
-        $zipPath = $folder . $zipFileName;
+        // Generate Sertifikat Kegiatan
+        foreach ($sertifikat->pesertakegiatans as $peserta) {
 
-        // Proses pembuatan folder ZIP
-        $zip = new \ZipArchive();
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== TRUE) {
-            return back()->withErrors('Gagal membuat ZIP.');
-        }
+            // ===========================
+            //  JIKA TEMPLATE OPD
+            // ===========================
 
-        // Penamaan file di dalam ZIP dengan nama peserta kegiatan
-        foreach ($pesertaList as $peserta) {
-            $cleanName = preg_replace('/[^A-Za-z0-9 _-]/', '', $peserta->nama_peserta);
-            $pdfFileName = "{$cleanName}.pdf";
+            if ($sertifikat->jenissertifikat_kegiatan === 'template_opd') {
 
-            // Load view PDF
-            $pdfContent = PDF::loadView('pages.generatepdf.sertifikat_kegiatan', [
-                'sertifikat' => $sertifikat,
-                'peserta' => $peserta,
-                'fieldstemplatesertifikat_kegiatan' => $fieldstemplates,
-                'backgroundPath' => $backgroundPath,
-                'backgroundBase64' => $backgroundBase64,
-                'backgroundMime' => $backgroundMime,
-                'totalcapaianjp_text' => $totaljp_text,
-            ])->setOptions([
+                // Ambil gambar sertifikat
+                $backgroundPath = public_path(
+                    'storage/' . ltrim($sertifikat->templatesertifikat_kegiatan, '/')
+                );
+
+                if (!file_exists($backgroundPath)) {
+                    continue;
+                }
+
+                $backgroundBase64 = base64_encode(
+                    file_get_contents($backgroundPath)
+                );
+
+                $backgroundMime = mime_content_type($backgroundPath);
+
+                // Loadview sertifikat kegiatan milik peserta
+                $pdf = PDF::loadView($view, [
+                    'sertifikat' => $sertifikat,
+                    'peserta' => $peserta,
+                    'fieldstemplatesertifikat_kegiatan' => $fieldstemplates,
+                    'backgroundPath' => $backgroundPath,
+                    'backgroundBase64' => $backgroundBase64,
+                    'backgroundMime' => $backgroundMime,
+                    'totalcapaianjp_text' => $totaljp_text,
+                ]);
+            }
+
+            // ===========================
+            // JIKA TEMPLATE BKPSDM
+            // ===========================
+
+            else {
+
+                // Ambil data ttd subunitkerja penyelenggara
+                $ttd = $peserta->detaillaporankegiatans
+                    ->laporankegiatans
+                    ->inputlaporankegiatans
+                    ->inputusulankegiatans
+                    ->usulankegiatans
+                    ->subunitkerjas
+                    ->ttdunitkerjas
+                    ->first();
+
+                // Ambil data stempel subunitkerja penyelenggara
+                $stempel = $peserta->detaillaporankegiatans
+                    ->laporankegiatans
+                    ->inputlaporankegiatans
+                    ->inputusulankegiatans
+                    ->usulankegiatans
+                    ->subunitkerjas
+                    ->stempelunitkerjas
+                    ->first();
+
+                $ttdBase64 = base64_encode(
+                    file_get_contents(public_path('storage/' . $ttd->gambarttd_opd))
+                );
+
+                $stempelBase64 = base64_encode(
+                    file_get_contents(public_path('storage/' . $stempel->gambarstempel_opd))
+                );
+
+                // Ambil gambar logo surakarta sebagai kop surat dari asset
+                $kop_path = public_path('build/assets/kop_surat.png');
+                if (!file_exists($kop_path)) {
+                    $kop_path = null;
+                }
+
+                // Loadview sertifikat kegiatan milik peserta
+                $pdf = PDF::loadView($view, [
+                    'sertifikat' => $sertifikat,
+                    'peserta' => $peserta,
+                    'kop_path' => $kop_path,
+                    'ttd' => $ttd,
+                    'stempel' => $stempel,
+                    'ttdBase64' => $ttdBase64,
+                    'stempelBase64' => $stempelBase64,
+                    'totalcapaianjp_text' => $totaljp_text,
+                ]);
+            }
+
+            // Atur opsi PDF ditampilkan
+            $pdf->setOptions([
                 'dpi' => 96,
-                'defaultFont' => 'Times New Roman',
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
+                'fontHeightRatio' => 1.0,
                 'chroot' => public_path(),
-                'fontHeightRatio' => 1.3,
-            ])->setPaper('A4', 'landscape')->output();
+            ])->setPaper('A4', 'landscape');
 
-            $zip->addFromString($pdfFileName, $pdfContent);
+            // Simpan file sertifikat peserta kegiatan
+            $path = $folder . '/peserta_' . $peserta->id . '.pdf';
+            Storage::disk('public')->put(
+                $path,
+                $pdf->output()
+            );
+
+            // Update data pada database
+            $peserta->update([
+                'filesertifikatgenerate_path' => $path,
+            ]);
         }
-        $zip->close();
 
-        // Redirect dan simpan folder ZIP
-        return response()->download($zipPath, $zipFileName, ['Content-Type' => 'application/zip'])->deleteFileAfterSend(true);
+        return back()->with('success', 'Semua sertifikat berhasil difinalisasi.');
     }
 
     /**

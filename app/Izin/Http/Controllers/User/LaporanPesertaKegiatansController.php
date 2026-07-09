@@ -8,6 +8,7 @@ use App\Izin\Models\Izin_Sertifikats;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Storage;
 
 class LaporanPesertaKegiatansController extends Controller
 {
@@ -17,7 +18,7 @@ class LaporanPesertaKegiatansController extends Controller
     public function approve($id)
     {
         $laporan = Izin_LaporanPesertakegiatans::findOrFail($id);
-        
+
         $laporan->update([
             'statuslaporan_pesertakegiatan' => 'approved'
         ]);
@@ -55,6 +56,31 @@ class LaporanPesertaKegiatansController extends Controller
      */
     public function store(Request $request, $sertifikat_id)
     {
+        $request->validate([
+            'uraianpeserta_kegiatan' => 'required|string',
+            'tujuanpeserta_kegiatan' => 'required|string',
+            'rangkumanpeserta_kegiatan' => 'required|string',
+            'kesimpulanpeserta_kegiatan' => 'required|string',
+
+            'hambatanpeserta_kegiatan' => [
+                'nullable',
+                'string',
+                'required_with:solusipeserta_kegiatan',
+            ],
+
+            'solusipeserta_kegiatan' => [
+                'nullable',
+                'string',
+                'required_with:hambatanpeserta_kegiatan',
+            ],
+        ], [
+            'hambatanpeserta_kegiatan.required_with' =>
+            'Hambatan wajib diisi apabila solusi diisi.',
+
+            'solusipeserta_kegiatan.required_with' =>
+            'Solusi wajib diisi apabila hambatan diisi.',
+        ]);
+
         // Ambil user yang sedang login saat ini
         $user = Auth::user();
 
@@ -73,6 +99,8 @@ class LaporanPesertaKegiatansController extends Controller
             'tujuanpeserta_kegiatan',
             'rangkumanpeserta_kegiatan',
             'kesimpulanpeserta_kegiatan',
+            'hambatanpeserta_kegiatan',
+            'solusipeserta_kegiatan',
         ]);
 
         // Ambil data lama
@@ -112,6 +140,8 @@ class LaporanPesertaKegiatansController extends Controller
                 'tujuanpeserta_kegiatan' => $request->tujuanpeserta_kegiatan,
                 'rangkumanpeserta_kegiatan' => $request->rangkumanpeserta_kegiatan,
                 'kesimpulanpeserta_kegiatan' => $request->kesimpulanpeserta_kegiatan,
+                'hambatanpeserta_kegiatan' => $request->hambatanpeserta_kegiatan,
+                'solusipeserta_kegiatan' => $request->solusipeserta_kegiatan,
                 'laporanpesertakegiatans' => $laporanpesertakegiatans,
                 'dokumentasipeserta_kegiatan' => $path_dokumentasipeserta,
                 'statuslaporan_pesertakegiatan' => $status,
@@ -133,6 +163,33 @@ class LaporanPesertaKegiatansController extends Controller
             'pesertakegiatans',
             'sertifikats.laporankegiatans.inputlaporankegiatans.inputusulankegiatans'
         ])->findOrFail($id);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Kalau PDF sudah pernah dibuat, langsung download file lama
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $laporanpesertakegiatans->filepdfgenerate_path &&
+            Storage::disk('public')->exists(
+                $laporanpesertakegiatans->filepdfgenerate_path
+            )
+        ) {
+
+            return Storage::disk('public')->download(
+                $laporanpesertakegiatans->filepdfgenerate_path,
+                'Laporan Hasil Kegiatan ' .
+                    $laporanpesertakegiatans->pesertakegiatans->nama_peserta .
+                    '.pdf'
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Belum pernah generate -> buat PDF
+    |--------------------------------------------------------------------------
+    */
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
         $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
@@ -161,7 +218,35 @@ class LaporanPesertaKegiatansController extends Controller
             'kop_path' => $kop_path,
         ])->setPaper('A4', 'portrait');
 
-        // Redirect dan simpan file PDF
-        return $pdf->stream('Laporan Hasil Kegiatan ' . $laporanpesertakegiatans->pesertakegiatans->nama_peserta . '.pdf');
+        /*
+    |--------------------------------------------------------------------------
+    | Simpan PDF permanen
+    |--------------------------------------------------------------------------
+    */
+
+        $folder = 'generated/laporan-peserta';
+
+        Storage::disk('public')->makeDirectory($folder);
+
+        $fileName = $laporanpesertakegiatans->id . '.pdf';
+
+        $path = $folder . '/' . $fileName;
+
+        Storage::disk('public')->put(
+            $path,
+            $pdf->output()
+        );
+
+        // Simpan path ke database
+        $laporanpesertakegiatans->update([
+            'filepdfgenerate_path' => $path,
+        ]);
+
+        return Storage::disk('public')->download(
+            $path,
+            'Laporan Hasil Kegiatan ' .
+                $laporanpesertakegiatans->pesertakegiatans->nama_peserta .
+                '.pdf'
+        );
     }
 }

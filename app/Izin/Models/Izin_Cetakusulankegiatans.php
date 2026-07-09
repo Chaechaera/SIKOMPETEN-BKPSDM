@@ -18,7 +18,8 @@ class Izin_Cetakusulankegiatans extends Model
         'pjunitkerja_id',
         'ttdunitkerja_id',
         'stempelunitkerja_id',
-        'statususulan_kegiatan'
+        'filepdfgenerate_path',
+        'statususulan_kegiatan',
     ];
 
     /* ========== RELATIONS ========== */

@@ -1,3 +1,10 @@
+@php
+$identitas = $usulankegiatan
+    ->inputusulankegiatans
+    ?->kirimbalasanusulankegiatans
+    ?->identitassurats;
+@endphp
+
 <x-app-layout>
     <div class="space-y-4 px-6 py-4">
 
@@ -15,7 +22,7 @@
             </div>
 
             {{-- ================================================== --}}
-            {{-- ======== BAGIAN 1: UPLOAD IDENTITAS SURAT ======== --}}
+            {{-- ======== BAGIAN 1: HIDDEN IDENTITAS SURAT ======== --}}
             {{-- ================================================== --}}
             <div class="bg-white shadow-lg rounded-lg p-6 mb-10">
 
@@ -23,65 +30,89 @@
 
                     {{-- Nomor Surat --}}
                     <div>
-                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Nomor Surat</label>
-                        <div class="required">
-                            <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="12/X/BKPSDM/001" required>
-                            @error('nomor_surat')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                            Nomor Surat
+                        </label>
+
+                        {{-- Ditampilkan ke user --}}
+                        <input
+                            type="text"
+                            value="{{ $identitas?->nomor_surat }}"
+                            readonly
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2">
+
+                        {{-- Tetap dikirim saat submit --}}
+                        <input
+                            type="hidden"
+                            name="nomor_surat"
+                            value="{{ $identitas?->nomor_surat }}">
                     </div>
 
                     {{-- Tanggal Surat --}}
                     <div>
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Tanggal Surat</label>
-                        <div class="relative">
-                            <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
-                            @error('tanggal_surat')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+
+                        <input
+                            type="date"
+                            value="{{ $identitas?->tanggal_surat }}"
+                            readonly
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2">
+
+                        <input
+                            type="hidden"
+                            name="tanggal_surat"
+                            value="{{ $identitas?->tanggal_surat }}">
                     </div>
 
                     {{-- Lampiran Surat --}}
                     <div>
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Lampiran Surat</label>
-                        <div class="relative">
-                            <input type="text" name="lampiran_surat" value="1 Bendel"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#e8ecff] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" readonly>
-                            @error('lampiran_surat')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+
+                        <input
+                            type="text"
+                            value="{{ $identitas?->lampiran_surat }}"
+                            readonly
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2">
+
+                        <input
+                            type="hidden"
+                            name="lampiran_surat"
+                            value="{{ $identitas?->lampiran_surat }}">
                     </div>
 
                     {{-- Sifat Surat --}}
                     <div>
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Sifat Surat</label>
-                        <div class="relative">
-                            <select name="sifat_surat" class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" required>
-                                <option value="" disabled selected>-- Pilih sifat surat --</option>
-                                <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                                <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
-                            </select>
-                            @error('sifat_surat')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+
+                        <select
+                            disabled
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2">
+
+                            <option selected>
+                                {{ $identitas?->sifat_surat }}
+                            </option>
+                        </select>
+
+                        <input
+                            type="hidden"
+                            name="sifat_surat"
+                            value="{{ $identitas?->sifat_surat }}">
                     </div>
 
                     {{-- Perihal Surat --}}
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">Perihal Surat</label>
-                        <div class="relative">
-                            <input type="text" name="perihal_surat" value="{{ old('perihal_surat') }}"
-                                class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg cursor-pointer bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] focus:outline-none p-2" placeholder="Permohonan Rekomendasi Kegiatan Workshop" required>
-                            @error('perihal_surat')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+
+                        <input
+                            type="text"
+                            value="{{ $identitas?->perihal_surat }}"
+                            readonly
+                            class="block w-full text-sm text-gray-700 border border-[#E0E7FF] rounded-lg bg-[#e8ecff] p-2">
+
+                        <input
+                            type="hidden"
+                            name="perihal_surat"
+                            value="{{ $identitas?->perihal_surat }}">
                     </div>
 
                     {{-- ===================================================== --}}

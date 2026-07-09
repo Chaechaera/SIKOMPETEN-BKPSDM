@@ -22,7 +22,7 @@ class ReviewUsulanKegiatansController extends Controller
             'verifikasiusulankegiatanterakhir',
             'cetakusulankegiatans',
             'balasanusulankegiatans'
-        ]);;
+        ])->whereNull('superadmin_archived_at');
 
         // Urutkan usulankegiatan yang perlu direview berdasarkan statusnya
         if ($request->filled('statususulan_kegiatan')) {
@@ -61,6 +61,50 @@ class ReviewUsulanKegiatansController extends Controller
 
         // Redirect ke halaman daftar usulan kegiatan yang perlu direview
         return view('pages.usulankegiatan.pending_list_usulan_kegiatan', compact('usulankegiatans'));
+    }
+
+    public function archive($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        $usulan->update([
+            'superadmin_archived_at' => now(),
+        ]);
+
+        return back()->with('success', 'Usulan berhasil diarsipkan.');
+    }
+
+    public function restore($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        $usulan->update([
+            'superadmin_archived_at' => null,
+        ]);
+
+        return back()->with('success', 'Usulan berhasil dipulihkan.');
+    }
+
+    public function archivePage(Request $request)
+    {
+        $query = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'verifikasiusulankegiatanterakhir'
+        ])
+        ->whereNotNull('superadmin_archived_at');
+
+        if ($request->filled('search')) {
+            $query->whereHas('inputusulankegiatans', function ($q) use ($request) {
+                $q->where('nama_kegiatan', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $usulankegiatans = $query
+            ->latest('superadmin_archived_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('pages.usulankegiatan.arsip_usulan_kegiatan_superadmin',compact('usulankegiatans'));
     }
 
     /**

@@ -8,7 +8,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
-use App\Izin\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -29,29 +28,29 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-if ($user->status !== 'aktif') {
-    Auth::logout();
+        if ($user->status !== 'aktif') {
+            Auth::logout();
 
-    return back()->withErrors([
-        'email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator untuk mengaktifkan kembali.'
-    ]);
-}
+            return back()->withErrors([
+                'email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator untuk mengaktifkan kembali.'
+            ]);
+        }
 
-if (! $user->hasVerifiedEmail()) {
-    Auth::logout();
+        if (! $user->hasVerifiedEmail()) {
+            Auth::logout();
 
-    return back()->withErrors([
-        'email' => 'Alamat email belum diverifikasi. Silakan periksa email Anda atau minta tautan verifikasi baru.'
-    ]);
-}
+            return back()->withErrors([
+                'email' => 'Alamat email belum diverifikasi. Silakan periksa email Anda atau minta tautan verifikasi baru.'
+            ]);
+        }
 
-$request->session()->regenerate();
+        $request->session()->regenerate();
 
-session([
-    'active_role' => $user->role
-]);
+        session([
+            'active_role' => $user->role
+        ]);
 
-return $this->authenticated($request, $user);
+        return $this->authenticated($request, $user);
 
         /*$request->session()->regenerate();
 

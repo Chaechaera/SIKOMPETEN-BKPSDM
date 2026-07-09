@@ -1,14 +1,14 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.superadmin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight"> FORMULIR CETAK SURAT BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Silahkan lengkapi data identitas surat balasan laporan kegiatan dan pastikan data yang diisikan telah sesuai sebelum mencetak surat balasan.
+             </p>
+        </div>
+          
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
             {{-- 📝 FORM CETAK BALASAN LAPORAN KEGIATAN --}}
@@ -20,12 +20,6 @@
                     name="laporankegiatan_id"
                     value="{{ $laporankegiatans->id }}">
 
-                <div class="bg-white rounded-xl shadow p-6 mb-4">
-                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR CETAK SURAT BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                    <p class="text-sm text-blue-600">
-                        Silahkan lengkapi data identitas surat balasan laporan kegiatan dan pastikan data yang diisikan telah sesuai sebelum mencetak surat balasan.
-                    </p>
-                </div>
 
                 {{-- ================================================== --}}
                 {{-- ======== BAGIAN 1: UPLOAD IDENTITAS SURAT ======== --}}

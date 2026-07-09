@@ -19,6 +19,7 @@ class Izin_Pesertakegiatans extends Model
         'subunitkerja_id_peserta',
         'sertifikat_id',
         'nomorsertifikatpeserta_kegiatan',
+        'filesertifikatgenerate_path',
     ];
 
     /* ========== RELATIONS ========== */

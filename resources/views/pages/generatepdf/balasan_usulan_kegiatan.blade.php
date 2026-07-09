@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Surat Pengajuan dan KAK Usulan Kegiatan</title>
+    <title>Surat Balasan Pengajuan dan KAK Usulan Kegiatan</title>
     <style>
         @page {
             margin: 1cm 2cm 1cm 2cm;
@@ -258,6 +258,8 @@
     </style>
 </head>
 
+
+
 <body>
 
     {{-- ====================== SURAT PERMOHONAN ====================== --}}
@@ -307,31 +309,36 @@
                 <tr>
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->nomor_surat ?? '' }}</td>
+                    <td>{{ $identitas->nomor_surat?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->sifat_surat ?? '' }}</td>
+                    <td>{{ $identitas->sifat_surat?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->lampiran_surat ?? '' }}</td>
+                    <td>{{ $identitas->lampiran_surat?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
-                    <td><strong>{{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->perihal_surat ?? '' }}</strong></td>
+                    <td>{{ $identitas->perihal_surat?? '' }}</td>
                 </tr>
             </table>
         </div>
 
         <div class="meta-right">
             <p>Surakarta,
-                {{ $usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->tanggal_surat
-                    ? \Carbon\Carbon::parse($usulankegiatans->inputusulankegiatans?->kirimbalasanusulankegiatans?->identitassurats?->tanggal_surat)->translatedFormat('d F Y')
-                    : '' }}
+                {{
+                    ($identitas->tanggal_surat ?? '')
+                    ? \Carbon\Carbon::parse(
+                        $identitas->tanggal_surat
+                        ?? ''
+                    )->translatedFormat('d F Y')
+                    : ''
+                }}
             </p>
         </div>
     </div>

@@ -9,123 +9,108 @@
             </p>
         </div>
 
-            <!-- TABLE -->
-<div class="bg-white rounded-xl shadow p-6">
+        {{-- Search and Filtering --}}
+        <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
 
-    <!-- FILTER ATAS -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            {{-- Search --}}
+            <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
+                <form method="GET">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
+                        class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
 
-        {{-- Search --}}
-<form method="GET" class="flex-1 relative">
-    <input
-        type="text"
-        name="search"
-        value="{{ request('search') }}"
-        placeholder="Cari nama kegiatan, nomor surat, atau OPD..."
-        onkeyup="this.form.submit()"
-        class="w-full pl-10 pr-4 py-2 border rounded-lg"
-    />
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-abuabuGelap">
+                        <i data-lucide="search"></i>
+                    </span>
+                </form>
+            </div>
 
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-    >
-        <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z"
-        />
-    </svg>
-</form>
-        <!-- FILTER + SORT -->
-        <div class="flex items-center gap-3 flex-wrap">
-
-            <form method="GET" class="flex items-center gap-3 flex-wrap">
-
-                <!-- TAHUN -->
-                <select name="tahun" onchange="this.form.submit()"
-                    class="border rounded-lg px-4 py-2 text-sm min-w-[140px]">
+            {{-- Tahun --}}
+            <form method="GET">
+                <select
+                    name="tahun"
+                    onchange="this.form.submit()"
+                    class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
                     <option value="">Semua Tahun</option>
                     @for ($year = 2021; $year <= 2026; $year++)
                         <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>
-                            {{ $year }}
+                        {{ $year }}
                         </option>
-                    @endfor
+                        @endfor
                 </select>
-
-                <!-- STATUS -->
-                <select name="status" onchange="this.form.submit()"
-                    class="border rounded-lg px-4 py-2 text-sm min-w-[140px]">
-
-                    <option value="">Semua Status</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>pending</option>
-                    <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>need review</option>
-                    <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>draft</option>
-                    <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>accepted</option>
-                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
-                    <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>finish</option>
-
-                </select>
-
             </form>
 
-            <!-- SORT -->
-            <div x-data="{ openSort: false }" class="relative">
+            {{-- Status --}}
+            <form method="GET">
+                <select name="status" onchange="this.form.submit()"
+                    class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
 
-                <button @click="openSort = !openSort"
-                    class="border rounded-lg px-3 py-2 bg-white hover:bg-gray-100 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 4h13M3 8h9m-9 4h6m-6 4h3" />
-                    </svg>
-                </button>
+                    <option value="">Semua Status</option>
 
-                <div x-show="openSort" @click.outside="openSort = false"
-                    x-transition
-                    class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow z-50">
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                        pending
+                    </option>
 
-                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'desc']) }}"
-                        class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort', 'desc') == 'desc' ? 'bg-gray-100 font-semibold' : '' }}">
-                        Terbaru
-                    </a>
+                    <option value="need_review" {{ request('status') == 'need_review' ? 'selected' : '' }}>
+                        need review
+                    </option>
 
-                    <a href="{{ request()->fullUrlWithQuery(['sort' => 'asc']) }}"
-                        class="block px-4 py-2 text-sm hover:bg-gray-100 {{ request('sort') == 'asc' ? 'bg-gray-100 font-semibold' : '' }}">
-                        Terlama
-                    </a>
+                    <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>
+                        draft
+                    </option>
 
-                </div>
-            </div>
+                    <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>
+                        accepted
+                    </option>
 
+                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                        rejected
+                    </option>
+
+                    <option value="finish" {{ request('status') == 'finish' ? 'selected' : '' }}>
+                        finish
+                    </option>
+
+                </select>
+            </form>
+
+            {{-- Sort --}}
+            <a href="{{ request()->fullUrlWithQuery(['sort' => request('sort') == 'asc' ? 'desc' : 'asc']) }}"
+                class="bg-white rounded-xl border border-abuabuMuda/60 shadow px-4 py-3 flex items-center justify-center">
+                @if(request('sort','desc') == 'desc')
+                <i data-lucide="list-sort-descending" class="w-5 h-5 text-abuabuSedang"></i>
+                @else
+                <i data-lucide="list-sort-ascending" class="w-5 h-5 text-abuabuSedang"></i>
+                @endif
+            </a>
         </div>
-    </div>
-                <div class="border rounded-lg overflow-x-auto">
-                    <table class="w-full text-sm table-fixed">
-                        <thead>
-                            <tr class="bg-gray-50 border-b text-center text-gray-600">
-                                <th class="py-3 px-4 w-32">Nomor Surat</th>
-                                <th class="py-3 px-4 w-24">OPD</th>
-                                <th class="py-3 px-4 w-48">Nama Kegiatan</th>
-                                <th class="py-3 px-4 w-48">Tanggal Pelaksanaan</th>
-                                <th class="py-3 px-4 w-28">Status Usulan</th>
-                                <th class="py-3 px-4 w-[450px]">Update Progress</th>
-                            </tr>
-                        </thead>
 
-                        <tbody>
-                            @forelse ($usulankegiatans as $index => $u)
-                            <tr class="border-b hover:bg-gray-50"
-                            x-data="{ openDokumen: false }">
+        <!-- TABLE -->
+        <div class="bg-white rounded-xl overflow-hidden shadow">
+            <table class="w-full text-sm font-semibold table-auto">
+                <thead>
+                    <tr class="bg-abuabuMuda border-b text-center">
+                        <th class="py-3 px-4">Nomor Surat</th>
+                        <th class="py-3 px-4">OPD</th>
+                        <th class="py-3 px-4">Nama Kegiatan</th>
+                        <th class="py-3 px-4">Tanggal Pelaksanaan</th>
+                        <th class="py-3 px-4">Status Laporan</th>
+                        <th class="py-3 px-4">Aksi</th>
+                    </tr>
+                </thead>
 
-                                <!-- Nomor Surat -->
-                                <td class="py-3 px-4 text-gray-600 text-center break-words">
-    {{ $u->inputlaporankegiatans->cetaklaporankegiatans->identitassurats->nomor_surat ?? '-' }}
-</td>
+                <tbody>
+                    @forelse ($usulankegiatans as $index => $u)
+                    <tr class="border-b text-center text-sm font-normal hover:bg-abuabuCerah/30">
+
+                        <!-- Nomor Surat -->
+                        <td class="py-3 px-4 whitespace-nowrap">
+                            {{ $u->inputlaporankegiatans->cetaklaporankegiatans->identitassurats->nomor_surat ?? '-' }}
+                        </td>
 
                         <!-- OPD -->
                         <td class="py-3 px-4 font-semibold">{{ $u->subunitkerjas->singkatan ?? '-' }}</td>
@@ -141,80 +126,81 @@
                         </td>
 
                         <!-- Status Usulan Kegiatan -->
-                        <td class="py-3 px-4 whitespace-nowrap">
+                        <td class="py-3 px-4 text-center whitespace-nowrap">
                             <span class="{{ $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui_class }}">
                                 {{ str_replace('_', ' ', $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui) }}
                             </span>
                         </td>
 
-                                <!-- Update Progress -->
-<td class="py-3 px-4 text-center">
-    <div class="flex justify-center items-center gap-2">
+                        <!-- Aksi -->
+                        <td class="py-3 px-4 text-center"
+                            x-data="{ openDokumen: false }">
+                            <div class="flex items-center justify-center gap-2">
 
-        {{-- CETAK --}}
-@if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
+                                {{-- CETAK --}}
+                                @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_cetak_laporan)
 
-   <a href="{{ route(
+                                <a href="{{ route(
     'superadmin.balasanlaporankegiatan.cetak',
     $u->inputlaporankegiatans->laporankegiatans->id
     ) }}"
-    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md
     bg-[#4361EE] text-white hover:bg-[#3651d4] transition
     inline-flex items-center justify-center">
-        Cetak
-    </a>
+                                    Cetak
+                                </a>
 
-@else
+                                @else
 
-    <button
-        class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-        Cetak
-    </button>
+                                <button
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                                    Cetak
+                                </button>
 
-@endif
+                                @endif
 
-        {{-- KIRIM --}}
-        @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
-            <a href="{{ route(
+                                {{-- KIRIM --}}
+                                @if($u->inputlaporankegiatans?->laporankegiatans?->boleh_kirim_balasan)
+                                <a href="{{ route(
                 'superadmin.balasanlaporankegiatan.kirim',
                 $u->inputlaporankegiatans->laporankegiatans->id
             ) }}"
-                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
-                Kirim
-            </a>
-        @else
-            <button
-                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-                Kirim
-            </button>
-        @endif
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md bg-[#5B2C89] text-white hover:bg-[#9868c7] transition">
+                                    Kirim
+                                </a>
+                                @else
+                                <button
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                                    Kirim
+                                </button>
+                                @endif
 
-        {{-- REVIEW --}}
-        @if($u->isReviewLaporan())
-            <button
-                onclick="openReviewModal('{{ $u->inputlaporankegiatans->laporankegiatans->id }}', 'laporankegiatans')"
-                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
-                Review
-            </button>
-        @else
-            <button
-                class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
-                Review
-            </button>
-        @endif
+                                {{-- REVIEW --}}
+                                @if($u->isReviewLaporan())
+                                <button
+                                    onclick="openReviewModal('{{ $u->inputlaporankegiatans->laporankegiatans->id }}', 'laporankegiatans')"
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md bg-[#216e7f] text-white hover:bg-[#398c9f] transition">
+                                    Review
+                                </button>
+                                @else
+                                <button
+                                    class="w-20 px-3 py-2 text-xs font-medium rounded-md bg-[#dcddde] text-gray-600 italic cursor-not-allowed">
+                                    Review
+                                </button>
+                                @endif
 
-        {{-- UPDATE --}}
-        <button
-    type="button"
-    @click="openDokumen = true"
-    class="w-24 px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700 transition">
-    Update
-</button>
+                                {{-- Open Dokumen --}}
+                                <button
+                                    type="button"
+                                    @click="openDokumen = true"
+                                    class="w-9 h-9 flex items-center justify-center rounded-lg bg-biruCerah/20 text-biruNavy/75 hover:bg-biruCerah/50 transition"
+                                    title="Open Dokumen">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                </button>
 
-    </div>
-    <!-- MODAL DETAIL -->
-                                        <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-                                            <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-gray-100">
+                                <!-- MODAL DETAIL -->
+                                <div x-show="openDokumen" x-cloak x-transition.opacity class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+                                    <div @click.outside="openDokumen = false" x-transition.scale class="relative bg-white w-[420px] max-w-full rounded-2xl shadow-2xl p-6 text-center border border-abuabuMuda/60">
 
                                         {{-- Button Close --}}
                                         <button @click="openDokumen = false"
@@ -222,91 +208,118 @@
                                             <i data-lucide="x"></i>
                                         </button>
 
-                                                <h2 class="text-lg font-bold text-gray-700 mb-4">
-                                                    Detail Dokumen
-                                                </h2>
+                                        <h2 class="text-2xl font-semibold bg-primary-gradient bg-clip-text text-transparent leading-tight">
+                                            DAFTAR DOKUMEN
+                                        </h2>
 
                                         <p class="text-sm font-normal text-abuabuCerah mb-6">
                                             Pilih dokumen terkait usulan kegiatan yang ingin dilihat.
                                         </p>
 
-                                                <div class="flex flex-col space-y-3 font-bold">
-                                                    {{-- Lihat Surat Balasan Usulan --}}
-                                                    <a href="{{ route('superadmin.pelaksanaankegiatan.show', $u->id) }}"
-                                                        class="block px-4 py-2 rounded-lg bg-[#fff1f5] text-[#ab5353]">
-                                                        Lihat Pelaksanaan Kegiatan
-                                                    </a>
+                                        <div class="flex flex-col space-y-3 font-semibold text-sm">
+                                            {{-- Lihat Surat dan Laporan Kegiatan --}}
+                                            <a href="{{ route('superadmin.laporankegiatan.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-hijauTransparan text-hijauTua hover:bg-hijauTua/60 transition">
+                                                Lihat Surat dan Laporan Hasil
+                                            </a>
 
-                                                    {{-- Lihat Surat dan Laporan Hasil --}}
-                                                    <a href="{{ route('superadmin.laporankegiatan.download', $u->id) }}"
-                                                        class="block px-4 py-2 rounded-lg bg-[#e0fbfc] text-[#0077b6]">
-                                                        Lihat Surat dan Laporan Hasil
-                                                    </a>
-                                                </div>
+                                            {{-- Lihat Surat Balasan Laporan Kegiatan --}}
+                                            @if(
+    $u->inputlaporankegiatans?->laporankegiatans?->sudah_cetak_balasan
+    ||
+    $u->inputlaporankegiatans?->laporankegiatans?->sudah_kirim_balasan
+)
+                                            <a href="{{ route('superadmin.balasanlaporankegiatan.download', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-unguBening text-unguSedang hover:bg-unguSedang/60 transition">
+                                                Lihat Surat Balasan Laporan
+                                            </a>
+                                            @else
 
-                                                    <p class="text-sm text-gray-500 my-6">
-                                                    Pilih aksi yang ingin dilakukan:
-                                                    </p>
+<button
+    disabled
+    class="block w-full px-4 py-3 rounded-lg bg-abuabuMuda text-abuabuSedang italic cursor-not-allowed">
 
-                                                    <div class="flex flex-col space-y-3 font-bold">
+    Lihat Surat Balasan Laporan
 
-                                                    {{-- ARCHIVE --}}
-                                                    @if(
-                                                        $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui === 'finish'
-                                                        && !$u->inputlaporankegiatans?->laporankegiatans?->is_archived
-                                                    )
+</button>
 
-                                                    <form
-                                                        action="{{ route(
+@endif
+
+                                            {{-- Pelaksanaan --}}
+                                            @if($u->inputusulankegiatans?->pelaksanaankegiatans)
+                                            <a href="{{ route('superadmin.pelaksanaankegiatan.show', $u->id) }}"
+                                                target="_blank"
+                                                class="block px-4 py-3 rounded-lg bg-merahBata/25 text-merahMaroon hover:bg-merahMaroon/60 transition">
+                                                Lihat Pelaksanaan Kegiatan
+                                            </a>
+                                            @else
+                                            <button
+                                                disabled
+                                                class="block w-full px-4 py-3 rounded-lg bg-abuabuMuda text-abuabuSedang italic cursor-not-allowed">
+                                                Lihat Pelaksanaan Kegiatan
+                                            </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- ARCHIVE --}}
+                                @if(
+                                $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui === 'finish'
+                                && !$u->inputlaporankegiatans?->balasanlaporankegiatans?->is_archived
+                                )
+
+                                <form
+                                    action="{{ route(
                                                         'superadmin.laporankegiatan.archive',
                                                         $u->inputlaporankegiatans->laporankegiatans->id
                                                     ) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Yakin arsipkan laporan ini?')">
-                                                    @csrf
+                                    method="POST"
+                                    onsubmit="return confirm('Yakin arsipkan laporan ini?')">
+                                    @csrf
 
-                                                    <button
-                                                        type="submit"
-                                                        class="block w-full px-4 py-2 rounded-lg bg-[#5B2C89] text-white">
-                                                        Arsipkan
-                                                    </button>
+                                    <button
+                                        type="submit"
+                                        class="w-9 h-9 flex items-center justify-center rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition"
+                                        title="Arsipkan">
+                                        <i data-lucide="archive" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
 
-                                                    </form>
+                                @elseif(
+                                $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
+                                )
 
-                                                    @elseif(
-                                                        $u->inputlaporankegiatans?->laporankegiatans?->status_laporan_ui !== 'finish'
-                                                    )
+                                <span
+                                    class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    title="Arsipkan">
+                                    <i data-lucide="archive" class="w-4 h-4"></i>
+                                </span>
 
-                                                    <span
-                                                        class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed">
-                                                        Arsipkan
-                                                    </span>
+                                @else
 
-                                                    @else
+                                <span
+                                    class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    title="Arsipkan">
+                                    <i data-lucide="archive" class="w-4 h-4"></i>
+                                </span>
 
-                                                    <span
-                                                        class="block w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-400">
-                                                        Arsipkan
-                                                    </span>
-
-                                                    @endif
-</td>
-                                    <div class="flex justify-center gap-2">
-                                        <div class="flex justify-center items-center gap-2 text-sm">
-                                                    </div>
-                                                </div>
-
-                                                                                </tr>
-                                                                                @empty
-                                                                                <tr>
-                                                                                    <td colspan="7" class="text-center text-gray-500 p-4">
-                                                                                        Tidak ada data laporan kegiatan.
-                                                                                    </td>
-                                                                                </tr>
-                                                                                @endforelse
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-gray-500 p-4">
+                            Tidak ada data laporan kegiatan.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         {{-- Pagination --}}
         <div class="mt-4">
@@ -359,6 +372,3 @@
     </script>
 
 </x-app-layout>
-
-
-

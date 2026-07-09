@@ -20,7 +20,10 @@ class Izin_Laporanpesertakegiatans extends Model
         'tujuanpeserta_kegiatan',
         'rangkumanpeserta_kegiatan',
         'kesimpulanpeserta_kegiatan',
+        'hambatanpeserta_kegiatan',
+        'solusipeserta_kegiatan',
         'dokumentasipeserta_kegiatan',
+        'filepdfgenerate_path',
         'uploaded_at',
     ];
 

@@ -167,7 +167,6 @@ border: 3px solid #000;
             width: 300px;
             right: 50px;
             bottom: 40px;
-
             width: 300px;
             text-align: left;
             /*display: flex;
@@ -224,7 +223,7 @@ border: 3px solid #000;
             transform-origin: center;
             opacity: 0.6;
             /* tetap transparan */
-            z-index: 1;
+            z-index: 2;
             mix-blend-mode: multiply;
         }
 
@@ -237,7 +236,7 @@ border: 3px solid #000;
             transform: translateX(-50%) scale(1.5);
             width: 100px;
             /*sedikit lebih kecil dari stempel */
-            z-index: 2;
+            z-index: 1;
         }
     </style>
 </head>

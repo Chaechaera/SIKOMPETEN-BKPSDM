@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('izin_identitassurats', function (Blueprint $table) {
-            $table->unique('nomor_surat');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('foto')->nullable()->after('email');
         });
     }
 
     public function down(): void
     {
-        Schema::table('izin_identitassurats', function (Blueprint $table) {
-            $table->dropUnique(['nomor_surat']);
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('foto');
         });
     }
 };

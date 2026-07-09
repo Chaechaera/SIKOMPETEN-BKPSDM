@@ -18,10 +18,66 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class UsulanKegiatansController extends Controller
 {
+
+    public function archive($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        $usulan->update([
+            'admin_archived_at' => now(),
+        ]);
+
+        return back()->with('success', 'Usulan berhasil diarsipkan.');
+    }
+
+    public function archivePage(Request $request)
+    {
+        $user = Auth::user();
+
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'cetakusulankegiatans',
+            'verifikasiusulankegiatanterakhir',
+            'inputlaporankegiatans'
+        ])
+            ->whereNotNull('admin_archived_at');
+
+        if ($user->role == 'admin') {
+            $usulankegiatans->where('subunitkerja_id', $user->subunitkerja_id);
+        }
+
+        if ($request->filled('search')) {
+            $usulankegiatans->whereHas('inputusulankegiatans', function ($q) use ($request) {
+                $q->where('nama_kegiatan', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $usulankegiatans = $usulankegiatans
+            ->latest('admin_archived_at')
+            ->paginate(20);
+
+        return view(
+            'pages.usulankegiatan.arsip_usulan_kegiatan',
+            compact('usulankegiatans')
+        );
+    }
+
+    public function restore($id)
+    {
+        $usulan = Izin_Usulankegiatans::findOrFail($id);
+
+        $usulan->update([
+            'admin_archived_at' => null,
+        ]);
+
+        return back()->with('success', 'Usulan berhasil dipulihkan.');
+    }
+
     /**
      * Tampilkan Rekapitulasi Kegiatan Pengembangan Kompetensi ASN
      */
@@ -30,6 +86,7 @@ class UsulanKegiatansController extends Controller
         // Ambil parameter search dan tahun dari request
         $search = request('search');
         $tahun = request('tahun');
+        $kategori = request('kategori');
 
         // Eager Loading dan Mapping
         $rekap = Izin_RefSubunitkerjas::withCount([
@@ -39,6 +96,7 @@ class UsulanKegiatansController extends Controller
             ->get()
             ->map(function ($subunit) use ($search, $tahun) {
 
+                // Permisalan suatu data
                 $total_jp = 0;
                 $jp0_10 = 0;
                 $jp11_19 = 0;
@@ -47,29 +105,25 @@ class UsulanKegiatansController extends Controller
 
                 // Looping usulankegiatan per subunitkerja
                 foreach ($subunit->usulankegiatans as $usulan) {
-
                     if (!$usulan->inputlaporankegiatans) {
                         continue;
                     }
 
+                    // Ambil laporankegiatans
                     $input = $usulan->inputlaporankegiatans;
-
                     if (!$input->laporankegiatans) {
                         continue;
                     }
 
                     // Ambil balasan dari DB
-                    $balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
-                        'inputlaporankegiatan_id',
-                        $input->id
-                    )->first();
+                    $balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where('inputlaporankegiatan_id', $input->id)->first();
+                    if (!$balasan) {
+                        continue;
+                    }
 
-                    if (!$balasan) continue;
-
-                    // filter tahun
+                    // Filter tahun berdasarkan tahun sertifikat keluar
                     if ($tahun) {
                         $sertifikat = $input->laporankegiatans->sertifikats;
-
                         if (
                             !$sertifikat ||
                             !$sertifikat->tanggalkeluarsertifikat_kegiatan ||
@@ -79,16 +133,16 @@ class UsulanKegiatansController extends Controller
                         }
                     }
 
-                    // pengambilan jp
+                    // Ambil JP
                     $jp = $balasan->totalcapaianjp_kegiatan;
 
-                    // total JP
+                    // Total JP
                     $total_jp += $jp;
 
-                    // jumlah kegiatan valid
+                    // Jumlah kegiatan valid
                     $jumlah_kegiatan_valid++;
 
-                    // kategori JP
+                    // Kategori JP
                     if ($jp <= 10) {
                         $jp0_10++;
                     } elseif ($jp <= 19) {
@@ -98,6 +152,34 @@ class UsulanKegiatansController extends Controller
                     }
                 }
 
+                // ===============================
+                // Hitung Persentase >20 JP
+                // ===============================
+                $persen20 = $jumlah_kegiatan_valid > 0
+                    ? round(($jp20 / $jumlah_kegiatan_valid) * 100)
+                    : 0;
+
+                $persen_20 = $persen20 . '%';
+
+                // ===============================
+                // Kategori Kinerja PK ASN
+                // ===============================
+
+                if ($jumlah_kegiatan_valid >= 12 && $persen20 >= 70) {
+                    $kategori = 'Sangat Baik';
+                } elseif ($jumlah_kegiatan_valid >= 9 && $persen20 >= 50) {
+                    $kategori = 'Baik';
+                } elseif ($jumlah_kegiatan_valid >= 6 && $persen20 >= 30) {
+                    $kategori = 'Cukup';
+                } elseif ($jumlah_kegiatan_valid >= 4 && $persen20 >= 10) {
+                    $kategori = 'Kurang';
+                } else {
+                    $kategori = 'Sangat Kurang';
+                }
+
+                // ===============================
+                // Return Data
+                // ===============================
                 return [
                     'nama' => $subunit->sub_unitkerja,
                     'jumlah_kegiatan' => $jumlah_kegiatan_valid,
@@ -105,35 +187,42 @@ class UsulanKegiatansController extends Controller
                     'jp11_19' => $jp11_19,
                     'jp20' => $jp20,
                     'total' => $total_jp,
-
-                    // persen dari jumlah kegiatan
-                    'persen_20' => $jumlah_kegiatan_valid > 0
-                        ? round(($jp20 / ($jp0_10 + $jp11_19 + $jp20)) * 100) . '%'
-                        : '0%',
+                    'persen_20' => $persen_20,
+                    'kategori_kinerja' => $kategori,
                 ];
             })
 
             // filter search dan tahun
-            ->filter(function ($row) use ($search, $tahun) {
+            ->filter(function ($row) use ($search, $tahun, $kategori) {
 
                 $matchSearch = true;
                 $matchTahun  = true;
 
+                // Berdasarkan pencarian search
                 if ($search) {
                     $matchSearch = str_contains(strtolower($row['nama']), strtolower($search));
                 }
 
+                // Berdasarkan filtering tahun
                 if ($tahun) {
-                    // kalau kamu belum punya field tahun di array, skip dulu
-                    $matchTahun = true; // nanti kita bisa upgrade
+                    $matchTahun = true;
                 }
 
-                return $matchSearch && $matchTahun;
+                // Berdasarkan filtering kategori kinerja
+                if ($kategori) {
+                    $matchKategori = $row['kategori_kinerja'] === $kategori;
+                } else {
+                    $matchKategori = true;
+                }
+
+                // Return hasil  filtering data
+                return $matchSearch && $matchTahun && $matchKategori;
             });
 
-        // pagination manual akibat proses mapping dan collection
-        $rekap = $rekap->values(); // reset index
-
+        // ===============================
+        // Pagination Data Rekapitulasi
+        // ===============================
+        $rekap = $rekap->values();
         $page = request()->get('page', 1);
         $perPage = 20;
 
@@ -157,14 +246,15 @@ class UsulanKegiatansController extends Controller
         // Ambil user yang sedang aktif saat ini
         $activeRole = session('active_role', Auth::user()->role);
 
+        // Mapping page untuk rekapitulasi
         if ($activeRole === 'superadmin') {
             return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
         }
-
         if ($activeRole === 'admin') {
             return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
         }
 
+        // Return hasil halaman rekapitulasi
         return view('pages.rekapitulasi.user', compact('rekap', 'tahuns'));
     }
 
@@ -183,7 +273,7 @@ class UsulanKegiatansController extends Controller
             'verifikasiusulankegiatanterakhir',
             'inputlaporankegiatans',
             'inputlaporankegiatans.laporankegiatans'
-        ]);
+        ])->whereNull('admin_archived_at');
 
         // Filter berdasarkan role
         if ($user->role === 'admin') {
@@ -214,21 +304,20 @@ class UsulanKegiatansController extends Controller
         $notifikasiReview = \App\Izin\Models\Izin_Verifikasiusulankegiatans::with([
             'usulankegiatans.inputusulankegiatans'
         ])
-        ->where('is_read', false)
-        ->whereHas('usulankegiatans', function ($q) use ($user) {
+            ->where('is_read', false)
+            ->whereHas('usulankegiatans', function ($q) use ($user) {
 
-            if ($user->role === 'admin') {
-                $q->where('subunitkerja_id', $user->subunitkerja_id);
-            }
+                if ($user->role === 'admin') {
+                    $q->where('subunitkerja_id', $user->subunitkerja_id);
+                }
 
-            if ($user->role === 'user') {
-                $q->where('dibuat_oleh', $user->id);
-            }
+                if ($user->role === 'user') {
+                    $q->where('dibuat_oleh', $user->id);
+                }
+            })
+            ->latest('tanggalverifikasi_inputusulankegiatan')
+            ->get();
 
-        })
-        ->latest('tanggalverifikasi_inputusulankegiatan')
-        ->get();
-        
         $usulankegiatans = $usulankegiatans->orderBy('updated_at', 'desc')->paginate(20)->appends($request->query());
 
         // Redirect ke halaman daftar pengajuan usulan kegiatan
@@ -417,81 +506,28 @@ class UsulanKegiatansController extends Controller
      */
     public function download($id)
     {
-        // Ambil user yang sedang login saat ini
-        //$user = Auth::user();
-
-        // Eager load relasi dari model dan temukan usulankegiatan berdasarkan id
         $usulankegiatans = Izin_Usulankegiatans::with([
-            'inputusulankegiatans',
-            'inputusulankegiatans.kopunitkerjas',
-            'detailusulankegiatans'
+            'inputusulankegiatans.cetakusulankegiatans'
         ])->findOrFail($id);
 
-        //$kirimusulankegiatans = $usulankegiatans->kirimusulankegiatans;
+        $cetak = $usulankegiatans
+            ->inputusulankegiatans
+            ->cetakusulankegiatans;
 
-        //$pengirim = $kirimusulankegiatans?->nipadmin_inputusulankegiatan; // relasi ke user pengirim
-
-        //$unitkerjaId = $pengirim?->subunitkerjas->unitkerja_id;
-
-        // Ambil kop,ttd, dan stempel dari inputusulankegiatan pertama (1 unitkerja dianggap telah mengupload sekali)
-        //$unitkerjaId = $user->subunitkerjas->unitkerja_id;
-        //$kop = Izin_Kopunitkerjas::where('unitkerja_id', $unitkerjaId)->latest()->first();
-        $kop = $usulankegiatans->inputusulankegiatans?->kopunitkerjas;
-        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
-        //$ttd = $usulankegiatans->inputusulankegiatans?->kopunitkerjas?->ttdunitkerjas;
-        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
-        //$stempel = $usulankegiatans->inputusulankegiatans?->kopunitkerjas?->stempelunitkerjas;
-
-        // Ambil gambar logo surakarta sebagai kop surat dari asset
-        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
-        if (!file_exists($kop_path)) {
-            $kop_path = null; // fallback kalau tidak ada file kop
+        if (
+            !$cetak ||
+            !$cetak->filepdfgenerate_path ||
+            !Storage::disk('public')->exists($cetak->filepdfgenerate_path)
+        ) {
+            abort(404, 'Dokumen belum digenerate.');
         }
 
-        // Baca file excel jadwal kegiatan kalau ada
-        $jadwalpelaksanaan_kegiatan = [];
-        if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
-            $path = storage_path('app/public/' . $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan);
-            if (file_exists($path)) {
-                try {
-                    $spreadsheet = IOFactory::load($path);
-                    $sheet = $spreadsheet->getActiveSheet();
-                    // Ambil semua baris, termasuk yang kosong
-                    $jadwalpelaksanaan_kegiatan = [];
-                    foreach ($sheet->toArray(null, true, true, true) as $row) {
-                        $values = array_values($row);
-                        $jadwalpelaksanaan_kegiatan[] = $values;
-                    }
-                    /*foreach ($sheet->toArray(null, true, true, true) as $row) {
-
-                        $values = [];
-
-                        foreach (array_values($row) as $cell) {
-                            $values[] = $this->rapikanText($cell);
-                        }
-
-                        $jadwalpelaksanaan_kegiatan[] = $values;
-                    }*/
-                } catch (\Exception $e) {
-                    $jadwalpelaksanaan_kegiatan = [];
-                }
-            }
-        }
-
-        // Load view PDF
-        $pdf = PDF::loadView('pages.generatepdf.surat_usulan_kegiatan', [
-            'usulankegiatans' => $usulankegiatans,
-            'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
-            'kop_path' => $kop_path,
-            'kop' => $kop,
-            'ttd' => $ttd,
-            'stempel' => $stempel,
-            //'pengirim' => $pengirim,
-            //user' => $user,
-        ])->setPaper('A4', 'portrait');
-
-        // Redirect dan simpan file PDF
-        return $pdf->stream('KAK dan Surat Pengajuan Usulan Kegiatan ' . $usulankegiatans->inputusulankegiatans->nama_kegiatan . '.pdf');
+        return Storage::disk('public')->download(
+            $cetak->filepdfgenerate_path,
+            'KAK dan Surat Pengajuan Usulan Kegiatan ' .
+                $usulankegiatans->inputusulankegiatans->nama_kegiatan .
+                '.pdf'
+        );
     }
 
     public function preview(Request $request, $id)
@@ -504,9 +540,9 @@ class UsulanKegiatansController extends Controller
             'detailusulankegiatans'
         ])->findOrFail($id);
 
-        $kop = $usulankegiatans->inputusulankegiatans->first()?->kopunitkerjas ?? null;
+        $kop = $usulankegiatans?->inputusulankegiatans?->kopunitkerjas;
 
-        $ttd = Izin_Ttdunitkerjas::where(
+        /*$ttd = Izin_Ttdunitkerjas::where(
             'unitkerja_id',
             $user->subunitkerjas->unitkerja_id
         )->first();
@@ -514,22 +550,32 @@ class UsulanKegiatansController extends Controller
         $stempel = Izin_Stempelunitkerjas::where(
             'unitkerja_id',
             $user->subunitkerjas->unitkerja_id
+        )->first();*/
+
+        $ttd = Izin_Ttdunitkerjas::where(
+            'subunitkerja_id',
+            $kop?->subunitkerja_id
+        )->first();
+
+        $stempel = Izin_Stempelunitkerjas::where(
+            'subunitkerja_id',
+            $kop?->subunitkerja_id
         )->first();
 
         $kop_path = public_path('build/assets/kop_surat.png');
-
         if (!file_exists($kop_path)) {
             $kop_path = null;
         }
 
         // Baca file excel jadwal kegiatan kalau ada
         $jadwalpelaksanaan_kegiatan = [];
+        $jadwalMerge = [];
 
         if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
 
             $path = storage_path(
                 'app/public/' .
-                $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan
+                    $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan
             );
 
             if (file_exists($path)) {
@@ -537,37 +583,67 @@ class UsulanKegiatansController extends Controller
                 try {
 
                     $spreadsheet = IOFactory::load($path);
-
                     $sheet = $spreadsheet->getActiveSheet();
 
-                    foreach ($sheet->toArray(null, true, true, true) as $row) {
-                        $jadwalpelaksanaan_kegiatan[] = array_values($row);
+                    $mergeInfo = [];
+
+                    foreach ($sheet->getMergeCells() as $merge) {
+
+                        if (preg_match('/A(\d+):A(\d+)/', $merge, $m)) {
+
+                            $start = (int) $m[1];
+                            $end   = (int) $m[2];
+
+                            $mergeInfo[$start] = $end - $start + 1;
+                        }
                     }
 
+                    $jadwalMerge = $mergeInfo;
+
+                    $rowNumber = 1;
+
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+
+                        $row = array_values(array_slice($row, 0, 3));
+
+                        // simpan nomor baris excel
+                        $row['_row'] = $rowNumber;
+
+                        // simpan rowspan
+                        $row['_rowspan'] = $mergeInfo[$rowNumber] ?? 0;
+
+                        $jadwalpelaksanaan_kegiatan[] = $row;
+
+                        $rowNumber++;
+                    }
                 } catch (\Exception $e) {
+
                     $jadwalpelaksanaan_kegiatan = [];
+                    $jadwalMerge = [];
                 }
             }
         }
+
+        $identitas = (object)[
+            'nomor_surat'   => $request->nomor_surat,
+            'tanggal_surat' => $request->tanggal_surat,
+            'sifat_surat'   => $request->sifat_surat,
+            'lampiran_surat' => $request->lampiran_surat,
+            'perihal_surat' => $request->perihal_surat,
+        ];
 
         $pdf = PDF::loadView(
             'pages.generatepdf.surat_usulan_kegiatan',
             [
                 'usulankegiatans' => $usulankegiatans,
                 'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
+                'jadwalMerge' => $jadwalMerge,
                 'kop_path' => $kop_path,
                 'kop' => $kop,
                 'ttd' => $ttd,
                 'stempel' => $stempel,
                 'user' => $user,
-
-                'preview_identitas' => [
-                    'nomor_surat' => $request->nomor_surat,
-                    'tanggal_surat' => $request->tanggal_surat,
-                    'lampiran_surat' => $request->lampiran_surat,
-                    'sifat_surat' => $request->sifat_surat,
-                    'perihal_surat' => $request->perihal_surat,
-                ]
+                'identitas' => $identitas,
             ]
         );
 
@@ -575,5 +651,27 @@ class UsulanKegiatansController extends Controller
             $pdf->output(),
             200
         )->header('Content-Type', 'application/pdf');
+    }
+
+    public function previewFile($id)
+    {
+        $usulan = Izin_Usulankegiatans::with(
+            'inputusulankegiatans.cetakusulankegiatans'
+        )->findOrFail($id);
+
+        $path = optional(
+            $usulan->inputusulankegiatans->cetakusulankegiatans
+        )->filepdfgenerate_path;
+
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            abort(404, 'Dokumen belum digenerate.');
+        }
+
+        return response()->file(
+            storage_path('app/public/' . $path),
+            [
+                'Content-Type' => 'application/pdf',
+            ]
+        );
     }
 }

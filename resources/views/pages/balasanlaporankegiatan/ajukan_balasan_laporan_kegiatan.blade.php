@@ -1,26 +1,19 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
-
-            {{-- Header --}}
-            @include('layouts.navigation')
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight"> FORMULIR BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Silahkan lengkapi data balasan laporan hasil kegiatan pada form ini dan pastikan data balasan laporan hasil kegiatan yang diisikan telah sesuai sebelum dicetak.
+            </p>
+        </div>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
         {{-- 📝 FORM BALASAN LAPORAN HASIL KEGIATAN --}}
         <form method="POST" action="{{ route('superadmin.balasanlaporankegiatan.store', $laporankegiatans->id) }}" enctype="multipart/form-data">
             @csrf
 
-                <div class="bg-white rounded-xl shadow p-6 mb-4">
-                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR BALASAN LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                    <p class="text-sm text-blue-600">
-                        Silahkan lengkapi data balasan laporan hasil kegiatan pada form ini dan pastikan data balasan laporan hasil kegiatan yang diisikan telah sesuai sebelum dicetak.
-                    </p>
-                </div>
 
                 {{-- ========================================================= --}}
                 {{-- ======== BAGIAN 1: BUAT BALASAN LAPORAN KEGIATAN ======== --}}
@@ -483,7 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
         el.style.top =
             ((f.y_percent / 100) * designArea.offsetHeight) + "px";
 
-        el.style.fontSize = (f.font_size ?? 36) + "px";
+        el.style.fontSize = (f.font_size ?? 28) + "px";
         el.style.color = f.font_color ?? "#000";
         el.style.fontWeight = f.font_weight ?? "bold";
         el.style.textAlign = f.text_align ?? "center";

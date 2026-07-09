@@ -450,7 +450,6 @@
             width: 100%;
             border-collapse: collapse;
             border-spacing: 0;
-            table-layout: fixed;
             font-size: 10.5pt;
             margin-top: 8px;
             page-break-inside: auto;
@@ -466,7 +465,7 @@
 
         .susunan-acara th,
         .susunan-acara td {
-            border: 0.5px solid #000;
+            border: 0.5px solid #000 !important;
             padding: 4px 6px;
             vertical-align: middle;
             line-height: 1.25;
@@ -494,7 +493,7 @@
             text-align: left;
             padding: 4px 5px;
             background-color: #f7f7f7;
-            border: 0.7px solid #000;
+            border: 0.7px solid #000 !important;
             font-size: 10.7pt;
             word-spacing: 2px;
             text-transform: capitalize;
@@ -507,22 +506,25 @@
             line-height: 1.2;
         }
 
-        .susunan-acara th:nth-child(1),
-.susunan-acara td:nth-child(1) {
-    width: 20%;
-    text-align: center;
-}
+        .th-hari,
+        .td-hari {
+            width: 25%;
+            text-align: center !important;
+            vertical-align: middle;
+        }
 
-.susunan-acara th:nth-child(2),
-.susunan-acara td:nth-child(2) {
-    width: 50%;
-}
+        .th-waktu,
+        .td-waktu {
+            width: 20%;
+            text-align: center !important;
+            vertical-align: middle;
+        }
 
-.susunan-acara th:nth-child(3),
-.susunan-acara td:nth-child(3) {
-    width: 30%;
-    text-align: center;
-}
+        .th-agenda,
+        .td-agenda {
+            width: 60%;
+            text-align: left;
+        }
 
         table {
             width: 100%;
@@ -607,34 +609,26 @@
                     <td class="label">Nomor</td>
                     <td class="colon">:</td>
                     <td>
-                        {{ $preview_identitas['nomor_surat']
-                            ?? $usulankegiatans->identitassurats?->nomor_surat
-                            ?? '' }}
+                        {{ $identitas->nomor_surat ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Sifat</td>
                     <td class="colon">:</td>
-                    <td>{{ $preview_identitas['sifat_surat']
-                        ?? $usulankegiatans->identitassurats?->sifat_surat
-                        ?? '' }}
+                    <td>{{ $identitas->sifat_surat ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td class="label">Lampiran</td>
                     <td class="colon">:</td>
-                    <td>{{ $preview_identitas['lampiran_surat']
-                        ?? $usulankegiatans->identitassurats?->lampiran_surat
-                        ?? '' }}</td>
+                    <td>{{ $identitas->lampiran_surat ?? '' }}</td>
                 </tr>
                 <tr>
                     <td class="label">Perihal</td>
                     <td class="colon">:</td>
                     <td>
                         <strong>
-                            {{ $preview_identitas['perihal_surat']
-                                ?? $usulankegiatans->identitassurats?->perihal_surat
-                                ?? '' }}
+                            {{ $identitas->perihal_surat ?? '' }}
                         </strong>
                     </td>
                 </tr>
@@ -643,16 +637,9 @@
 
         <div class="meta-right">
             <p>Surakarta,
-                @php
-                $tanggalSurat =
-                    $preview_identitas['tanggal_surat']
-                    ?? $usulankegiatans->identitassurats?->tanggal_surat;
-                @endphp
-
-                {{ $tanggalSurat
-                    ? \Carbon\Carbon::parse($tanggalSurat)
-                        ->translatedFormat('d F Y')
-                    : '' }}
+                {{ $identitas->tanggal_surat
+    ? \Carbon\Carbon::parse($identitas->tanggal_surat)->translatedFormat('d F Y')
+    : '' }}
             </p>
         </div>
     </div>
@@ -699,7 +686,7 @@
         </div>
 
         <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        <!--<p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>-->
         <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
     </div>
 
@@ -1084,104 +1071,109 @@
         @if(!empty($jadwalpelaksanaan_kegiatan) && count($jadwalpelaksanaan_kegiatan) > 1)
         <div class="susunan-acara-wrapper">
             <table class="susunan-acara">
-            @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
-            @php
-            // Bersihkan semua sel dari spasi tak terlihat dan format Excel
-            /*$row = array_map(function ($cell) {
-            if (is_array($cell))
-            $cell = implode(', ', array_filter($cell));
-            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
-            $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
-            return $cell === '' ? null : $cell;
-            }, $row);*/
-            $row = array_map(function ($cell) {
+                @foreach($jadwalpelaksanaan_kegiatan as $r => $row)
+                @php
+                // Bersihkan semua sel dari spasi tak terlihat dan format Excel
+                /*$row = array_map(function ($cell) {
+                if (is_array($cell))
+                $cell = implode(', ', array_filter($cell));
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell); // hapus karakter kontrol
+                $cell = trim(str_replace([' ', "\t", "\n", "\r"], '', $cell)); // hapus spasi non-breaking, tab, newline
+                return $cell === '' ? null : $cell;
+                }, $row);*/
+                $row = array_map(function ($cell) {
 
-            if (is_array($cell)) {
-            $cell = implode(', ', array_filter($cell));
-            }
+                if (is_array($cell)) {
+                $cell = implode(', ', array_filter($cell));
+                }
 
-            $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
+                $cell = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $cell);
 
-            // jangan hapus spasi
-            $cell = trim($cell);
+                // jangan hapus spasi
+                $cell = trim($cell);
 
-            // rapikan spasi ganda
-            $cell = preg_replace('/\s+/', ' ', $cell);
+                // rapikan spasi ganda
+                $cell = preg_replace('/\s+/', ' ', $cell);
 
-            return $cell === '' ? null : $cell;
-            }, $row);
+                return $cell === '' ? null : $cell;
+                }, $row);
 
-            // Cek apakah semua kolom benar-benar kosong
-            $hasData = false;
-            foreach ($row as $v) {
-            if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
-            $hasData = true;
-            break;
-            }
-            }
-            if (!$hasData)
-            continue; // lewati baris kosong sepenuhnya
+                // Cek apakah semua kolom benar-benar kosong
+                $hasData = false;
+                foreach ($row as $v) {
+                if (!empty($v) && !preg_match('/^\d+\.?$/', $v)) { // bukan cuma nomor urut
+                $hasData = true;
+                break;
+                }
+                }
+                if (!$hasData)
+                continue; // lewati baris kosong sepenuhnya
 
-            // Deteksi header grup seperti "Belanja Operasional Lainnya"
-            $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
-            @endphp
+                // Deteksi header grup seperti "Belanja Operasional Lainnya"
+                $isGroupHeader = count(array_filter($row)) === 1 && !empty($row[0]);
+                @endphp
 
-            {{-- Judul grup --}}
-            @if($isGroupHeader)
-            <tr class="group-row">
-                <td colspan="{{ count($jadwalpelaksanaan_kegiatan[0]) }}">
-                    {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
-                </td>
-            </tr>
-
-            {{-- Header tabel --}}
-            @elseif($r === 0)
-            <thead>
-                <tr>
-                    @foreach($row as $cell)
-                    <th>
-                        {{ ucwords(
-                                        preg_replace(
-                                            ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
-                                            ['$1 $2', '$1 ('],
-                                            $cell
-                                        )
-                                    ) }}
-                    </th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-
-                {{-- Data biasa --}}
-                @else
-                <tr>
-                    @foreach($row as $i => $cell)
-                    @php
-                    // Kasih spasi antar huruf besar, lalu rapihin whitespace ganda
-                    //$cleanCell = ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', trim($cell)));
-                    $cleanCell = trim($cell);
-
-                    $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
-
-                    $cleanCell = preg_replace('/([a-z])([A-Z])/', '$1 $2', $cleanCell);
-
-                    $cleanCell = preg_replace('/([a-zA-Z])\(/', '$1 (', $cleanCell);
-                    $cleanCell = preg_replace('/\s+/', ' ', $cleanCell);
-
-                    // Nomor kolom (kolom pertama) diperkecil
-                    $isNumberCol = $i === 0 && is_numeric(str_replace('.', '', $cleanCell));
-                    @endphp
-
-                    <td class="{{ $isNumberCol ? 'td-nomor' : 'td-isi' }}">
-                        {{ $cleanCell }}
+                {{-- Judul grup --}}
+                @if($isGroupHeader)
+                <tr class="group-row">
+                    <td colspan="{{ count($jadwalpelaksanaan_kegiatan[0]) }}">
+                        {{ ucwords(preg_replace(['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'], '$1 $2', $row[0])) }}
                     </td>
-                    @endforeach
                 </tr>
-                @endif
-                @endforeach
-            </tbody>
-        </table>
+
+                {{-- Header tabel --}}
+                @elseif($r === 0)
+                <thead>
+                    <tr>
+                        @for($i = 0; $i < 3; $i++)
+                            <th>
+                            {{ ucwords(
+                    preg_replace(
+                        ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
+                        ['$1 $2', '$1 ('],
+                        $row[$i]
+                    )
+                ) }}
+                            </th>
+                            @endfor
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {{-- Data biasa --}}
+                    @else
+                    <tr>
+
+                        {{-- Kolom Hari / Tanggal --}}
+                        @if(($row['_rowspan'] ?? 0) > 0)
+
+                        <td rowspan="{{ $row['_rowspan'] }}" class="td-hari">
+                            {{ $row[0] }}
+                        </td>
+
+                        @elseif(!empty($row[0]))
+
+                        <td class="td-hari">
+                            {{ $row[0] }}
+                        </td>
+
+                        @endif
+
+                        {{-- Waktu --}}
+                        <td class="td-waktu">
+                            {{ $row[1] }}
+                        </td>
+
+                        {{-- Agenda --}}
+                        <td class="td-agenda">
+                            {{ $row[2] }}
+                        </td>
+
+                    </tr>
+                    @endif
+                    @endforeach
+                </tbody>
+            </table>
         </div>
         @else
         <p class="indent">Terlampir dalam jadwal kegiatan.</p>

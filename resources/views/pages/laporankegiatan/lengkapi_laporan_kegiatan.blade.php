@@ -1,14 +1,15 @@
 <x-app-layout>
-    <div x-data="{ sidebarOpen: false }" class="flex min-h-screen bg-gray-50">
+    <div class="space-y-4 px-6 py-4">
 
-        {{-- Sidebar --}}
-        @include('pages.sidebar.admin')
-
-        {{-- Main Content --}}
-        <main class="flex-1 space-y-6 transition-all duration-300" :class="sidebarOpen ? 'ml-64' : 'ml-0'">
+        <!-- Card Judul -->
+        <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
+            <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight"> FORMULIR LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
+            <p class="text-sm text-abuabuCerah max-w-6xl">
+                Silahkan lengkapi data untuk laporan hasil kegiatan Pengembangan Kompetensi ASN yang telah diselenggarakan pada form ini.
+            </p>
+        </div>
 
             {{-- Header --}}
-            @include('layouts.navigation')
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
             {{-- FORM LAPORAN KEGIATAN --}}
@@ -16,13 +17,6 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="laporankegiatan_id" value="{{ $laporankegiatans->id }}">
-
-                <div class="bg-white rounded-xl shadow p-6 mb-4">
-                    <h1 class="text-2xl font-medium bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent leading-tight">FORMULIR LAPORAN HASIL KEGIATAN PENGEMBANGAN KOMPETENSI ASN</h1>
-                    <p class="text-sm font-semibold text-blue-600">
-                        Silahkan lengkapi laporan setelah kegiatan selesai dilaksanakan.
-                    </p>
-                </div>
 
             {{-- Step Progress --}}
             <x-step-progress :usulan="$usulankegiatans" :is-laporan="true" />
@@ -392,43 +386,48 @@
     <div id="fileContainer"></div>
 </div>
 
-                    {{-- ================= TEMPLATE SERTIFIKAT ================= --}}
-<div class="mt-4">
-
+                    {{-- Pilih Jenis Template Sertifikat --}}
+                <div class="mt-4">
     <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
-        Template Sertifikat Kegiatan
+        Pilih Jenis Template Sertifikat
     </label>
 
-    {{-- 🔹 TEMPLATE DEFAULT (BISA DIKLIK) --}}
-    <div class="mb-3">
-        <p class="text-sm text-gray-500 mb-2">Klik jika ingin pakai template ini:</p>
+    <label class="flex items-center gap-2 text-sm mb-2">
+        <input type="radio" name="jenissertifikat_kegiatan" value="template_bkpsdm"
+            {{ old('jenissertifikat_kegiatan', $laporankegiatans->jenissertifikat_kegiatan ?? '') == 'template_bkpsdm' ? 'checked' : '' }}>
+        Template BKPSDM
+    </label>
 
-        <img src="{{ asset('images/Template Sertifikat.jpeg') }}"
-    id="defaultTemplate"
-    onclick="pilihTemplateDefault()"
-    class="w-64 border-2 border-transparent rounded-lg cursor-pointer hover:shadow-lg transition">
+    <label class="flex items-center gap-2 text-sm">
+        <input type="radio" name="jenissertifikat_kegiatan" value="template_opd"
+            {{ old('jenissertifikat_kegiatan', $laporankegiatans->jenissertifikat_kegiatan ?? '') == 'template_opd' ? 'checked' : '' }}>
+        Template OPD
+    </label>
 
-    {{-- 🔹 UPLOAD SENDIRI --}}
-    <div>
-        <p class="text-sm text-gray-500 mt-2">Atau upload template sendiri:</p>
-
-        <input type="file" name="templatesertifikat_kegiatan"
-            id="uploadInput"
-            accept=".png,.jpg"
-            class="block w-full text-sm text-gray-700
-            border border-[#E0E7FF] rounded-lg cursor-pointer
-            bg-gray-50 focus:ring-2 focus:ring-[#A5B4FC]
-            focus:outline-none p-2 mt-2">
-    </div>
-
-    {{-- 🔥 HIDDEN INPUT --}}
-    <input type="hidden" name="pakai_template_default" id="pakaiTemplateDefault" value="0">
-
-    @error('templatesertifikat_kegiatan')
+    @error('jenissertifikat_kegiatan')
         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
     @enderror
-
 </div>
+
+                {{-- Template Sertifikat --}}
+                <div class="mt-4" id="uploadTemplateWrapper">
+                    <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
+                        Unggah File Template Sertifikat Kegiatan
+                        <span class="text-gray-400 text-sm">(JPG, PNG)</span>
+                    </label>
+                    <p class="text-sm text-gray-500 mt-1">Format: .jpg / .png</p>
+                    <p class="text-sm text-gray-500">Contoh nama file: template_sertifikat.jpg</p>
+                    <div class="relative mb-3 mt-2">
+                        <input type="file" name="templatesertifikat_kegiatan" accept=".png,.jpg" class="block w-full text-sm text-gray-700 
+                                  border border-[#E0E7FF] rounded-lg cursor-pointer
+                                  bg-[#F9FAFF] focus:ring-2 focus:ring-[#A5B4FC] 
+                                  focus:outline-none p-2">
+                        @error('templatesertifikat_kegiatan')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
 
                 {{-- ===================================================== --}}
 {{-- =============== BAGIAN 4: TOMBOL AKSI =============== --}}

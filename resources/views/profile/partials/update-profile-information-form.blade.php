@@ -1,90 +1,158 @@
-<section class="bg-gradient-to-b from-[#F6F2FF] to-[#FFFFFF] p-8 rounded-2xl shadow-sm border border-[#EDE6FF]">
+{{-- FORM VERIFICATION --}}
+<form id="send-verification" method="POST" action="{{ route('verification.send') }}">
+    @csrf
+</form>
 
-    <header class="mb-6">
-        <h2 class="text-2xl font-semibold text-[#5C4A9A]">
-            Profile Information
-        </h2>
+<form method="POST"
+      action="{{ route('profile.update') }}"
+      enctype="multipart/form-data"
+      class="bg-white rounded-2xl border border-gray-200 shadow p-6 space-y-6">
 
-        <p class="mt-1 text-sm text-[#8679C3]">
-            Update your account's profile information and email address.
-        </p>
-    </header>
+    @csrf
+    @method('PATCH')
 
-    {{-- FORM VERIFICATION SEND --}}
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
+    <h3 class="text-xl font-semibold text-gray-800 border-b pb-3">
+        Edit Informasi Akun
+    </h3>
 
-    {{-- MAIN FORM --}}
-    <form method="post" action="{{ route('profile.update') }}" class="space-y-6">
-        @csrf
-        @method('patch')
+    {{-- FOTO PROFIL --}}
+    <div class="flex items-center gap-6">
 
-        {{-- NAME --}}
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-[#E6DFFF]">
-            <label for="name" class="block text-sm font-medium text-[#5C4A9A] mb-1">
-                Name
+        @if($user->foto)
+            <img src="{{ asset('storage/'.$user->foto) }}"
+                class="w-24 h-24 rounded-full object-cover border shadow">
+        @else
+            <img src="{{ asset('images/default-profile.png') }}"
+                class="w-24 h-24 rounded-full object-cover border shadow">
+        @endif
+
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Foto Profil
             </label>
 
-            <input id="name" name="name" type="text"
-                   class="w-full px-4 py-2 rounded-lg border border-[#D8CCFF] 
-                   focus:ring-2 focus:ring-[#B8A9FF] focus:border-[#B8A9FF] transition"
-                   value="{{ old('name', $user->name) }}" required autofocus />
+            <input
+                type="file"
+                name="foto"
+                accept="image/*"
+                class="block w-full rounded-lg border border-gray-300 p-2">
 
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <x-input-error class="mt-2" :messages="$errors->get('foto')" />
         </div>
 
-        {{-- EMAIL --}}
-        <div class="bg-white p-5 rounded-xl shadow-sm border border-[#E6DFFF]">
-            <label for="email" class="block text-sm font-medium text-[#5C4A9A] mb-1">
-                Email
-            </label>
+    </div>
 
-            <input id="email" name="email" type="email"
-                   class="w-full px-4 py-2 rounded-lg border border-[#D8CCFF] 
-                   focus:ring-2 focus:ring-[#B8A9FF] focus:border-[#B8A9FF] transition"
-                   value="{{ old('email', $user->email) }}" required />
+    {{-- NAMA --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            Nama
+        </label>
 
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+        <input
+            type="text"
+            name="nama"
+            value="{{ old('nama', $user->nama) }}"
+            class="w-full rounded-lg bg-gray-100 border-gray-300"
+            readonly>
 
-            {{-- VERIFIKASI EMAIL --}}
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-3 bg-[#F4ECFF] p-4 rounded-lg border border-[#D9C7FF]">
-                    <p class="text-sm text-[#6A55B5]">
-                        Your email address is unverified.
+        <x-input-error class="mt-2" :messages="$errors->get('nama')" />
+    </div>
 
-                        <button form="send-verification"
-                            class="underline text-sm text-[#8571E6] hover:text-[#6C54E0]">
-                            Click here to re-send the verification email.
-                        </button>
+    {{-- EMAIL --}}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            Email
+        </label>
+
+        <input
+            type="email"
+            name="email"
+            value="{{ old('email', $user->email) }}"
+            class="w-full rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            required>
+
+        <x-input-error class="mt-2" :messages="$errors->get('email')" />
+
+        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+
+            <div class="mt-3 rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+
+                <p class="text-sm text-yellow-800">
+                    Email belum diverifikasi.
+
+                    <button
+                        form="send-verification"
+                        class="underline font-medium">
+
+                        Kirim ulang email verifikasi
+
+                    </button>
+                </p>
+
+                @if (session('status') === 'verification-link-sent')
+
+                    <p class="mt-2 text-sm text-green-600">
+                        Link verifikasi berhasil dikirim.
                     </p>
 
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-[#6CCF85]">
-                            A new verification link has been sent to your email address.
-                        </p>
-                    @endif
-                </div>
-            @endif
-        </div>
+                @endif
 
-        {{-- BUTTON / STATUS --}}
-        <div class="flex items-center gap-4">
-            <button
-                class="px-6 py-2.5 bg-[#A796FF] hover:bg-[#917DFF] text-white rounded-xl shadow-md transition">
-                Save
-            </button>
+            </div>
 
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-[#8679C3]"
-                >Saved.</p>
-            @endif
-        </div>
-    </form>
+        @endif
 
-</section>
+    </div>
+
+    {{-- OPD --}}
+    <div>
+
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+            OPD
+        </label>
+
+        <input
+            type="text"
+            value="{{ $user->subunitkerjas->sub_unitkerja ?? '-' }}"
+            readonly
+            class="w-full rounded-lg bg-gray-100 border-gray-300">
+
+    </div>
+
+    {{-- BUTTON --}}
+    <div class="flex items-center gap-4 pt-2">
+
+        <button
+            type="submit"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition">
+
+            Simpan Perubahan
+
+        </button>
+
+        <button
+            type="button"
+            onclick="document.getElementById('editInformasi').classList.add('hidden')"
+            class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100">
+
+            Batal
+
+        </button>
+
+        @if (session('status') === 'profile-updated')
+
+            <p
+                x-data="{ show: true }"
+                x-show="show"
+                x-transition
+                x-init="setTimeout(() => show = false, 2000)"
+                class="text-sm text-green-600">
+
+                Berhasil disimpan.
+
+            </p>
+
+        @endif
+
+    </div>
+
+</form>

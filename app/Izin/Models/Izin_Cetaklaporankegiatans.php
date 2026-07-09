@@ -18,7 +18,8 @@ class Izin_Cetaklaporankegiatans extends Model
         'pjunitkerja_id',
         'ttdunitkerja_id',
         'stempelunitkerja_id',
-        'statuslaporan_kegiatan'
+        'filepdfgenerate_path',
+        'statuslaporan_kegiatan',
     ];
 
     /* ========== RELATIONS ========== */

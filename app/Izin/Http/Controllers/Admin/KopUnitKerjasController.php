@@ -141,8 +141,7 @@ class KopUnitKerjasController extends Controller
         ]);
 
         // Redirect ke halaman dashboard admin
-        return redirect()->route('admin.dashboard')
-            ->with('success', 'Data KOP OPD berhasil disimpan');
+        return redirect()->route('admin.dashboard')->with('success', 'Data KOP OPD berhasil disimpan');
     }
 
     /**
@@ -162,10 +161,12 @@ class KopUnitKerjasController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // Cek apakah data sudah ada untuk subunit ini
         $kop = Izin_Kopunitkerjas::findOrFail($id);
         $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop->subunitkerja_id)->first();
         $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop->subunitkerja_id)->first();
 
+        // Validasi data request yang diupdate
         $request->validate([
             'unitkerja_id' => 'required',
             'subunitkerja_id' => 'required',
@@ -185,7 +186,7 @@ class KopUnitKerjasController extends Controller
             'gambarstempel_opd' => 'nullable|image|mimes:png,jpg,jpeg|max:2048'
         ]);
 
-        // ================== UPDATE KOP ==================
+        // ================== UPDATE DATA KOP ==================
         $kop->update([
             'nama_opd' => $request->nama_opd,
             'lokasi_opd' => $request->lokasi_opd,
@@ -196,7 +197,7 @@ class KopUnitKerjasController extends Controller
             'kodepos_opd' => $request->kodepos_opd,
         ]);
 
-        // ================== UPDATE TTD ==================
+        // ================== UPDATE DATA TTD ==================
         if ($ttd) {
             $ttd->update([
                 'jabatanpenanggungjawab_opd' => $request->jabatanpenanggungjawab_opd,
@@ -206,80 +207,73 @@ class KopUnitKerjasController extends Controller
             ]);
         }
 
+        // ================== UPDATE GAMBAR OPD ==================
 
         // Update data gambar kop OPD
         if ($request->hasFile('gambarkop_opd')) {
             if ($kop->gambarkop_opd) {
                 Storage::disk('public')->delete($kop->gambarkop_opd);
             }
-            $kop->gambarkop_opd = $request->file('gambarkop_opd')
-                ->storeAs(
-                    'izin/gambarkop_opd',
-                    time() . '_' . $request->file('gambarkop_opd')->getClientOriginalName(),
-                    'public'
-                );
-            $kop->save();
+            $manager = new ImageManager(new Driver());
+            $file = $request->file('gambarkop_opd');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = storage_path('app/public/izin/gambarkop_opd/' . $filename);
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+            $manager->read($file->getRealPath())
+                ->toPng()
+                ->save($path);
+            $this->removeWhiteBackground($path, $path);
+            $kop->update([
+                'gambarkop_opd' => 'izin/gambarkop_opd/' . $filename
+            ]);
         }
 
         // Update data gambar TTD OPD
         if ($request->hasFile('gambarttd_opd')) {
-
-    if ($ttd->gambarttd_opd) {
-        Storage::disk('public')->delete($ttd->gambarttd_opd);
-    }
-
-    $manager = new ImageManager(new Driver());
-
-    $file = $request->file('gambarttd_opd');
-    $filename = time() . '_' . $file->getClientOriginalName();
-
-    $path = storage_path('app/public/izin/gambarttd_opd/' . $filename);
-
-    if (!file_exists(dirname($path))) {
-        mkdir(dirname($path), 0755, true);
-    }
-
-    $manager->read($file->getRealPath())
-        ->toPng()
-        ->save($path);
-
-    $this->removeWhiteBackground($path, $path);
-
-    $ttd->gambarttd_opd = 'izin/gambarttd_opd/' . $filename;
-    $ttd->save();
-}
+            if ($ttd->gambarttd_opd) {
+                Storage::disk('public')->delete($ttd->gambarttd_opd);
+            }
+            $manager = new ImageManager(new Driver());
+            $file = $request->file('gambarttd_opd');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = storage_path('app/public/izin/gambarttd_opd/' . $filename);
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+            $manager->read($file->getRealPath())
+                ->toPng()
+                ->save($path);
+            $this->removeWhiteBackground($path, $path);
+            $ttd->update([
+                'gambarttd_opd' => 'izin/gambarttd_opd/' . $filename
+            ]);
+        }
 
         // Update data gambar stempel OPD
         if ($request->hasFile('gambarstempel_opd')) {
-
-    if ($stempel->gambarstempel_opd) {
-        Storage::disk('public')->delete($stempel->gambarstempel_opd);
-    }
-
-    $manager = new ImageManager(new Driver());
-
-    $file = $request->file('gambarstempel_opd');
-    $filename = time() . '_' . $file->getClientOriginalName();
-
-    $path = storage_path('app/public/izin/gambarstempel_opd/' . $filename);
-
-    if (!file_exists(dirname($path))) {
-        mkdir(dirname($path), 0755, true);
-    }
-
-    $manager->read($file->getRealPath())
-        ->toPng()
-        ->save($path);
-
-    $this->removeWhiteBackground($path, $path);
-
-    $stempel->gambarstempel_opd = 'izin/gambarstempel_opd/' . $filename;
-    $stempel->save();
-}
+            if ($stempel->gambarstempel_opd) {
+                Storage::disk('public')->delete($stempel->gambarstempel_opd);
+            }
+            $manager = new ImageManager(new Driver());
+            $file = $request->file('gambarstempel_opd');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = storage_path('app/public/izin/gambarstempel_opd/' . $filename);
+            if (!file_exists(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+            $manager->read($file->getRealPath())
+                ->toPng()
+                ->save($path);
+            $this->removeWhiteBackground($path, $path);
+            $stempel->update([
+                'gambarstempel_opd' => 'izin/gambarstempel_opd/' . $filename
+            ]);
+        }
 
         // Redirect ke halaman dashboard admin
-        return redirect()->route('admin.dashboard')
-            ->with('success', 'Data KOP OPD berhasil diupdate');
+        return redirect()->route('admin.dashboard')->with('success', 'Data KOP OPD berhasil diupdate');
     }
 
     /**

@@ -4,7 +4,7 @@
         {{-- Card Informasi --}}
         <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow p-6 mb-8">
             <h1 class="text-2xl font-medium bg-primary-gradient bg-clip-text text-transparent leading-tight">
-                Sertifikat Kegiatan Pengembangan Kompetensi ASN
+                SERTIFIKAT KEGIATAN PENGEMBANGAN KOMPETENSI ASN
             </h1>
             <p class="text-sm text-abuabuCerah max-w-4xl">
                 Berikut adalah daftar sertifikat kegiatan pengembangan kompetensi ASN milik peserta yang dimuat dalam bentuk file ZIP.
@@ -99,35 +99,93 @@
                             Peserta
                         </td>
 
-                                        <!-- Sertifikat -->
-                                        <td class="py-3 px-4 text-center">
-                                            @php
-    $laporanId = $u->inputlaporankegiatans?->laporankegiatans?->id;
-@endphp
+                        <!-- Sertifikat -->
+                        <td class="py-3 px-4">
+                            @php
+                            $laporan = $u->inputlaporankegiatans?->laporankegiatans;
+                            $sertifikat = $laporan?->sertifikats;
 
-@if($laporanId)
-    <a href="{{ route('admin.sertifikat.download', $laporanId) }}"
-        target="_blank"
-        class="block px-3 py-2 text-xs rounded-lg bg-[#defff8] text-[#136769] font-medium hover:bg-[#c0f0e8]">
-        Download Sertifikat
-    </a>
-@else
-    <span class="block px-3 py-2 text-xs rounded-lg bg-gray-200 text-gray-400">
-        Tidak tersedia
-    </span>
-@endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                            $laporanId = $laporan?->id;
+                            $sertifikatId = $sertifikat?->id;
 
-        {{-- Empty State --}}
-        <div id="emptyState" class="hidden text-center py-12 text-gray-500">
-            Tidak ada data yang sesuai dengan pencarian
+                            $alreadyFinalized =
+                            $sertifikat &&
+                            $sertifikat->pesertakegiatans()->exists() &&
+                            $sertifikat->pesertakegiatans()
+                            ->whereNotNull('filesertifikatgenerate_path')
+                            ->count() ==
+                            $sertifikat->pesertakegiatans()->count();
+                            @endphp
+
+                            @if ($sertifikatId)
+
+                            <div class="flex flex-col gap-2">
+
+                                @if (!$alreadyFinalized)
+
+                                {{-- FINALISASI --}}
+                                <form
+                                    action="{{ route('admin.sertifikat.finalisasi', $sertifikatId) }}"
+                                    method="POST">
+
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="w-full rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs py-2">
+
+                                        Finalisasi Sertifikat
+
+                                    </button>
+
+                                </form>
+
+                                @else
+
+                                {{-- Status --}}
+                                <div
+                                    class="w-full rounded-lg bg-gray-200 text-gray-600 text-xs py-2 text-center cursor-not-allowed">
+
+                                    Sudah Difinalisasi
+
+                                </div>
+
+                                @endif
+
+                                {{-- DOWNLOAD ZIP --}}
+                                <a
+                                    href="{{ route('admin.sertifikat.download', $laporanId) }}"
+                                    class="block rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 text-center">
+
+                                    Download ZIP
+
+                                </a>
+
+                            </div>
+
+                            @else
+
+                            <span
+                                class="text-gray-500 py-2">
+
+                                Proses Belum Selesai Sertifikat Belum Tergenerate
+
+                            </span>
+
+                            @endif
+
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+    </div>
+
+    {{-- Empty State --}}
+    <div id="emptyState" class="hidden text-center py-12 text-gray-500">
+        Tidak ada data yang sesuai dengan pencarian
+    </div>
     </div>
 
     {{-- Script --}}

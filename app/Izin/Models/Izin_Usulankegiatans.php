@@ -23,6 +23,10 @@ class Izin_Usulankegiatans extends Model
         'waktuselesai_kegiatan',
         'statususulan_kegiatan',
         'dibuat_oleh',
+
+        // Arsip
+        'admin_archived_at',
+        'superadmin_archived_at',
     ];
 
     /* ========== RELATIONS ========== */

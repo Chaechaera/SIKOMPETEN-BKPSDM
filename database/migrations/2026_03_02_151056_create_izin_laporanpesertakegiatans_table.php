@@ -21,6 +21,8 @@ return new class extends Migration
             $table->text('tujuanpeserta_kegiatan')->nullable();
             $table->text('rangkumanpeserta_kegiatan')->nullable();
             $table->text('kesimpulanpeserta_kegiatan')->nullable();
+            $table->text('hambatanpeserta_kegiatan')->nullable();
+            $table->text('solusipeserta_kegiatan')->nullable();
             $table->text('dokumentasipeserta_kegiatan')->nullable();
             $table->timestamp('uploaded_at')->nullable();   
             $table->timestamps();

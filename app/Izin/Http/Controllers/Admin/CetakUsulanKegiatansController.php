@@ -11,6 +11,9 @@ use App\Izin\Services\IdentitasSuratsService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CetakUsulanKegiatansController extends Controller
 {
@@ -85,7 +88,161 @@ class CetakUsulanKegiatansController extends Controller
             ]);
         });
 
-        // Redirect ke halaman download Surat Pengajuan dan KAK Usulan Kegiatan
-        return redirect()->route('admin.usulankegiatan.download', $usulan->id)->with('success', 'Usulan berhasil dicetak.');
+        $usulankegiatans = Izin_Usulankegiatans::with([
+            'inputusulankegiatans',
+            'inputusulankegiatans.kopunitkerjas',
+            'inputusulankegiatans.cetakusulankegiatans.identitassurats',
+            'detailusulankegiatans'
+        ])->findOrFail($id);
+
+        $cetak = $usulankegiatans
+            ->inputusulankegiatans
+            ->cetakusulankegiatans;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kalau PDF sudah pernah dibuat, langsung download file lama
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $cetak &&
+            $cetak->filepdfgenerate_path &&
+            Storage::disk('public')->exists($cetak->filepdfgenerate_path)
+        ) {
+            return Storage::disk('public')->download(
+                $cetak->filepdfgenerate_path,
+                'KAK dan Surat Pengajuan Usulan Kegiatan ' .
+                    $usulankegiatans->inputusulankegiatans->nama_kegiatan .
+                    '.pdf'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Belum pernah generate -> buat PDF
+        |--------------------------------------------------------------------------
+        */
+
+        // Ambil kop, ttd dan stempel
+        $kop = $usulankegiatans->inputusulankegiatans?->kopunitkerjas;
+        $ttd = Izin_Ttdunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+        $stempel = Izin_Stempelunitkerjas::where('subunitkerja_id', $kop?->subunitkerja_id)->first();
+
+        // Ambil gambar logo surakarta sebagai kop surat dari asset
+        $kop_path = public_path('build/assets/kop_surat.png'); // contoh nama file
+        if (!file_exists($kop_path)) {
+            $kop_path = null; // fallback kalau tidak ada file kop
+        }
+
+        // Baca file excel jadwal kegiatan kalau ada
+        $jadwalpelaksanaan_kegiatan = [];
+        $jadwalMerge = [];
+
+        if ($usulankegiatans->detailusulankegiatans?->jadwalpelaksanaan_kegiatan) {
+
+            $path = storage_path(
+                'app/public/' .
+                    $usulankegiatans->detailusulankegiatans->jadwalpelaksanaan_kegiatan
+            );
+
+            if (file_exists($path)) {
+
+                try {
+
+                    $spreadsheet = IOFactory::load($path);
+                    $sheet = $spreadsheet->getActiveSheet();
+
+                    $mergeInfo = [];
+
+                    foreach ($sheet->getMergeCells() as $merge) {
+
+                        if (preg_match('/A(\d+):A(\d+)/', $merge, $m)) {
+
+                            $start = (int) $m[1];
+                            $end   = (int) $m[2];
+
+                            $mergeInfo[$start] = $end - $start + 1;
+                        }
+                    }
+
+                    $jadwalMerge = $mergeInfo;
+
+                    $rowNumber = 1;
+
+                    foreach ($sheet->toArray(null, true, true, true) as $row) {
+
+                        $row = array_values(array_slice($row, 0, 3));
+
+                        // simpan nomor baris excel
+                        $row['_row'] = $rowNumber;
+
+                        // simpan rowspan
+                        $row['_rowspan'] = $mergeInfo[$rowNumber] ?? 0;
+
+                        $jadwalpelaksanaan_kegiatan[] = $row;
+
+                        $rowNumber++;
+                    }
+                } catch (\Exception $e) {
+
+                    $jadwalpelaksanaan_kegiatan = [];
+                    $jadwalMerge = [];
+                }
+            }
+        }
+
+        // Ambil identitas surat
+        $identitas = optional(
+            optional($cetak)->identitassurats
+        );
+
+        // Generate PDF
+        $pdf = Pdf::loadView('pages.generatepdf.surat_usulan_kegiatan', [
+            'usulankegiatans' => $usulankegiatans,
+            'jadwalpelaksanaan_kegiatan' => $jadwalpelaksanaan_kegiatan,
+            'jadwalMerge' => $jadwalMerge,
+            'kop_path' => $kop_path,
+            'kop' => $kop,
+            'ttd' => $ttd,
+            'stempel' => $stempel,
+            'identitas' => $identitas,
+        ])->setPaper('A4', 'portrait');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Simpan PDF permanen
+        |--------------------------------------------------------------------------
+        */
+
+        // Buat folder penyimpanan dokumen generate
+        $folder = 'generated/usulan';
+        Storage::disk('public')->makeDirectory($folder);
+
+        // Penamaan dan menyimpan dokumen hasil generate
+        $fileName = $id . '.pdf';
+        $path = $folder . '/' . $fileName;
+        Storage::disk('public')->put(
+            $path,
+            $pdf->output()
+        );
+
+        // Simpan lokasi file ke database
+        if ($cetak) {
+            $cetak->update([
+                'filepdfgenerate_path' => $path,
+            ]);
+        } else {
+            $cetak = $usulankegiatans
+                ->inputusulankegiatans
+                ->cetakusulankegiatans()
+                ->create([
+                    'filepdfgenerate_path' => $path,
+                ]);
+        }
+
+        return redirect()
+            ->route('admin.usulankegiatan.index')
+            ->with('success', 'Usulan berhasil dicetak.');
     }
 }
