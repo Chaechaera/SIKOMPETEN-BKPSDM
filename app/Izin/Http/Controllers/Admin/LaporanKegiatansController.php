@@ -182,21 +182,47 @@ class LaporanKegiatansController extends Controller
         )->count();
 
         $counts = [
-            'pending'     => $all->where('status_laporan_ui', 'pending')->count(),
-            'draft'       => $all->where('status_laporan_ui', 'draft')->count(),
-            'need_review' => $all->where('status_laporan_ui', 'need_review')->count(),
-            'accepted'    => $all->where('status_laporan_ui', 'accepted')->count(),
-            'rejected'    => $all->where('status_laporan_ui', 'rejected')->count(),
-            'finish'      => $all->where('status_laporan_ui', 'finish')->count(),
-        ];
+    'pending' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'pending' &&
+        !$item->is_archived
+    )->count(),
+
+    'draft' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'draft' &&
+        !$item->is_archived
+    )->count(),
+
+    'need_review' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'need_review' &&
+        !$item->is_archived
+    )->count(),
+
+    'accepted' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'accepted' &&
+        !$item->is_archived
+    )->count(),
+
+    'rejected' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'rejected' &&
+        !$item->is_archived
+    )->count(),
+
+    'finish' => $all->filter(fn($item) =>
+        $item->status_laporan_ui == 'finish' &&
+        !$item->is_archived
+    )->count(),
+
+    'archive' => $all->where('is_archived', 1)->count(),
+];
         $colors = [
-            'pending'     => 'bg-[#FFE6EB]',
-            'draft'   => 'bg-[#E3EEFF]',
-            'need_review' => 'bg-[#F2E9FF]',
-            'accepted'    => 'bg-[#E6FFF0]',
-            'rejected'    => 'bg-[#FFE6E6]',
-            'finish'      => 'bg-[#FFF7E6]',
-        ];
+    'pending'     => 'bg-[#FFE6EB]',
+    'draft'       => 'bg-[#E3EEFF]',
+    'need_review' => 'bg-[#F2E9FF]',
+    'accepted'    => 'bg-[#E6FFF0]',
+    'rejected'    => 'bg-[#FFE6E6]',
+    'finish'      => 'bg-[#FFF7E6]',
+    'archive'     => 'bg-[#E5E7EB]',
+];
 
         /* ================= VIEW ================= */
         return view('pages.laporankegiatan.list_laporan_kegiatan', compact(
@@ -692,6 +718,12 @@ class LaporanKegiatansController extends Controller
             }
         }
 
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
+
         $pdf = PDF::loadView(
             'pages.generatepdf.laporan_hasil_kegiatan',
             [
@@ -708,6 +740,10 @@ class LaporanKegiatansController extends Controller
                 'ttd' => $ttd,
                 'stempel' => $stempel,
                 'identitas' => $identitas,
+                'showTtd' => $showTtd,
+                'showStempel' => $showStempel,
+                'showNIP' => $showNIP,
+                'showJabatan' => $showJabatan
             ]
         );
 

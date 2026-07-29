@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Barryvdh\DomPDF\Facade\PDF;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -83,10 +84,14 @@ class UsulanKegiatansController extends Controller
      */
     public function rekap()
     {
+        // Ambil Data OPD
+        $opds = Izin_RefSubunitkerjas::orderBy('sub_unitkerja')->get();
+
         // Ambil parameter search dan tahun dari request
         $search = request('search');
         $tahun = request('tahun');
         $kategori = request('kategori');
+        $opd = request('opd');
 
         // Eager Loading dan Mapping
         $rekap = Izin_RefSubunitkerjas::withCount([
@@ -193,30 +198,23 @@ class UsulanKegiatansController extends Controller
             })
 
             // filter search dan tahun
-            ->filter(function ($row) use ($search, $tahun, $kategori) {
+            ->filter(function ($row) use ($search, $kategori) {
 
-                $matchSearch = true;
-                $matchTahun  = true;
-
-                // Berdasarkan pencarian search
-                if ($search) {
-                    $matchSearch = str_contains(strtolower($row['nama']), strtolower($search));
+                if (
+                    $search &&
+                    !str_contains(strtolower($row['nama']), strtolower($search))
+                ) {
+                    return false;
                 }
 
-                // Berdasarkan filtering tahun
-                if ($tahun) {
-                    $matchTahun = true;
+                if (
+                    $kategori &&
+                    $row['kategori_kinerja'] !== $kategori
+                ) {
+                    return false;
                 }
 
-                // Berdasarkan filtering kategori kinerja
-                if ($kategori) {
-                    $matchKategori = $row['kategori_kinerja'] === $kategori;
-                } else {
-                    $matchKategori = true;
-                }
-
-                // Return hasil  filtering data
-                return $matchSearch && $matchTahun && $matchKategori;
+                return true;
             });
 
         // ===============================
@@ -243,19 +241,104 @@ class UsulanKegiatansController extends Controller
             ->orderBy('tahun', 'desc')
             ->pluck('tahun');
 
+        // Permisalan Chart Data Grafik
+        $chartData = [];
+
+        if ($opd) {
+            $subunit = Izin_RefSubunitkerjas::with([
+                'usulankegiatans.inputlaporankegiatans.laporankegiatans.sertifikats'
+            ])->find($opd);
+
+            if ($subunit) {
+                $group = [];
+                foreach ($subunit->usulankegiatans as $usulan) {
+                    if (!$usulan->inputlaporankegiatans)
+                        continue;
+
+                    $input = $usulan->inputlaporankegiatans;
+                    if (!$input->laporankegiatans)
+                        continue;
+
+                    $sertifikat = $input->laporankegiatans->sertifikats;
+                    if (!$sertifikat)
+                        continue;
+
+                    $thn = Carbon::parse(
+                        $sertifikat->tanggalkeluarsertifikat_kegiatan
+                    )->year;
+
+                    if ($tahun && $thn != $tahun) {
+                        continue;
+                    }
+
+                    $balasan = \App\Izin\Models\Izin_Balasanlaporankegiatans::where(
+                        'inputlaporankegiatan_id',
+                        $input->id
+                    )->first();
+
+                    if (!$balasan)
+                        continue;
+
+                    if (!isset($group[$thn])) {
+                        $group[$thn] = [
+                            'jumlah' => 0,
+                            'jp' => 0,
+                            'jp20' => 0
+                        ];
+                    }
+
+                    $group[$thn]['jumlah']++;
+                    $group[$thn]['jp'] += $balasan->totalcapaianjp_kegiatan;
+
+                    if ($balasan->totalcapaianjp_kegiatan > 20) {
+                        $group[$thn]['jp20']++;
+                    }
+                }
+                ksort($group);
+
+                foreach ($group as $tahun => $item) {
+                    // Perhitungan Persentase 20JP
+                    $persen = round(
+                        ($item['jp20'] / $item['jumlah']) * 100
+                    );
+
+                    // Perhitungan Grafik PK ASN
+                    if ($item['jumlah'] >= 12 && $persen >= 70) {
+                        $score = 5;
+                    } elseif ($item['jumlah'] >= 9 && $persen >= 50) {
+                        $score = 4;
+                    } elseif ($item['jumlah'] >= 6 && $persen >= 30) {
+                        $score = 3;
+                    } elseif ($item['jumlah'] >= 4 && $persen >= 10) {
+                        $score = 2;
+                    } else {
+                        $score = 1;
+                    }
+
+                    // Tampilkan Datanya
+                    $chartData[] = [
+                        'tahun' => $tahun,
+                        'jumlah' => $item['jumlah'],
+                        'jp' => $item['jp'],
+                        'kategori' => $score
+                    ];
+                }
+            }
+        }
+
         // Ambil user yang sedang aktif saat ini
         $activeRole = session('active_role', Auth::user()->role);
 
         // Mapping page untuk rekapitulasi
         if ($activeRole === 'superadmin') {
-            return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
+            return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns', 'opds', 'chartData'));
         }
         if ($activeRole === 'admin') {
-            return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns'));
+            return view('pages.rekapitulasi.admin_superadmin', compact('rekap', 'tahuns', 'opds', 'chartData'));
         }
 
         // Return hasil halaman rekapitulasi
-        return view('pages.rekapitulasi.user', compact('rekap', 'tahuns'));
+        return view('pages.rekapitulasi.user', compact('rekap', 'tahuns', 'opds', 'chartData'));
     }
 
     /**
@@ -592,7 +675,7 @@ class UsulanKegiatansController extends Controller
                         if (preg_match('/A(\d+):A(\d+)/', $merge, $m)) {
 
                             $start = (int) $m[1];
-                            $end   = (int) $m[2];
+                            $end = (int) $m[2];
 
                             $mergeInfo[$start] = $end - $start + 1;
                         }
@@ -624,13 +707,19 @@ class UsulanKegiatansController extends Controller
             }
         }
 
-        $identitas = (object)[
-            'nomor_surat'   => $request->nomor_surat,
+        $identitas = (object) [
+            'nomor_surat' => $request->nomor_surat,
             'tanggal_surat' => $request->tanggal_surat,
-            'sifat_surat'   => $request->sifat_surat,
+            'sifat_surat' => $request->sifat_surat,
             'lampiran_surat' => $request->lampiran_surat,
             'perihal_surat' => $request->perihal_surat,
         ];
+
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
 
         $pdf = PDF::loadView(
             'pages.generatepdf.surat_usulan_kegiatan',
@@ -644,6 +733,10 @@ class UsulanKegiatansController extends Controller
                 'stempel' => $stempel,
                 'user' => $user,
                 'identitas' => $identitas,
+                'showTtd' => $showTtd,
+                'showStempel' => $showStempel,
+                'showNIP' => $showNIP,
+                'showJabatan' => $showJabatan,
             ]
         );
 

@@ -10,23 +10,27 @@
         </div>
 
         <!-- Cards -->
-        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
-            @foreach($counts as $status => $value)
-            @php
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 sm:gap-4 mb-8">
+    @foreach($counts as $status => $value)
+        @php
             $bg = $colors[$status] ?? 'bg-gray-100';
-            @endphp
 
-            <a href="{{ request()->fullUrlWithQuery(['status' => $status]) }}"
-                class="block p-5 sm:p-6 rounded-xl {{ $bg }} shadow-sm hover:scale-[1.02] transition">
-                <h2 class="text-gray-700 text-sm font-medium">
-                    {{ str_replace('_', ' ', ucfirst($status)) }}
-                </h2>
-                <p class="text-2xl font-bold text-[#2B3674] mt-2">
-                    {{ $value }}
-                </p>
-            </a>
-            @endforeach
-        </section>
+            $url = $status === 'archive'
+                ? route('admin.laporankegiatan.arsip')
+                : request()->fullUrlWithQuery(['status' => $status]);
+        @endphp
+
+        <a href="{{ $url }}"
+            class="block p-5 sm:p-6 rounded-xl {{ $bg }} shadow-sm hover:scale-[1.02] transition">
+            <h2 class="text-gray-700 text-sm font-medium">
+                {{ str_replace('_', ' ', ucfirst($status)) }}
+            </h2>
+            <p class="text-2xl font-bold text-[#2B3674] mt-2">
+                {{ $value }}
+            </p>
+        </a>
+    @endforeach
+</section>
 
         {{-- Search and Filtering --}}
         <div class="flex flex-col md:flex-row gap-4 text-base font-normal">

@@ -54,9 +54,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/user/sertifikat/download/{sertifikat}/{peserta}', [SertifikatsController::class, 'download'])->name('user.sertifikat.download');
 
         // Informasi Mengenai Pengembangan Kompetensi ASN
-        Route::get('/user/aboutus', function () {
-            return view('pages.about_us');
-        })->name('user.aboutus');
+        Route::get('/user/aboutus', function () {return view('pages.about_us');})->name('user.aboutus');
 
         // Melihat Rekapitulasi Kegiatan
         Route::get('/user/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('user.rekapitulasi');
@@ -70,9 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:admin'])->group(function () {
 
         // Informasi Mengenai Pengembangan Kompetensi ASN
-        Route::get('/admin/informasi', function () {
-            return view('pages.informasi_pk_asn');
-        })->name('admin.informasi');
+        Route::get('/admin/informasi', function () {return view('pages.informasi_pk_asn');})->name('admin.informasi');
 
         // Melihat Rekapitulasi Kegiatan
         Route::get('/admin/rekapitulasi', [UsulanKegiatansController::class, 'rekap'])->name('admin.rekapitulasi');
@@ -210,11 +206,7 @@ Route::middleware('auth')->group(function () {
 
         // Download Surat Pengajuan dan KAK Usulan Kegiatan
         Route::get('/superadmin/usulankegiatan/{id}/download', [UsulanKegiatansController::class, 'download'])->name('superadmin.usulankegiatan.download');
-        //Route::get('/superadmin/usulankegiatan/{id}/preview', [UsulanKegiatansController::class, 'preview'])->name('superadmin.usulankegiatan.preview');
-    Route::get(
-    '/superadmin/usulankegiatan/{id}/preview-file',
-    [UsulanKegiatansController::class, 'previewFile']
-)->name('superadmin.usulankegiatan.previewFile');
+        Route::get('/superadmin/usulankegiatan/{id}/preview-file', [UsulanKegiatansController::class, 'previewFile'])->name('superadmin.usulankegiatan.previewFile');
 
         // Buat Review untuk Usulan Kegiatan yang Diajukan Admin
         Route::get('/superadmin/usulankegiatan/{id}/review', [ReviewUsulanKegiatansController::class, 'reviewForm'])->name('superadmin.usulankegiatan.review');
@@ -222,7 +214,7 @@ Route::middleware('auth')->group(function () {
 
         // Download Surat Balasan Pengajuan Usulan Kegiatan
         Route::get('/superadmin/balasanusulankegiatan/{id}/downloadBalasan', [BalasanUsulanKegiatansController::class, 'downloadBalasan'])->name('superadmin.usulankegiatan.downloadBalasan');
-
+        
         // Cetak Surat Balasan Pengajuan Usulan Kegiatan
         Route::get('/superadmin/balasanusulankegiatan/{id}/cetak', [BalasanUsulanKegiatansController::class, 'createCetak'])->name('superadmin.balasanusulankegiatan.cetak');
         Route::post('/superadmin/balasanusulankegiatan/{id}/cetak', [BalasanUsulanKegiatansController::class, 'storeCetak'])->name('superadmin.balasanusulankegiatan.cetak.store');

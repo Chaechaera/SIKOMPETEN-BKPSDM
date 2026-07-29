@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Surat dan Laporan Hasil Kegiatan</title>
+    <title>Surat dan Laporan Hasil Kegiatan {{ $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan }}</title>
     <style>
         @page {
             margin: 1cm 2cm 1cm 2cm;
@@ -214,6 +214,15 @@
             position: absolute;
             left: 40%;
             top: -90px;
+            transform: translateX(5%);
+            width: 100%;
+            z-index: 1;
+        }
+
+        .ttd-layer-no-stempel {
+            position: absolute;
+            left: 40%;
+            top: 10px;
             transform: translateX(5%);
             width: 100%;
             z-index: 1;
@@ -438,7 +447,7 @@
             text-align: center;
             padding: 4px 5px;
             background-color: #f7f7f7;
-             border: 0.7px solid #000 !important;
+            border: 0.7px solid #000 !important;
             font-size: 10.7pt;
             word-spacing: 2px;
             text-transform: capitalize;
@@ -466,7 +475,7 @@
         .td-waktu {
             width: 20%;
             text-align: center !important;
-            vertical-align:middle;
+            vertical-align: middle;
         }
 
         .th-kegiatan,
@@ -479,7 +488,7 @@
         .td-penanggungjawab {
             width: 30%;
             text-align: center !important;
-            vertical-align:middle;
+            vertical-align: middle;
         }
 
         .peserta-kegiatan {
@@ -552,7 +561,7 @@
         .td-nip {
             width: 20%;
             text-align: center !important;
-            vertical-align:middle;
+            vertical-align: middle;
         }
 
         .th-jabatan,
@@ -706,21 +715,37 @@
 
         <div class="ttd-wrapper">
 
+            @php
+            $hasStempel = $showStempel
+            && !empty($stempel?->gambarstempel_opd)
+            && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd));
+            @endphp
+
             {{-- ===== STAMPEL ===== --}}
-            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @if($showStempel && !empty($stempel?->gambarstempel_opd) &&
+            file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}"
+                class="stempel-layer"
+                alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
-            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @if($showTtd && !empty($ttd?->gambarttd_opd))
+            <img
+                src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}"
+                class="{{ $hasStempel ? 'ttd-layer' : 'ttd-layer-no-stempel' }}"
+                alt="TTD OPD">
             @endif
 
         </div>
 
         <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
-        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+        @if ($showJabatan && $ttd?->jabatanpenanggungjawab_opd)
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        @endif
+        @if ($showNIP && $ttd?->nipkepala_opd)
+        <p>NIP. <strong>{{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</strong></p>
+        @endif
     </div>
 
     <div class="page-break"></div>
@@ -1229,60 +1254,60 @@
                 {{-- Judul grup --}}
                 @if($row['_isGroupHeader'] ?? false)
 
-<tr class="group-row">
-    <td colspan="3">
-        {{ $row[0] }}
-    </td>
-</tr>
+                <tr class="group-row">
+                    <td colspan="3">
+                        {{ $row[0] }}
+                    </td>
+                </tr>
 
-@elseif($row['_isColumnHeader'] ?? false)
+                @elseif($row['_isColumnHeader'] ?? false)
 
                 {{-- Header tabel --}}
-                    <tr>
-                        @for($i = 0; $i < 3; $i++)
-                            <th>
-                            {{ ucwords(
+                <tr>
+                    @for($i = 0; $i < 3; $i++)
+                        <th>
+                        {{ ucwords(
                     preg_replace(
                         ['/([a-z])([A-Z])/', '/([a-zA-Z])\(/'],
                         ['$1 $2', '$1 ('],
                         $row[$i]
                     )
                 ) }}
-                            </th>
-                            @endfor
-                    </tr>
+                        </th>
+                        @endfor
+                </tr>
 
-                    {{-- Data biasa --}}
-                    @else
-                    <tr>
-                        {{-- Kolom Hari / Tanggal --}}
-                        @if(($row['_rowspan'] ?? 0) > 0)
+                {{-- Data biasa --}}
+                @else
+                <tr>
+                    {{-- Kolom Hari / Tanggal --}}
+                    @if(($row['_rowspan'] ?? 0) > 0)
 
-                        <td rowspan="{{ $row['_rowspan'] }}" class="td-waktu">
-                            {{ $row[0] }}
-                        </td>
+                    <td rowspan="{{ $row['_rowspan'] }}" class="td-waktu">
+                        {{ $row[0] }}
+                    </td>
 
-                        @elseif(!empty($row[0]))
+                    @elseif(!empty($row[0]))
 
-                        <td class="td-waktu">
-                            {{ $row[0] }}
-                        </td>
+                    <td class="td-waktu">
+                        {{ $row[0] }}
+                    </td>
 
-                        @endif
-
-                        {{-- Waktu --}}
-                        <td class="td-kegiatan">
-                            {{ $row[1] }}
-                        </td>
-
-                        {{-- Agenda --}}
-                        <td class="td-penanggungjawab">
-                            {{ $row[2] }}
-                        </td>
-
-                    </tr>
                     @endif
-                    @endforeach
+
+                    {{-- Waktu --}}
+                    <td class="td-kegiatan">
+                        {{ $row[1] }}
+                    </td>
+
+                    {{-- Agenda --}}
+                    <td class="td-penanggungjawab">
+                        {{ $row[2] }}
+                    </td>
+
+                </tr>
+                @endif
+                @endforeach
                 </tbody>
             </table>
         </div>
@@ -1419,21 +1444,37 @@
 
         <div class="ttd-wrapper">
 
+            @php
+            $hasStempel = $showStempel
+            && !empty($stempel?->gambarstempel_opd)
+            && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd));
+            @endphp
+
             {{-- ===== STAMPEL ===== --}}
-            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @if($showStempel && !empty($stempel?->gambarstempel_opd) &&
+            file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}"
+                class="stempel-layer"
+                alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
-            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @if($showTtd && !empty($ttd?->gambarttd_opd))
+            <img
+                src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}"
+                class="{{ $hasStempel ? 'ttd-layer' : 'ttd-layer-no-stempel' }}"
+                alt="TTD OPD">
             @endif
 
         </div>
 
         <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
-        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+        @if ($showJabatan && $ttd?->jabatanpenanggungjawab_opd)
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        @endif
+        @if ($showNIP && $ttd?->nipkepala_opd)
+        <p>NIP. <strong>{{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</strong></p>
+        @endif
     </div>
 
     {{-- ====================== LAMPIRAN DOKUMENTASI HASIL KEGIATAN ====================== --}}

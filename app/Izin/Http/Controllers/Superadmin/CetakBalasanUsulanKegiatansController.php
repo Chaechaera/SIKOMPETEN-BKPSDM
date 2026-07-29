@@ -13,6 +13,7 @@ use App\Izin\Models\Izin_Usulankegiatans;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class CetakBalasanUsulanKegiatansController extends Controller
 {
@@ -47,7 +48,7 @@ class CetakBalasanUsulanKegiatansController extends Controller
         return redirect()->route('superadmin.usulankegiatan.downloadBalasan', $usulan->id)->with('success', 'Usulan berhasil dicetak.');
     }
 
-    public function preview($id)
+    public function preview(Request $request, $id)
     {
         $usulan = Izin_Usulankegiatans::with([
             'detailusulankegiatans',
@@ -88,6 +89,12 @@ class CetakBalasanUsulanKegiatansController extends Controller
             $kop_path = null;
         }
 
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
+
         $pdf = Pdf::loadView(
             'pages.generatepdf.balasan_usulan_kegiatan',
             [
@@ -98,6 +105,10 @@ class CetakBalasanUsulanKegiatansController extends Controller
                 'ttd' => $ttd,
                 'stempel' => $stempel,
                 'ttdPengusul' => $ttdPengusul,
+                'showTtd' => $showTtd,
+                'showStempel' => $showStempel,
+                'showNIP' => $showNIP,
+                'showJabatan' => $showJabatan,
             ]
         );
 

@@ -17,6 +17,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 @php
@@ -37,8 +38,8 @@ $realRole = Auth::user()->role;
         <!-- Page Content -->
         <main
             class="flex-1 transition-all duration-300"
-            :class="sidebarOpen ? 'ml-0' : 'ml-20'"> 
-            
+            :class="sidebarOpen ? 'ml-0' : 'ml-20'">
+
             {{-- Header --}}
             @include('layouts.navigation')
 

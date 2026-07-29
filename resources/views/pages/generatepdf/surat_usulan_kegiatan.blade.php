@@ -219,6 +219,15 @@
             z-index: 1;
         }
 
+        .ttd-layer-no-stempel {
+            position: absolute;
+            left: 40%;
+            top: 10px;
+            transform: translateX(5%);
+            width: 100%;
+            z-index: 1;
+        }
+
         /* ====================== PEMBATAS HALAMAN AGAR TTD TIDAK TERPISAH ====================== */
         .page-break {
             page-break-after: always;
@@ -673,21 +682,37 @@
 
         <div class="ttd-wrapper">
 
+            @php
+            $hasStempel = $showStempel
+            && !empty($stempel?->gambarstempel_opd)
+            && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd));
+            @endphp
+
             {{-- ===== STAMPEL ===== --}}
-            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @if($showStempel && !empty($stempel?->gambarstempel_opd) &&
+            file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}"
+                class="stempel-layer"
+                alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
-            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @if($showTtd && !empty($ttd?->gambarttd_opd))
+            <img
+                src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}"
+                class="{{ $hasStempel ? 'ttd-layer' : 'ttd-layer-no-stempel' }}"
+                alt="TTD OPD">
             @endif
 
         </div>
 
         <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <!--<p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>-->
-        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+        @if ($showJabatan && $ttd?->jabatanpenanggungjawab_opd)
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        @endif
+        @if ($showNIP && $ttd?->nipkepala_opd)
+        <p>NIP. <strong>{{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</strong></p>
+        @endif
     </div>
 
     <div class="page-break"></div>
@@ -1191,21 +1216,37 @@
 
         <div class="ttd-wrapper">
 
+            @php
+            $hasStempel = $showStempel
+            && !empty($stempel?->gambarstempel_opd)
+            && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd));
+            @endphp
+
             {{-- ===== STAMPEL ===== --}}
-            @if(!empty($stempel?->gambarstempel_opd) && file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
-            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}" class="stempel-layer" alt="Stempel OPD">
+            @if($showStempel && !empty($stempel?->gambarstempel_opd) &&
+            file_exists(storage_path('app/public/' . $stempel->gambarstempel_opd)))
+            <img src="{{ storage_path('app/public/' . $stempel->gambarstempel_opd) }}"
+                class="stempel-layer"
+                alt="Stempel OPD">
             @endif
 
             {{-- ===== TTD ===== --}}
-            @if(!empty($ttd?->gambarttd_opd) && file_exists(storage_path('app/public/' . $ttd->gambarttd_opd)))
-            <img src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}" class="ttd-layer" alt="TTD OPD">
+            @if($showTtd && !empty($ttd?->gambarttd_opd))
+            <img
+                src="{{ storage_path('app/public/' . $ttd->gambarttd_opd) }}"
+                class="{{ $hasStempel ? 'ttd-layer' : 'ttd-layer-no-stempel' }}"
+                alt="TTD OPD">
             @endif
 
         </div>
 
         <p><strong>{{ $ttd?->namakepala_opd ?? 'dr. Retno Widyastuti, M.Kes' }}</strong></p>
-        <p><strong>{{ $ttd?->pangkatpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
-        <p>NIP. {{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</p>
+        @if ($showJabatan && $ttd?->jabatanpenanggungjawab_opd)
+        <p><strong>{{ $ttd?->jabatanpenanggungjawab_opd ?? 'ASN Golongan III/C' }}</strong></p>
+        @endif
+        @if ($showNIP && $ttd?->nipkepala_opd)
+        <p>NIP. <strong>{{ $ttd?->nipkepala_opd ?? '197912182006041006' }}</strong></p>
+        @endif
     </div>
 </body>
 

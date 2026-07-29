@@ -98,6 +98,104 @@
                     </div>
                 </div>
 
+                {{-- ================================================== --}}
+                {{-- PENGATURAN DOKUMEN --}}
+                {{-- ================================================== --}}
+                <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+
+                    <h2 class="text-lg font-bold bg-gradient-to-r from-[#922B80] to-[#5B2C89] bg-clip-text text-transparent mb-4">
+                        Pengaturan Dokumen
+                    </h2>
+
+                    <div class="space-y-4">
+
+                        {{-- Toggle TTD --}}
+                        <label class="flex items-center justify-between border rounded-lg p-4">
+
+                            <div>
+                                <p class="font-semibold text-gray-700">
+                                    Tampilkan TTD OPD
+                                </p>
+
+                                <p class="text-sm text-gray-400">
+                                    Menampilkan tanda tangan pejabat pada dokumen.
+                                </p>
+                            </div>
+
+                            <input
+                                type="checkbox"
+                                name="show_ttd"
+                                value="1"
+                                checked
+                                class="w-5 h-5 text-purple-600 rounded">
+                        </label>
+
+                        {{-- Toggle Stempel --}}
+                        <label class="flex items-center justify-between border rounded-lg p-4">
+
+                            <div>
+                                <p class="font-semibold text-gray-700">
+                                    Tampilkan Stempel OPD
+                                </p>
+
+                                <p class="text-sm text-gray-400">
+                                    Menampilkan stempel OPD pada dokumen.
+                                </p>
+                            </div>
+
+                            <input
+                                type="checkbox"
+                                name="show_stempel"
+                                value="1"
+                                checked
+                                class="w-5 h-5 text-purple-600 rounded">
+                        </label>
+
+                        {{-- Toggle NIP --}}
+                        <label class="flex items-center justify-between border rounded-lg p-4">
+
+                            <div>
+                                <p class="font-semibold text-gray-700">
+                                    Tampilkan NIP
+                                </p>
+
+                                <p class="text-sm text-gray-400">
+                                    Menampilkan NIP pejabat pada dokumen.
+                                </p>
+                            </div>
+
+                            <input
+                                type="checkbox"
+                                name="show_nip"
+                                value="1"
+                                checked
+                                class="w-5 h-5 text-purple-600 rounded">
+                        </label>
+
+                        {{-- Toggle Jabatan --}}
+                        <label class="flex items-center justify-between border rounded-lg p-4">
+
+                            <div>
+                                <p class="font-semibold text-gray-700">
+                                    Tampilkan Jabatan
+                                </p>
+
+                                <p class="text-sm text-gray-400">
+                                    Menampilkan jabatan pejabat pada dokumen.
+                                </p>
+                            </div>
+
+                            <input
+                                type="checkbox"
+                                name="show_jabatan"
+                                value="1"
+                                checked
+                                class="w-5 h-5 text-purple-600 rounded">
+                        </label>
+                    </div>
+
+                </div>
+
                 {{-- PREVIEW PDF --}}
                 <div x-show="showPreview"
                     x-transition
@@ -130,15 +228,11 @@
                     {{-- Kanan --}}
                     <div class="flex gap-3">
                         <button
-                            type="submit"
+                            type="button"
+                            onclick="downloadBalasanUsulan()"
                             class="px-6 py-2.5 bg-[#FFA41B] text-white rounded-lg font-semibold">
                             Cetak Balasan
                         </button>
-
-                        <a href="{{ route('superadmin.usulankegiatan.pending') }}"
-                            class="px-6 py-2.5 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700">
-                            Selanjutnya
-                        </a>
                     </div>
                 </div>
         </form>
@@ -195,6 +289,57 @@
                     this.pdfUrl = URL.createObjectURL(blob);
                 }
             }
+        }
+    </script>
+
+    <script>
+        async function downloadBalasanUsulan() {
+
+            const form = document.getElementById('balasanForm');
+
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                alert('Gagal membuat laporan.');
+                return;
+            }
+
+            // Ambil nama file dari header Content-Disposition
+            let fileName = "BalasanUsulan.pdf";
+
+            const disposition = response.headers.get("Content-Disposition");
+
+            if (disposition) {
+                const match = disposition.match(/filename="?([^"]+)"?/);
+                if (match && match[1]) {
+                    fileName = decodeURIComponent(match[1]);
+                }
+            }
+
+            const blob = await response.blob();
+
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+
+            a.href = url;
+            a.download = fileName;
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            window.URL.revokeObjectURL(url);
+
+            window.location.href = "{{ route('superadmin.usulankegiatan.pending') }}";
         }
     </script>
 

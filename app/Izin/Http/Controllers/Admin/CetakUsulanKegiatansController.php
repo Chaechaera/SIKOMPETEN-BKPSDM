@@ -18,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class CetakUsulanKegiatansController extends Controller
 {
     /**
-     * Simpan Data Cetak Pengajuan Usulan Kegiatan
+     * Simpan Data Cetak Pengajuan Usulan Kegiatan dan Proses Generate Dokumen Pengajuan Usulan Kegiatan
      */
     public function store(Request $request, IdentitasSuratsService $identitassuratservice, $id)
     {
@@ -197,6 +197,12 @@ class CetakUsulanKegiatansController extends Controller
             optional($cetak)->identitassurats
         );
 
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
+
         // Generate PDF
         $pdf = Pdf::loadView('pages.generatepdf.surat_usulan_kegiatan', [
             'usulankegiatans' => $usulankegiatans,
@@ -207,6 +213,10 @@ class CetakUsulanKegiatansController extends Controller
             'ttd' => $ttd,
             'stempel' => $stempel,
             'identitas' => $identitas,
+            'showTtd' => $showTtd,
+            'showStempel' => $showStempel,
+            'showNIP' => $showNIP,
+            'showJabatan' => $showJabatan,
         ])->setPaper('A4', 'portrait');
 
         /*
@@ -241,8 +251,11 @@ class CetakUsulanKegiatansController extends Controller
                 ]);
         }
 
-        return redirect()
-            ->route('admin.usulankegiatan.index')
-            ->with('success', 'Usulan berhasil dicetak.');
+        return Storage::disk('public')->download(
+            $path,
+            'KAK dan Surat Pengajuan Usulan Kegiatan ' .
+                $usulankegiatans->inputusulankegiatans->nama_kegiatan .
+                '.pdf'
+        );
     }
 }

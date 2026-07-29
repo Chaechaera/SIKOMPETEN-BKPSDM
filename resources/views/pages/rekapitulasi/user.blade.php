@@ -34,33 +34,34 @@
             </div>
 
             {{-- Filters --}}
-            <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
-                {{-- Search --}}
-                <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
-                    <form method="GET">
-                        <input type="text" id="searchInput" name="search" value="{{ request('search') }}" placeholder="Search ....." class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
-                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-abuabuGelap"><i data-lucide="search"></i></span>
-                    </form>
-                </div>
+            <form method="GET">
+                <div class="flex flex-col md:flex-row gap-4 text-base font-normal">
+                    {{-- Search --}}
+                    <div class="bg-white rounded-xl border border-abuabuMuda/60 shadow flex-1 relative">
+                        <form method="GET">
+                            <input type="text" id="searchInput" name="search" value="{{ request('search') }}" placeholder="Search ....." class="w-full border-none pl-12 pr-6 py-3 rounded-lg" />
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-abuabuGelap"><i data-lucide="search"></i></span>
+                        </form>
+                    </div>
 
-                {{-- Tahun Filter --}}
-                <form method="GET">
+                    {{-- Tahun Filter --}}
                     <select name="tahun" onchange="this.form.submit()"
-                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
-                        <option value="">Tahun Anggaran</option>
-                        @foreach ($tahuns as $tahun)
-                        <option class="text-black" value="{{ $tahun }}" {{ request('tahun') == $tahun ? 'selected' : '' }}>
+                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-56 px-3 py-3 text-abuabuGelap">
+                        <option value="">Pilih Tahun</option>
+                        @foreach($tahuns as $tahun)
+                        @if(!empty($tahun))
+                        <option class="text-black" value="{{ $tahun }}"
+                            {{ request('tahun') == $tahun ? 'selected' : '' }}>
                             {{ $tahun }}
                         </option>
+                        @endif
                         @endforeach
                     </select>
-                </form>
 
-                {{-- Kategori Filter --}}
-                <form method="GET">
+                    {{-- Kategori Filter --}}
                     <select name="kategori"
                         onchange="this.form.submit()"
-                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-52 px-3 py-3 text-abuabuGelap">
+                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-56 px-3 py-3 text-abuabuGelap">
                         <option value="">Semua Kategori</option>
                         <option value="Sangat Baik" {{ request('kategori')=='Sangat Baik' ? 'selected' : '' }}>
                             🟢 Sangat Baik
@@ -78,8 +79,47 @@
                             🔴 Sangat Kurang
                         </option>
                     </select>
-                </form>
+
+                    {{-- OPD Filter --}}
+                    <select name="opd"
+                        onchange="this.form.submit()"
+                        class="bg-white rounded-xl border border-abuabuMuda/60 shadow w-full md:w-56 px-3 py-3 text-abuabuGelap">
+                        <option value="">Pilih OPD</option>
+                        @foreach($opds as $o)
+                        <option value="{{$o->id}}" @selected(request('opd')==$o->id)>
+                            {{$o->singkatan}}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+            </form>
+
+            {{-- Grafik Trend Rekapitulasi Berdasarkan OPD --}}
+            @if(!request('opd'))
+
+            {{-- Belum memilih OPD --}}
+            <div class="bg-white rounded-xl shadow mb-5 overflow-hidden text-gray-500">
+                <p class="p-2 text-sm text-center">
+                    Pilih OPD terlebih dahulu untuk melihat grafik perkembangan kegiatan
+                </p>
             </div>
+            @elseif(count($chartData) > 0)
+
+            {{-- Ada data trend --}}
+            <div class="bg-white rounded-xl shadow mb-5 overflow-hidden">
+                <div class="relative w-full h-72">
+                    <canvas id="trendChart" class="w-full max-w-full"></canvas>
+                </div>
+            </div>
+            @else
+
+            {{-- Tidak ada data trend --}}
+            <div class="bg-white rounded-xl shadow mb-5 overflow-hidden text-gray-500">
+                <p class="p-2 text-sm text-center">
+                    Belum terdapat grafik trend karena kegiatan pengembangan kompetensi pada OPD yang dipilih belum dibuat atau belum memiliki data yang dapat ditampilkan.
+                </p>
+            </div>
+            @endif
 
             {{-- Tabel Rekapitulasi --}}
             <div class="bg-white rounded-xl overflow-x-auto overflow-y-visible shadow">
@@ -159,7 +199,18 @@
                     </thead>
                     <tbody>
                         @forelse ($rekap as $index => $row)
-                        <tr class="border-b text-center hover:bg-abuabuCerah/30 table-row">
+                        @php
+                        $rowColor = match ($row['kategori_kinerja']) {
+                        'Sangat Baik' => 'hover:bg-hijauBening/95',
+                        'Baik' => 'hover:bg-biruCerah/95',
+                        'Cukup' => 'hover:bg-kuningBening/95',
+                        'Kurang' => 'hover:bg-orangeBening/95',
+                        'Sangat Kurang' => 'hover:bg-merahBening/95',
+                        default => 'bg-white',
+                        };
+                        @endphp
+
+                        <tr class="border-b text-center transition-colors {{ $rowColor }} table-row">
                             <td class="p-4 border-r">{{ $index + 1 }}</td>
                             <td class="p-4 border-r font-semibold text-left">
                                 {{ $row['nama'] }}
@@ -185,11 +236,11 @@
                             <td class="p-4 font-semibold whitespace-nowrap">
                                 @php
                                 $badge = match ($row['kategori_kinerja']) {
-                                'Sangat Baik' => ['bg-hijauBening text-hijauTua', '🟢'],
-                                'Baik' => ['bg-biruCerah text-biruMariana', '🔵'],
-                                'Cukup' => ['bg-kuningBening text-orangeMuda', '🟡'],
-                                'Kurang' => ['bg-orangeBening text-orange', '🟠'],
-                                'Sangat Kurang' => ['bg-merahBening text-merahCabai', '🔴'],
+                                'Sangat Baik' => ['bg-hijauBening border border-hijauTua text-hijauTua', '🟢'],
+                                'Baik' => ['bg-biruCerah border border-biruMariana text-biruMariana', '🔵'],
+                                'Cukup' => ['bg-kuningBening border border-orangeMuda text-orangeMuda', '🟡'],
+                                'Kurang' => ['bg-orangeBening border border-orange text-orange', '🟠'],
+                                'Sangat Kurang' => ['bg-merahBening border border-merahCabai text-merahCabai', '🔴'],
                                 };
                                 @endphp
 
@@ -219,6 +270,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
@@ -238,6 +290,97 @@
                 }
             });
         });
+
+        const data = @json($chartData);
+
+        const ctx = document.getElementById('trendChart');
+
+        if (ctx && data.length) {
+
+            new Chart(ctx, {
+
+                type: 'line',
+
+                data: {
+
+                    labels: data.map(e => e.tahun),
+
+                    datasets: [
+
+                        {
+
+                            label: 'Jumlah Kegiatan',
+
+                            data: data.map(e => e.jumlah)
+
+                        },
+
+                        {
+
+                            label: 'Total JP',
+
+                            data: data.map(e => e.jp)
+
+                        },
+
+                        {
+
+                            label: 'Kategori',
+
+                            data: data.map(e => e.kategori)
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+
+                    plugins: {
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label: function(context) {
+
+                                    if (context.dataset.label == "Kategori") {
+
+                                        const map = {
+                                            1: "Sangat Kurang",
+                                            2: "Kurang",
+                                            3: "Cukup",
+                                            4: "Baik",
+                                            5: "Sangat Baik"
+                                        };
+
+                                        return "Kategori : " + map[context.raw];
+
+                                    }
+
+                                    return context.dataset.label + ": " + context.raw;
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            });
+
+        }
     </script>
 
     {{-- Navbar --}}

@@ -290,7 +290,7 @@
                     </div>
                 </div>
 
-                {{-- Peserta Kegiatan --}}
+               {{-- Peserta Kegiatan --}}
                 <div class="mt-4">
                     <label class="block text-sm font-semibold text-[#5A5A5A] mb-2">
                         Unggah Peserta Kegiatan
@@ -298,6 +298,23 @@
                     </label>
                     <p class="text-sm text-gray-500 mt-1">Format: .xls / .xlsx</p>
                     <p class="text-sm text-gray-500">Contoh nama file: peserta_kegiatan.xlsx</p>
+
+                    <div class="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                        <p class="text-sm font-semibold text-blue-700">
+                            Template Excel Peserta
+                        </p>
+
+                        <p class="text-sm text-gray-700 mt-1">
+                            Baris pertama (header) wajib menggunakan urutan kolom berikut:
+                        </p>
+
+                        <ul class="list-disc list-inside text-sm text-gray-700 mt-2">
+                            <li>Nama Peserta</li>
+                            <li>NIP Peserta</li>
+                            <li>Jabatan Peserta</li>
+                            <li>Subunitkerja Peserta</li>
+                        </ul>
+                    </div>
                     <div class="relative mb-3 mt-2">
                         <input type="file" name="peserta_laporan" accept=".xls,.xlsx" class="block w-full text-sm text-gray-700
                                   border border-[#E0E7FF] rounded-lg cursor-pointer

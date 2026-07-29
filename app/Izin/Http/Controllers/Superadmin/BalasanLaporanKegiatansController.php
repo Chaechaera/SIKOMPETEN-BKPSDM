@@ -94,33 +94,33 @@ class BalasanLaporanKegiatansController extends Controller
      * Download Surat Balasan Laporan Hasil Kegiatan Final
      */
     public function download($id)
-{
-    // $id yang dikirim dari blade adalah id InputUsulanKegiatan
-    $input = Izin_Inputlaporankegiatans::with([
-        'kirimbalasanlaporankegiatans',
-        'inputusulankegiatans',
-        'laporankegiatans',
-    ])
-    ->where('inputusulankegiatan_id', $id)
-    ->firstOrFail();
+    {
+        // $id yang dikirim dari blade adalah id InputUsulanKegiatan
+        $input = Izin_Inputlaporankegiatans::with([
+            'kirimbalasanlaporankegiatans',
+            'inputusulankegiatans',
+            'laporankegiatans',
+        ])
+            ->where('inputusulankegiatan_id', $id)
+            ->firstOrFail();
 
-    $kirimBalasan = $input->kirimbalasanlaporankegiatans;
+        $kirimBalasan = $input->kirimbalasanlaporankegiatans;
 
-    if (
-        !$kirimBalasan ||
-        !$kirimBalasan->filepdfgenerate_path ||
-        !Storage::disk('public')->exists($kirimBalasan->filepdfgenerate_path)
-    ) {
-        return back()->with('error', 'File surat balasan belum tersedia.');
+        if (
+            !$kirimBalasan ||
+            !$kirimBalasan->filepdfgenerate_path ||
+            !Storage::disk('public')->exists($kirimBalasan->filepdfgenerate_path)
+        ) {
+            return back()->with('error', 'File surat balasan belum tersedia.');
+        }
+
+        return Storage::disk('public')->download(
+            $kirimBalasan->filepdfgenerate_path,
+            'Surat Balasan Laporan ' .
+                ($input->inputusulankegiatans->nama_kegiatan ?? 'Kegiatan') .
+                '.pdf'
+        );
     }
-
-    return Storage::disk('public')->download(
-        $kirimBalasan->filepdfgenerate_path,
-        'Surat Balasan Laporan ' .
-        ($input->inputusulankegiatans->nama_kegiatan ?? 'Kegiatan') .
-        '.pdf'
-    );
-}
 
     /**
      * Tampilkan Form Kirim Balasan Laporan Hasil Kegiatan Final
@@ -146,7 +146,7 @@ class BalasanLaporanKegiatansController extends Controller
         $cara = optional(
             $laporankegiatans->inputlaporankegiatans
                 ?->inputusulankegiatans
-                    ?->usulankegiatans
+                ?->usulankegiatans
         )->carapelatihan_id ?? 0;
         // 🔹 TAHUN
         $tahun = date('Y');
@@ -262,8 +262,8 @@ class BalasanLaporanKegiatansController extends Controller
             return Storage::disk('public')->download(
                 $kirimBalasan->filepdfgenerate_path,
                 'Surat Balasan Laporan Kegiatan ' .
-                $laporan->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan .
-                '.pdf'
+                    $laporan->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan .
+                    '.pdf'
             );
         }
 
@@ -278,17 +278,11 @@ class BalasanLaporanKegiatansController extends Controller
         ])->findOrFail($laporan->id);
 
         $balasanlaporankegiatans = Izin_Balasanlaporankegiatans::with([
-    'inputlaporankegiatans',
-    'sertifikats'
-])->where(
-    'inputlaporankegiatan_id',
-    $laporan->inputlaporankegiatans->id
-)->first();
+            'inputlaporankegiatans',
+            'sertifikats'
+        ])->where('inputlaporankegiatan_id', $laporan->inputlaporankegiatans->id)->first();
 
-$balasanlaporankegiatans->setRelation(
-    'laporankegiatans',
-    $laporankegiatans
-);
+        $balasanlaporankegiatans->setRelation('laporankegiatans', $laporankegiatans);
 
         $admin = User::where(
             'nip',
@@ -316,7 +310,7 @@ $balasanlaporankegiatans->setRelation(
                 ->inputlaporankegiatans
                 ->inputusulankegiatans
                 ?->usulankegiatans
-                    ?->subunitkerja_id
+                ?->subunitkerja_id
         )->latest()->first();
 
         // Ambil gambar logo surakarta sebagai kop surat dari asset
@@ -324,6 +318,12 @@ $balasanlaporankegiatans->setRelation(
         if (!file_exists($kop_path)) {
             $kop_path = null; // fallback kalau tidak ada file kop
         }
+
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
 
         $pdf = Pdf::loadView(
             'pages.generatepdf.balasan_laporan_kegiatan',
@@ -336,6 +336,10 @@ $balasanlaporankegiatans->setRelation(
                 'ttd' => $ttd,
                 'stempel' => $stempel,
                 'ttdPengusul' => $ttdPengusul,
+                'showTtd' => $showTtd,
+                'showStempel' => $showStempel,
+                'showNIP' => $showNIP,
+                'showJabatan' => $showJabatan,
             ]
         )->setPaper('A4', 'portrait');
 
@@ -382,12 +386,13 @@ $balasanlaporankegiatans->setRelation(
             'filepdfgenerate_path' => $path,
         ]);
 
-        return redirect()
-            ->route('superadmin.laporankegiatan.pending')
-            ->with(
-                'success',
-                'Surat balasan berhasil dicetak.'
-            );
+        // Download file dokumen hasil generate langsung
+        return Storage::disk('public')->download(
+            $path,
+            'Balasan Laporan Hasil Kegiatan ' .
+                $laporan->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan .
+                '.pdf'
+        );
     }
 
     /**
@@ -398,7 +403,7 @@ $balasanlaporankegiatans->setRelation(
     {
         $request->validate([
             'filekirim_balasanlaporankegiatan' =>
-                'required|file|mimes:pdf,doc,docx|max:10240',
+            'required|file|mimes:pdf,doc,docx|max:10240',
             'laporankegiatan_id' => 'required',
         ]);
 
@@ -423,14 +428,14 @@ $balasanlaporankegiatans->setRelation(
             $kirim = Izin_Kirimbalasanlaporankegiatans::updateOrCreate(
                 [
                     'inputlaporankegiatan_id' =>
-                        $laporan->inputlaporankegiatans->id
+                    $laporan->inputlaporankegiatans->id
                 ],
                 [
                     'identitassurat_id' =>
-                        optional(
-                            $laporan->inputlaporankegiatans
-                                ->kirimbalasanlaporankegiatans
-                        )->identitassurat_id,
+                    optional(
+                        $laporan->inputlaporankegiatans
+                            ->kirimbalasanlaporankegiatans
+                    )->identitassurat_id,
 
                     'filekirim_balasanlaporankegiatan' => $filePath,
 
@@ -533,7 +538,7 @@ $balasanlaporankegiatans->setRelation(
                 ->inputlaporankegiatans
                 ->inputusulankegiatans
                 ?->usulankegiatans
-                    ?->subunitkerja_id
+                ?->subunitkerja_id
         )->latest()->first();
 
         $kop_path = public_path('build/assets/kop_surat.png');
@@ -541,6 +546,13 @@ $balasanlaporankegiatans->setRelation(
         if (!file_exists($kop_path)) {
             $kop_path = null;
         }
+
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
+
 
         $pdf = Pdf::loadView(
             'pages.generatepdf.balasan_laporan_kegiatan',
@@ -555,6 +567,11 @@ $balasanlaporankegiatans->setRelation(
                 'ttd' => $ttd,
                 'stempel' => $stempel,
                 'ttdPengusul' => $ttdPengusul,
+
+                'showTtd' => $showTtd,
+                'showStempel' => $showStempel,
+                'showNIP' => $showNIP,
+                'showJabatan' => $showJabatan,
             ]
         )->setPaper('A4', 'portrait');
 

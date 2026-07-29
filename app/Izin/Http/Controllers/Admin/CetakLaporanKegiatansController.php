@@ -24,134 +24,137 @@ class CetakLaporanKegiatansController extends Controller
      * Simpan Data Cetak Laporan Hasil Kegiatan
      */
     public function store(Request $request, $id)
-{
-    $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
-        ->findOrFail($id);
+    {
+        $input = Izin_Inputlaporankegiatans::with('laporankegiatans')
+            ->findOrFail($id);
 
-    $laporan = $input->laporankegiatans;
+        $laporan = $input->laporankegiatans;
 
-    if (!$laporan) {
-        abort(404, 'Laporan tidak ditemukan');
-    }
+        if (!$laporan) {
+            abort(404, 'Laporan tidak ditemukan');
+        }
 
-    DB::transaction(function () use ($laporan, $input) {
+        DB::transaction(function () use ($laporan, $input) {
 
-        Izin_Cetaklaporankegiatans::firstOrCreate([
-            'inputlaporankegiatan_id' => $input->id
-        ]);
-
-        // 🔥 FORCE UPDATE (PASTI KENA DB)
-        Izin_Laporankegiatans::where('id', $laporan->id)
-            ->update([
-                'statuslaporan_kegiatan' => 'pending'
+            Izin_Cetaklaporankegiatans::firstOrCreate([
+                'inputlaporankegiatan_id' => $input->id
             ]);
-    });
 
-    return back()->with('success', 'Data cetak berhasil dibuat');
-}
+            // 🔥 FORCE UPDATE (PASTI KENA DB)
+            Izin_Laporankegiatans::where('id', $laporan->id)
+                ->update([
+                    'statuslaporan_kegiatan' => 'pending'
+                ]);
+        });
 
-public function download(Request $request, $id)
-{
-    $usulan = Izin_Usulankegiatans::with([
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-        'inputlaporankegiatans.cetaklaporankegiatans.identitassurats'
-    ])->findOrFail($id);
-
-    $input = $usulan->inputlaporankegiatans;
-
-    if (!$input) {
-        abort(404, 'Input laporan tidak ditemukan');
+        return back()->with('success', 'Data cetak berhasil dibuat');
     }
 
-    $laporan = $input->laporankegiatans;
+    /**
+     * Simpan Data Cetak Laporan Hasil Kegiatan dan Proses Generate Dokumen Laporan Hasil Kegiatan
+     */
+    public function download(Request $request, $id)
+    {
+        $usulan = Izin_Usulankegiatans::with([
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+            'inputlaporankegiatans.cetaklaporankegiatans.identitassurats'
+        ])->findOrFail($id);
 
-    if (!$laporan) {
-        abort(404, 'Laporan tidak ditemukan');
-    }
+        $input = $usulan->inputlaporankegiatans;
 
-    DB::transaction(function () use ($request, $input, $laporan) {
+        if (!$input) {
+            abort(404, 'Input laporan tidak ditemukan');
+        }
 
-    // Ambil user yang sedang login saat ini
+        $laporan = $input->laporankegiatans;
+
+        if (!$laporan) {
+            abort(404, 'Laporan tidak ditemukan');
+        }
+
+        DB::transaction(function () use ($request, $input, $laporan) {
+
+            // Ambil user yang sedang login saat ini
             $user = Auth::user();
 
-        // 🔥 VALIDASI NOMOR SURAT (WAJIB UNIK)
-        $validated = $request->validate([
-            'nomor_surat'   => 'required|unique:izin_identitassurats,nomor_surat',
-            'tanggal_surat' => 'required',
-            'lampiran_surat'=> 'required',
-            'sifat_surat'   => 'required',
-            'perihal_surat' => 'required',
-        ]);
+            // 🔥 VALIDASI NOMOR SURAT (WAJIB UNIK)
+            $validated = $request->validate([
+                'nomor_surat'   => 'required|unique:izin_identitassurats,nomor_surat',
+                'tanggal_surat' => 'required',
+                'lampiran_surat' => 'required',
+                'sifat_surat'   => 'required',
+                'perihal_surat' => 'required',
+            ]);
 
-        // 🔥 CETAK (ANTI DUPLIKAT)
-        $cetak = Izin_Cetaklaporankegiatans::with('identitassurats')
-    ->firstOrCreate([
-        'inputlaporankegiatan_id' => $input->id
-    ]);
+            // 🔥 CETAK (ANTI DUPLIKAT)
+            $cetak = Izin_Cetaklaporankegiatans::with('identitassurats')
+                ->firstOrCreate([
+                    'inputlaporankegiatan_id' => $input->id
+                ]);
 
-    
-    $identitas = $cetak->identitassurats;
 
-if ($identitas) {
+            $identitas = $cetak->identitassurats;
 
-    $identitas->update([
-        'nomor_surat' => $request->nomor_surat,
-        'tanggal_surat' => Carbon::createFromFormat('d-m-Y', $request->tanggal_surat)->format('Y-m-d'),
-        'lampiran_surat' => $request->lampiran_surat,
-        'sifat_surat' => $request->sifat_surat,
-        'perihal_surat' => $request->perihal_surat,
-    ]);
+            if ($identitas) {
 
-} else {
+                $identitas->update([
+                    'nomor_surat' => $request->nomor_surat,
+                    'tanggal_surat' => Carbon::createFromFormat('d-m-Y', $request->tanggal_surat)->format('Y-m-d'),
+                    'lampiran_surat' => $request->lampiran_surat,
+                    'sifat_surat' => $request->sifat_surat,
+                    'perihal_surat' => $request->perihal_surat,
+                ]);
+            } else {
 
-    $identitas = Izin_Identitassurats::create([
-        'nomor_surat' => $request->nomor_surat,
-        'tanggal_surat' => Carbon::createFromFormat('d-m-Y', $request->tanggal_surat)->format('Y-m-d'),
-        'lampiran_surat' => $request->lampiran_surat,
-        'sifat_surat' => $request->sifat_surat,
-        'perihal_surat' => $request->perihal_surat,
-    ]);
+                $identitas = Izin_Identitassurats::create([
+                    'nomor_surat' => $request->nomor_surat,
+                    'tanggal_surat' => Carbon::createFromFormat('d-m-Y', $request->tanggal_surat)->format('Y-m-d'),
+                    'lampiran_surat' => $request->lampiran_surat,
+                    'sifat_surat' => $request->sifat_surat,
+                    'perihal_surat' => $request->perihal_surat,
+                ]);
 
                 // Ambil ttdunitkerja terakhir user yang sedang login saat ini
-            $ttdunitkerja_user = Izin_Ttdunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
-            $ttdunitkerja_id = $usulan->inputusulankegiatans?->ttdunitkerja_id ?? $ttdunitkerja_user?->id ?? null;
+                $ttdunitkerja_user = Izin_Ttdunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
+                $ttdunitkerja_id = $usulan->inputusulankegiatans?->ttdunitkerja_id ?? $ttdunitkerja_user?->id ?? null;
 
-            // Ambil stempelunitkerja terakhir user yang sedang login saat ini
-            $stempelunitkerja_user = Izin_Stempelunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
-            $stempelunitkerja_id = $usulan->inputusulankegiatans?->stempelunitkerja_id ?? $stempelunitkerja_user?->id ?? null;
+                // Ambil stempelunitkerja terakhir user yang sedang login saat ini
+                $stempelunitkerja_user = Izin_Stempelunitkerjas::where('subunitkerja_id', $user->subunitkerja_id)->latest()->first();
+                $stempelunitkerja_id = $usulan->inputusulankegiatans?->stempelunitkerja_id ?? $stempelunitkerja_user?->id ?? null;
 
 
-    $cetak->update([
-        'identitassurat_id' => $identitas->id,
-        'nipadmin_cetaklaporankegiatan' => $user->nip,
-                'pjunitkerja_id' => $user->id,
-                'statuslaporan_kegiatan' => 'pending',
-                'ttdunitkerja_id' => $ttdunitkerja_id,
-                'stempelunitkerja_id' => $stempelunitkerja_id
-    ]);
-}
+                $cetak->update([
+                    'identitassurat_id' => $identitas->id,
+                    'nipadmin_cetaklaporankegiatan' => $user->nip,
+                    'pjunitkerja_id' => $user->id,
+                    'statuslaporan_kegiatan' => 'pending',
+                    'ttdunitkerja_id' => $ttdunitkerja_id,
+                    'stempelunitkerja_id' => $stempelunitkerja_id
+                ]);
+            }
 
-        // 🔥 UPDATE STATUS
-        $laporan->update([
-            'statuslaporan_kegiatan' => 'pending'
+            // 🔥 UPDATE STATUS
+            $laporan->update([
+                'statuslaporan_kegiatan' => 'pending'
+            ]);
+        });
+
+        // 🔥 REFRESH TOTAL (INI PENTING BIAR PDF NGGAK CACHE)
+        $usulan->refresh()->load([
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+            'inputlaporankegiatans.cetaklaporankegiatans.identitassurats'
         ]);
-    });
 
-    // 🔥 REFRESH TOTAL (INI PENTING BIAR PDF NGGAK CACHE)
-    $usulan->refresh()->load([
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-        'inputlaporankegiatans.cetaklaporankegiatans.identitassurats'
-    ]);
+        $laporankegiatans = $laporan->load([
+            'detaillaporankegiatans',
+            'inputlaporankegiatans',
+            'inputlaporankegiatans.cetaklaporankegiatans.identitassurats',
+            'inputlaporankegiatans.inputusulankegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
+            'detaillaporankegiatans.pesertakegiatans',
+            'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
+        ]);
 
-    $laporankegiatans = $laporan->load([
-    'detaillaporankegiatans',
-    'inputlaporankegiatans',
-    'inputlaporankegiatans.cetaklaporankegiatans.identitassurats',
-    'inputlaporankegiatans.inputusulankegiatans',
-    'inputlaporankegiatans.inputusulankegiatans.kopunitkerjas',
-    'detaillaporankegiatans.pesertakegiatans',
-    'inputlaporankegiatans.inputusulankegiatans.usulankegiatans',
-]);
         // Ambil data cetak laporan kegiatan
         $cetak = $laporankegiatans->inputlaporankegiatans->cetaklaporankegiatans;
 
@@ -348,6 +351,12 @@ if ($identitas) {
             )->identitassurats
         );
 
+        // Ambil parameter untuk menampilkan ttd, stempel, NIP, dan jabatan
+        $showTtd = $request->boolean('show_ttd');
+        $showStempel = $request->boolean('show_stempel');
+        $showNIP = $request->boolean('show_nip');
+        $showJabatan = $request->boolean('show_jabatan');
+
         // Load view PDF
         $pdf = PDF::loadView('pages.generatepdf.laporan_hasil_kegiatan', [
             'laporankegiatans' => $laporankegiatans,
@@ -363,6 +372,10 @@ if ($identitas) {
             'ttd' => $ttd,
             'stempel' => $stempel,
             'identitas' => $identitas,
+            'showTtd' => $showTtd,
+            'showStempel' => $showStempel,
+            'showNIP' => $showNIP,
+            'showJabatan' => $showJabatan,
         ])->setPaper('A4', 'portrait');
 
         /*
@@ -403,33 +416,34 @@ if ($identitas) {
             'Laporan dan Surat Hasil Pelaksanaan Kegiatan ' .
                 $laporankegiatans->inputlaporankegiatans->inputusulankegiatans->nama_kegiatan .
                 '.pdf'
-        );}
+        );
+    }
 
-public function create($id)
-{
-    
-    $usulan = Izin_Usulankegiatans::with([
-        'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
-        'inputlaporankegiatans.cetaklaporankegiatans.identitassurats',
-        'subunitkerjas'
-    ])->findOrFail($id);
+    public function create($id)
+    {
 
-    $input = $usulan->inputlaporankegiatans;
+        $usulan = Izin_Usulankegiatans::with([
+            'inputlaporankegiatans.laporankegiatans.detaillaporankegiatans',
+            'inputlaporankegiatans.cetaklaporankegiatans.identitassurats',
+            'subunitkerjas'
+        ])->findOrFail($id);
 
-    $cetak = $input?->cetaklaporankegiatans;
-    $identitas = $cetak?->identitassurats;
-    $laporankegiatans = Izin_Laporankegiatans::find($input->laporankegiatan_id);
+        $input = $usulan->inputlaporankegiatans;
 
-    return view('pages.laporankegiatan.cetak_laporan_kegiatan', compact(
-        'usulan',
-        'input',
-        'cetak',
-        'identitas',
-        'laporankegiatans'
-    ));
-}
+        $cetak = $input?->cetaklaporankegiatans;
+        $identitas = $cetak?->identitassurats;
+        $laporankegiatans = Izin_Laporankegiatans::find($input->laporankegiatan_id);
 
-/**
+        return view('pages.laporankegiatan.cetak_laporan_kegiatan', compact(
+            'usulan',
+            'input',
+            'cetak',
+            'identitas',
+            'laporankegiatans'
+        ));
+    }
+
+    /**
      * Helper Konversi Nilai Angka Rupiah Menjadi Terbilang Nominal
      */
     private function rupiahTerbilang($angka, $case = 'capital')

@@ -102,6 +102,7 @@ $sertifikats = [
         );
 
         // Upload file peserta kegiatan
+        // Upload file peserta kegiatan
         $path_peserta_laporan = [];
         if ($request->hasFile('peserta_laporan')) {
             $detaillaporankegiatans['peserta_laporan'] = $request->file('peserta_laporan')->store('izin/peserta_laporan', 'public');
@@ -109,7 +110,32 @@ $sertifikats = [
             $spreadsheet = IOFactory::load(Storage::disk('public')->path($detaillaporankegiatans['peserta_laporan']));
             $sheet = $spreadsheet->getActiveSheet();
 
-            foreach ($sheet->toArray(null, true, true, true) as $row) {
+            $rows = $sheet->toArray(null, true, true, true);
+
+            $header = array_map(fn($value) => trim((string) $value), array_values($rows[1]));
+
+$expectedHeader = [
+    'Nama Peserta',
+    'NIP Peserta',
+    'Jabatan Peserta',
+    'Subunitkerja Peserta',
+];
+
+foreach ($expectedHeader as $index => $expected) {
+    if (($header[$index] ?? '') !== $expected) {
+
+        Storage::disk('public')->delete($detaillaporankegiatans['peserta_laporan']);
+
+        return back()
+            ->withInput()
+            ->withErrors([
+                'peserta_laporan' =>
+                    'Template Excel tidak sesuai. Gunakan header: Nama Peserta, NIP Peserta, Jabatan Peserta, Subunitkerja Peserta.'
+            ]);
+    }
+}
+
+            foreach ($rows as $row) {
                 $path_peserta_laporan[] = array_values($row);
             }
         }
