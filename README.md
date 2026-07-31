@@ -796,18 +796,4 @@ Penggunaan aplikasi ini ditujukan untuk kebutuhan akademik, penelitian, dan peng
 
 ---
 
-# 👨‍💻 Developer
-
-<div align="center">
-
-## SIKOMPETEN
-
-**Sistem Informasi Pengembangan Kompetensi Aparatur Sipil Negara (ASN)**
-
-Dikembangkan sebagai implementasi **Tugas Akhir** Program Studi **Diploma III Teknik Informatika** Universitas Sebelas Maret.
-
-**Developer**
-
-**Cheera Nur'ellyza Ade Purwahyo**
-
-</div>
+Develop by **Chaechaera**
