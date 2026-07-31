@@ -790,7 +790,7 @@ Kemudian tampilkan pada README.
 
 # 📄 Lisensi
 
-Aplikasi ini dikembangkan untuk mendukung digitalisasi administrasi Pengembangan Kompetensi Aparatur Sipil Negara (ASN) di lingkungan **BKPSDM Kota Surakarta**.
+Aplikasi ini dikembangkan untuk mendukung digitalisasi administrasi Pengembangan Kompetensi Aparatur Sipil Negara (ASN) di lingkungan Pemerintah Daerah dalam rangka mencapai tujuan Good Governance dan e-Goverment sesuai tujuan yang ditetapkan.
 
 Penggunaan aplikasi ini ditujukan untuk kebutuhan akademik, penelitian, dan pengembangan sistem informasi pemerintahan.
 
@@ -809,9 +809,5 @@ Dikembangkan sebagai implementasi **Tugas Akhir** Program Studi **Diploma III Te
 **Developer**
 
 **Cheera Nur'ellyza Ade Purwahyo**
-
-Backend Developer • Laravel Developer • BKPSDM Kota Surakarta
-
-⭐ Jika repository ini bermanfaat, jangan lupa berikan **Star** pada repository GitHub ini.
 
 </div>
