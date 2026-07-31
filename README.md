@@ -788,12 +788,4 @@ Kemudian tampilkan pada README.
 
 ---
 
-# 📄 Lisensi
-
-Aplikasi ini dikembangkan untuk mendukung digitalisasi administrasi Pengembangan Kompetensi Aparatur Sipil Negara (ASN) di lingkungan Pemerintah Daerah dalam rangka mencapai tujuan Good Governance dan e-Goverment sesuai tujuan yang ditetapkan.
-
-Penggunaan aplikasi ini ditujukan untuk kebutuhan akademik, penelitian, dan pengembangan sistem informasi pemerintahan.
-
----
-
 Develop by **Chaechaera**
